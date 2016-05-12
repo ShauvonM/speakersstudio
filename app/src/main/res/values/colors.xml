@@ -3,7 +3,11 @@
     <color name="colorPrimary">#f79328</color>
     <color name="colorPrimaryDark">#a86c2b</color>
     <color name="textColorPrimary">#ffffff</color>
-    <color name="windowBackground">#fafafa</color>
+    <color name="windowBackground">#616161</color>
     <color name="navigationBarColor">#000000</color>
     <color name="colorAccent">#017c8b</color>
+
+    <color name="shadow">#88444444</color>
+
+    <color name="stepListBG">#017c8b</color>
 </resources>

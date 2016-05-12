@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    style="@style/PromptWrapper">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/card_view"
+        style="@style/PromptCard">
+
+        <RelativeLayout
+            android:id="@+id/card_view_contents"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/card_text"
+                android:text="What is the Topic?"
+                style="@style/PromptText" />
+
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:id="@+id/prompt_edit_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                >
+                <TextView
+                    android:id="@+id/card_label"
+                    android:text="What is the Topic?"
+                    style="@style/PromptLabel"
+                    />
+                <EditText
+                    android:id="@+id/prompt_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <LinearLayout
+                    android:layout_gravity="end"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/prompt_char_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="15"
+                        />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/prompt_char_limit_sep"/>
+                    <TextView
+                        android:id="@+id/prompt_char_max"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="/ 150"/>
+
+                </LinearLayout>
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+    <include layout="@layout/presentation_prompt_button_help" />
+    <include layout="@layout/presentation_prompt_button_save" />
+
+</RelativeLayout>

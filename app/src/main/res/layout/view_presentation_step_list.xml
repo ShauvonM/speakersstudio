@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.thespeakers_studio.thespeakersstudioapp.StepListView
+        android:id="@+id/step_list"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:paddingTop="@dimen/step_list_padding"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/step_list_padding"
+        android:layout_margin="0dp"
+        >
+
+        <LinearLayout
+            android:id="@+id/step_1"
+            style="@style/StepListItem">
+            <TextView
+                android:id="@+id/step_1_label"
+                android:text="@string/step_1"
+                style="@style/StepListLabel" />
+            <TextView
+                android:id="@+id/step_1_text"
+                android:text="@string/details"
+                style="@style/StepListText"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/step_2"
+            style="@style/StepListItem">
+            <TextView
+                android:id="@+id/step_2_label"
+                android:text="@string/step_2"
+                style="@style/StepListLabel" />
+            <TextView
+                android:id="@+id/step_2_text"
+                android:text="@string/landscape"
+                style="@style/StepListText"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/step_3"
+            style="@style/StepListItem">
+            <TextView
+                android:id="@+id/step_3_label"
+                android:text="@string/step_3"
+                style="@style/StepListLabel" />
+            <TextView
+                android:id="@+id/step_3_text"
+                android:text="@string/specifics"
+                style="@style/StepListText"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/step_4"
+            style="@style/StepListItem">
+            <TextView
+                android:id="@+id/step_4_label"
+                android:text="@string/step_4"
+                style="@style/StepListLabel" />
+            <TextView
+                android:id="@+id/step_4_text"
+                android:text="@string/content"
+                style="@style/StepListText"
+                />
+        </LinearLayout>
+
+    </com.thespeakers_studio.thespeakersstudioapp.StepListView>
+
+    <Button
+        android:id="@+id/button_outline"
+        android:layout_below="@+id/step_list"
+        android:text="@string/outline"
+        style="@style/StepListButton"
+        />
+
+</RelativeLayout>

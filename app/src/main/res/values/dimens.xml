@@ -3,4 +3,25 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="nav_drawer_width">260dp</dimen>
+
+    <dimen name="toolbar_shadow">10dp</dimen>
+
+    <dimen name="default_padding">5dp</dimen>
+
+    <dimen name="step_list_padding">20dp</dimen>
+    <dimen name="step_list_label_font_size">15dp</dimen>
+    <dimen name="step_list_font_size">36dp</dimen>
+    <dimen name="step_list_button_font_size">36dp</dimen>
+
+    <dimen name="step_list_item_padding_vertical">15dp</dimen>
+    <dimen name="step_list_item_padding_horizontal">20dp</dimen>
+
+    <dimen name="step_list_line_width">1dp</dimen>
+
+    <dimen name="prompt_margin_horizontal">40dp</dimen>
+    <dimen name="prompt_font_size">24dp</dimen>
+    <dimen name="prompt_label_font_size">16dp</dimen>
+    <dimen name="prompt_spacing">20dp</dimen>
+    <dimen name="prompt_corner_radius">4dp</dimen>
+
 </resources>
