@@ -13,8 +13,9 @@ public class Prompt {
     private String processedText;
     private String answer;
     private boolean isOpen;
+    private boolean required;
 
-    public Prompt(int id, int step, int order, int type, String text, int charLimit) {
+    public Prompt(int id, int step, int order, int type, String text, boolean req, int charLimit) {
         this.id = id;
         this.step = step;
         this.order = order;
@@ -24,9 +25,16 @@ public class Prompt {
         this.charLimit = charLimit;
         this.answer = "";
         this.isOpen = false;
+        this.required = req;
     }
     public Prompt(int id, int step, int order, int type, String text) {
-        this(id, step, order, type, text, 0);
+        this(id, step, order, type, text, true, 0);
+    }
+    public Prompt(int id, int step, int order, int type, String text, boolean req) {
+        this(id, step, order, type, text, req, 0);
+    }
+    public Prompt(int id, int step, int order, int type, String text, int charLimit) {
+        this(id, step, order, type, text, true, charLimit);
     }
 
     public int getId() {
@@ -53,6 +61,7 @@ public class Prompt {
     public void setAnswer(String a) {
         this.answer = a;
     }
+    public boolean getRequired() { return this.required; }
 
     public void setText(String text) {
         this.text = text;

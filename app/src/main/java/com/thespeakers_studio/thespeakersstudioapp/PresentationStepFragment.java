@@ -9,8 +9,11 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
 
@@ -21,7 +24,7 @@ public class PresentationStepFragment extends Fragment {
     private View mView;
     private ActionBar mToolbar;
 
-    private RecyclerView mRecyclerView;
+    private PromptListRecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
@@ -36,7 +39,7 @@ public class PresentationStepFragment extends Fragment {
         mToolbar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         mToolbar.setDisplayHomeAsUpEnabled(true);
 
-        mRecyclerView = (RecyclerView) mView.findViewById(R.id.step_cards);
+        mRecyclerView = (PromptListRecyclerView) mView.findViewById(R.id.step_cards);
 
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);

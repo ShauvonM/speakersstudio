@@ -33,7 +33,7 @@ public class PresentationData {
         mPrompts.add(new Prompt(24, 5, 0, NEXT, ""));
 
         // Prompt(int id, int step, int order, String type, String text, int charLimit)
-        mPrompts.add(new Prompt(1, 1, 1, TEXT,        "What is the Topic?", 50));
+        mPrompts.add(new Prompt(1, 1, 1, TEXT,        "What is the Topic?", true, 50));
         mPrompts.add(new Prompt(2, 1, 2, TEXT,        "What is the Event?", 50));
         mPrompts.add(new Prompt(3, 1, 3, TEXT,        "What is the tone of the event (formal, informal, etc.)?", 50));
         mPrompts.add(new Prompt(4, 1, 4, DATETIME,    "When is the presentation?"));

@@ -27,6 +27,11 @@ public class PromptDataAdapter extends RecyclerView.Adapter<PromptViewHolder> {
     @Override
     public PromptViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         PromptViewHolder vh;
+        vh = new PromptViewHolder(getView(parent, viewType), parent);
+        return vh;
+    }
+
+    private View getView (ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View v;
 
@@ -44,8 +49,7 @@ public class PromptDataAdapter extends RecyclerView.Adapter<PromptViewHolder> {
                 v = inflater.inflate(R.layout.presentation_prompt_card, parent, false);
                 break;
         }
-        vh = new PromptViewHolder(v, parent);
-        return vh;
+        return v;
     }
 
     @Override

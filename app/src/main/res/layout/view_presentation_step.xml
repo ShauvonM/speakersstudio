@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     >
 
-    <android.support.v7.widget.RecyclerView
+    <com.thespeakers_studio.thespeakersstudioapp.PromptListRecyclerView
         android:id="@+id/step_cards"
         android:scrollbars="vertical"
         android:layout_width="match_parent"

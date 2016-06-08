@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#f79328</color>
-    <color name="colorPrimaryDark">#a86c2b</color>
+    <!-- pallete: http://www.colourlovers.com/palette/148712/Gamebookers -->
+    <color name="colorPrimary">#FF9900</color>
+    <color name="colorPrimaryDark">#c77700</color>
     <color name="textColorPrimary">#ffffff</color>
-    <color name="windowBackground">#616161</color>
-    <color name="navigationBarColor">#000000</color>
-    <color name="colorAccent">#017c8b</color>
+    <color name="windowBackground">#979797</color>
+    <color name="navigationBarColor">#424242</color>
+    <color name="colorAccent">#3299BB</color>
 
     <color name="shadow">#88444444</color>
 
-    <color name="stepListBG">#017c8b</color>
+    <color name="stepListBG">#3299BB</color>
 </resources>
