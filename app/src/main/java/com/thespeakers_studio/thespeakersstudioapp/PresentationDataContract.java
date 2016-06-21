@@ -6,7 +6,7 @@ import android.provider.BaseColumns;
  * Created by smcgi_000 on 4/21/2016.
  */
 public class PresentationDataContract {
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "SpeakersStudio.db";
 
     public PresentationDataContract() {}
@@ -48,7 +48,8 @@ public class PresentationDataContract {
         public static final String COLUMN_NAME_ANSWER_ID = "answer_id";
         public static final String COLUMN_NAME_PRESENTATION_ID = PresentationEntry.COLUMN_NAME_PRESENTATION_ID;
         public static final String COLUMN_NAME_PROMPT_ID = "prompt_id";
-        public static final String COLUMN_NAME_ANSWER_TEXT = "answer_text";
+        public static final String COLUMN_NAME_ANSWER_KEY = "answer_key";
+        public static final String COLUMN_NAME_ANSWER_VALUE = "answer_value";
         public static final String COLUMN_NAME_DATE_CREATED = PresentationDataContract.COLUMN_NAME_DATE_CREATED;
         public static final String COLUMN_NAME_DATE_MODIFIED = PresentationDataContract.COLUMN_NAME_DATE_MODIFIED;
         public static final String COLUMN_NAME_CREATED_BY = PresentationDataContract.COLUMN_NAME_CREATED_BY;
@@ -58,7 +59,8 @@ public class PresentationDataContract {
                 "CREATE TABLE " + PresentationAnswerEntry.TABLE_NAME + " (" +
                         PresentationAnswerEntry._ID + " INTEGER PRIMARY KEY, " +
                         PresentationAnswerEntry.COLUMN_NAME_ANSWER_ID + TEXT_TYPE + COMMA_SEP +
-                        PresentationAnswerEntry.COLUMN_NAME_ANSWER_TEXT + TEXT_TYPE + COMMA_SEP +
+                        PresentationAnswerEntry.COLUMN_NAME_ANSWER_KEY + TEXT_TYPE + COMMA_SEP +
+                        PresentationAnswerEntry.COLUMN_NAME_ANSWER_VALUE + TEXT_TYPE + COMMA_SEP +
                         PresentationAnswerEntry.COLUMN_NAME_PRESENTATION_ID + TEXT_TYPE + COMMA_SEP +
                         PresentationAnswerEntry.COLUMN_NAME_PROMPT_ID + INT_TYPE + COMMA_SEP +
                         PresentationAnswerEntry.COLUMN_NAME_CREATED_BY + TEXT_TYPE + COMMA_SEP +

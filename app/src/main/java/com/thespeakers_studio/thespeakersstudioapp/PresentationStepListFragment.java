@@ -1,17 +1,13 @@
 package com.thespeakers_studio.thespeakersstudioapp;
 
 import android.support.v7.app.ActionBar;
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.Toolbar;
 
 /**
  * Created by smcgi_000 on 5/9/2016.
@@ -39,7 +35,7 @@ public class PresentationStepListFragment extends Fragment implements View.OnCli
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        mView = inflater.inflate(R.layout.view_presentation_step_list, container, false);
+        mView = inflater.inflate(R.layout.fragment_step_list, container, false);
 
         mToolbar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         mToolbar.setDisplayHomeAsUpEnabled(false);

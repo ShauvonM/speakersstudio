@@ -1,23 +1,14 @@
 package com.thespeakers_studio.thespeakersstudioapp;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 /**
  * Created by smcgi_000 on 5/9/2016.
@@ -39,13 +30,13 @@ public class StepListView extends LinearLayout {
         setWillNotDraw(false);
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
-        mShadowWidth = ShadowHelper.getShadowBlur(2, context);
-        mShadowY = ShadowHelper.getShadowY(2, context);
+        mShadowWidth = Utils.getShadowBlur(2, context);
+        mShadowY = Utils.getShadowY(2, context);
 
         mBGPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBGPaint.setColor(ContextCompat.getColor(context, R.color.stepListBG));
         mBGPaint.setStyle(Paint.Style.FILL);
-        ShadowHelper.setShadowLayer(mBGPaint, 2, context);
+        Utils.setShadowLayer(mBGPaint, 2, context);
 
         mBGPath = new Path();
 
@@ -54,14 +45,7 @@ public class StepListView extends LinearLayout {
         mStepLinePaint.setAlpha(128);
         mStepLinePaint.setStyle(Paint.Style.STROKE);
         mStepLinePaint.setStrokeWidth(getResources().getDimensionPixelSize(R.dimen.step_list_line_width));
-        ShadowHelper.setShadowLayer(mStepLinePaint, 0, context);
-    }
-
-    private static float dpToPixel(float dp, Context context) {
-        Resources resources = context.getResources();
-        DisplayMetrics metrics = resources.getDisplayMetrics();
-        float px = dp * ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
-        return px;
+        Utils.setShadowLayer(mStepLinePaint, 0, context);
     }
 
     @Override
@@ -73,7 +57,7 @@ public class StepListView extends LinearLayout {
 
         View lastStep = this.findViewById(R.id.step_4);
         int lastItemWidth = lastStep.getMeasuredWidth();
-        int margin = 0; //(int) getResources().getDimensionPixelSize(R.dimen.step_list_item_margin);
+        int margin = 0;
         int arrowHeight = (int) getResources().getDimensionPixelSize(R.dimen.step_list_item_padding_vertical);
 
         int padding = ((width - lastItemWidth) / 2) - margin;

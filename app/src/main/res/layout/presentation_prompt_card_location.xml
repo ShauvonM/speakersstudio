@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- custom to location cards -->
+    <TextView
+        android:text="Select..."
+        android:id="@+id/prompt_location_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/PromptDateTimeFields"
+        />
+
+    <!--
+    <fragment
+        android:id="@+id/place_autocomplete_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment" />
+        -->
+    <!-- end of location card items -->
+
+</merge>

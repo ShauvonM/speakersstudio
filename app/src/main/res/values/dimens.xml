@@ -18,10 +18,16 @@
 
     <dimen name="step_list_line_width">1dp</dimen>
 
+    <dimen name="prompt_list_line_width">10dp</dimen>
+
+    <dimen name="prompt_header_margin_top">20dp</dimen>
     <dimen name="prompt_margin_horizontal">40dp</dimen>
     <dimen name="prompt_font_size">24dp</dimen>
+    <dimen name="prompt_small_font_size">18dp</dimen>
+    <dimen name="prompt_datetime_size">22dp</dimen>
     <dimen name="prompt_label_font_size">16dp</dimen>
-    <dimen name="prompt_spacing">20dp</dimen>
-    <dimen name="prompt_corner_radius">4dp</dimen>
+    <dimen name="prompt_spacing_top">50dp</dimen>
+    <dimen name="prompt_spacing_bottom">5dp</dimen>
+    <dimen name="prompt_corner_radius">5dp</dimen>
 
 </resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <RelativeLayout
+        android:id="@+id/list_prompt_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:id="@+id/list_prompt_remove"
+            android:src="@drawable/ic_clear_white_24dp"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_centerInParent="true"
+            android:padding="0dp"
+            android:background="@android:color/transparent" />
+
+        <EditText
+            android:id="@+id/prompt_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/list_prompt_remove"
+            android:layout_centerVertical="true"
+            android:layout_centerInParent="true" />
+
+    </RelativeLayout>
+
+</merge>

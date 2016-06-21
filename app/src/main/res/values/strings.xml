@@ -26,5 +26,30 @@
     <string name="step_3">Step 3</string>
     <string name="step_4">Step 4</string>
     <string name="prompt_char_limit_sep"> / </string>
+    <string name="datepicker_button_default">Choose Date</string>
+    <string name="datetime_at">at</string>
+    <string name="location_prompt">Select...</string>
+    <string name="contactinfo_name_hint">Name</string>
+    <string name="contactinfo_company_hint">Company</string>
+    <string name="contactinfo_phone_hint">Phone Number</string>
+    <string name="contactinfo_email_hint">Email Address</string>
+    <string name="custom_duration_hint">Duration (Minutes)</string>
+
+    <string name="five_minutes">Five Minutes</string>
+    <string name="ten_minutes">Ten Minutes</string>
+    <string name="twenty_minutes">Twenty Minutes</string>
+    <string name="thirty_minutes">Thirty Minutes</string>
+    <string name="specify_duration">Specify Duration...</string>
+    <string name="minutes">Minutes</string>
+
+    <string name="list_and">and</string>
+
+    <string-array name="presentation_duration_array">
+        <item>@string/five_minutes</item>
+        <item>@string/ten_minutes</item>
+        <item>@string/twenty_minutes</item>
+        <item>@string/thirty_minutes</item>
+        <item>@string/specify_duration</item>
+    </string-array>
 
 </resources>
