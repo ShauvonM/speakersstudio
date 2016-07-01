@@ -19,8 +19,6 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
-import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
-import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -28,18 +26,24 @@ import java.util.Calendar;
 import java.util.UUID;
 
 public class PresentationMainActivity extends AppCompatActivity implements
+        PresentationListFragment.PresentationListFragmentHandler,
         PresentationStepListFragment.OnStepSelectedListener,
         PresentationPromptListFragment.PromptSaveListener,
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener,
+        FragmentManager.OnBackStackChangedListener {
 
     private PresentationDbHelper mDbHelper;
+    private ArrayList<PresentationData> mPresentations;
     private String mPresentationId;
-    private PresentationData mPresentation;
-
-    private Toolbar mToolbar;
 
     private GoogleApiClient mGoogleApiClient;
     private LocationSelectedListener mLocationListener;
+
+    private PresentationListFragment mPresentationListFragment;
+    private PresentationStepListFragment mStepListFragment;
+    private PresentationPromptListFragment mPromptListFragment;
+
+    private Menu mMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,10 +59,10 @@ public class PresentationMainActivity extends AppCompatActivity implements
 
         mDbHelper = new PresentationDbHelper(getApplicationContext());
 
-        mPresentation = loadPresentation();
+        mPresentations = loadPresentations();
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(mToolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         setTitle();
 
@@ -66,13 +70,83 @@ public class PresentationMainActivity extends AppCompatActivity implements
             return;
         }
 
-        showStepList();
+        mPresentationId = null;
+
+        mPresentationListFragment = new PresentationListFragment();
+        mPresentationListFragment.setPresentationData(mPresentations);
+
+        mStepListFragment = new PresentationStepListFragment();
+        mPromptListFragment = new PresentationPromptListFragment();
+
+        getFragmentManager().addOnBackStackChangedListener(this);
+
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.add(R.id.fragment_container, mPresentationListFragment, "presentation_list");
+        ft.add(R.id.fragment_container, mStepListFragment, "step_list");
+        ft.add(R.id.fragment_container, mPromptListFragment, "prompt_list");
+        ft.commit();
+
+        //showStepList();
+        showPresentationList();
+    }
+
+    @Override
+    public void onBackPressed() {
+        FragmentManager fm = getFragmentManager();
+        if (fm.getBackStackEntryCount() > 0) {
+            fm.popBackStack();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public void onBackStackChanged() {
+        Log.d("SS", "Back stack changed " + mPresentationListFragment.isVisible() + " " + mStepListFragment.isVisible());
+        Utils.hideKeyboard(this, findViewById(R.id.fragment_container));
+        if (mPresentationListFragment.isVisible()) {
+            onPresentationListShown();
+        } else if (mStepListFragment.isVisible()) {
+            onStepListShown();
+        } else if (mPromptListFragment.isVisible()) {
+            onPromptListShown();
+        }
+    }
+
+    public void onPresentationListShown() {
+        mPresentationListFragment.refresh();
+        mPresentationId = null;
+        setTitle();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+    }
+
+    public void onStepListShown() {
+        // we are on the step list
+        mStepListFragment.animateProgressHeight();
+        mPromptListFragment.clearStep();
+        setTitle();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    public void onPromptListShown() {
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    public PresentationData getSelectedPresentation() {
+        for (PresentationData pres : mPresentations) {
+            if (pres.getId() == mPresentationId) {
+                return pres;
+            }
+        }
+        return null;
     }
 
     public void setTitle() {
-        String topic = mPresentation.getTopic();
-        if (topic != null) {
-            getSupportActionBar().setTitle(topic);
+        PresentationData pres = getSelectedPresentation();
+        if (pres != null) {
+            getSupportActionBar().setTitle(pres.getTopic());
+        } else {
+            getSupportActionBar().setTitle(getResources().getString(R.string.saved_presentations));
         }
     }
 
@@ -80,11 +154,45 @@ public class PresentationMainActivity extends AppCompatActivity implements
         return mGoogleApiClient;
     }
 
-    private void showStepList() {
-        PresentationStepListFragment StepListFragment = new PresentationStepListFragment();
-        StepListFragment.setArguments(getIntent().getExtras());
+    private void showPresentationList() {
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.hide(mPromptListFragment);
+        ft.hide(mStepListFragment);
+        ft.show(mPresentationListFragment);
+        ft.commit();
 
-        getFragmentManager().beginTransaction().add(R.id.fragment_container, StepListFragment).commit();
+        onPresentationListShown();
+    }
+
+    @Override
+    public void onOpenPresentation(String id) {
+        Log.d("SS", "Presentation " + id + " selected");
+        mPresentationId = id;
+        mStepListFragment.setPresentation(getSelectedPresentation());
+        mPromptListFragment.setPresentation(getSelectedPresentation());
+        showStepList();
+    }
+
+    @Override
+    public void onCreateNewPresentation() {
+        PresentationData newPres = createNewPresentation();
+        mPresentations.add(newPres);
+        mPresentationId = newPres.getId();
+        mStepListFragment.setPresentation(newPres);
+        mPromptListFragment.setPresentation(newPres);
+        showStepList();
+    }
+
+    private void showStepList() {
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+
+        ft.hide(mPresentationListFragment);
+        ft.show(mStepListFragment);
+
+        ft.addToBackStack("presentation_" + mPresentationId);
+        ft.commit();
     }
 
     public void onStepSelected(int step) {
@@ -92,24 +200,18 @@ public class PresentationMainActivity extends AppCompatActivity implements
         showStep(step);
     }
 
-    public PresentationData getPresentation() {
-        return mPresentation;
-    }
-
     private void showStep(int step) {
-        PresentationPromptListFragment stepFragment = new PresentationPromptListFragment();
-        Bundle args = new Bundle();
-        args.putInt("step", step);
-        stepFragment.setArguments(args);
+        mPromptListFragment.setStep(step);
 
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
 
-        transaction.replace(R.id.fragment_container, stepFragment);
-        transaction.addToBackStack("step" + step);
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
 
-        transaction.commit();
+        ft.hide(mStepListFragment);
+        ft.show(mPromptListFragment);
 
-        stepFragment.setOnPromptSaveListener(this);
+        ft.addToBackStack("step_" + step);
+        ft.commit();
     }
 
     @Override
@@ -118,8 +220,7 @@ public class PresentationMainActivity extends AppCompatActivity implements
         String id;
         ContentValues values = new ContentValues();
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String datetime = dateFormat.format(Calendar.getInstance().getTime());
+        String datetime = Utils.getDateTimeStamp();
 
         ArrayList<PromptAnswer> answers = prompt.getAnswer();
 
@@ -128,6 +229,7 @@ public class PresentationMainActivity extends AppCompatActivity implements
             values.put(PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_KEY, answer.getKey());
             values.put(PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_VALUE, answer.getValue());
             values.put(PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_DATE_MODIFIED, datetime);
+            values.put(PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_LINK_ID, answer.getAnswerLinkId());
 
             answer.setModifiedDate(datetime);
 
@@ -163,6 +265,16 @@ public class PresentationMainActivity extends AppCompatActivity implements
                 }
             }
         }
+
+        // update the modified date property on the presentation
+        ContentValues presUpdate = new ContentValues();
+        presUpdate.put(PresentationDataContract.PresentationEntry.COLUMN_NAME_DATE_MODIFIED, datetime);
+        db.update(PresentationDataContract.PresentationEntry.TABLE_NAME,
+                presUpdate,
+                PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID + " = ?",
+                new String[]{mPresentationId});
+        getSelectedPresentation().setModifiedDate(datetime);
+
         db.close();
 
         if (prompt.getId() == PresentationData.PRESENTATION_TOPIC) {
@@ -171,22 +283,39 @@ public class PresentationMainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onBackPressed() {
-        FragmentManager fm = getFragmentManager();
-        if (fm.getBackStackEntryCount() > 0) {
-            fm.popBackStack();
-        } else {
-            super.onBackPressed();
+    public void onNextStep(int step) {
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+
+        final int nextStep = step + 1;
+        if (nextStep < 5) {
+            mStepListFragment.setOnProgressAnimationListener(new StepListView.OnProgressAnimationListener() {
+                @Override
+                public void onProgressAnimationFinished() {
+                    showStep(nextStep);
+                    mStepListFragment.clearOnProgressAnimationListener();
+                }
+            });
         }
+
+        ft.hide(mPromptListFragment);
+        ft.show(mStepListFragment);
+
+        ft.addToBackStack("step_list");
+
+        ft.commit();
     }
 
-    private PresentationData loadPresentation() {
+    private ArrayList<PresentationData> loadPresentations() {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        ArrayList<PresentationData> presies = new ArrayList<>();
 
         // pick what columns to load
         String[] presProjection = {
                 PresentationDataContract.PresentationEntry._ID,
-                PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID
+                PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID,
+                PresentationDataContract.PresentationEntry.COLUMN_NAME_DATE_MODIFIED
         };
         String[] ansProjection = {
                 PresentationDataContract.PresentationAnswerEntry._ID,
@@ -195,6 +324,7 @@ public class PresentationMainActivity extends AppCompatActivity implements
                 PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_KEY,
                 PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_VALUE,
                 PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_ID,
+                PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_LINK_ID,
                 PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_DATE_CREATED,
                 PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_DATE_MODIFIED,
                 PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_CREATED_BY,
@@ -210,28 +340,34 @@ public class PresentationMainActivity extends AppCompatActivity implements
         // fetch the presentation
         Cursor presCursor = db.query(PresentationDataContract.PresentationEntry.TABLE_NAME, presProjection, null, null, null, null, sortOrder);
 
-        // TODO: fetch presentation by id
         presCursor.moveToFirst();
-        if (presCursor.isAfterLast()) {
-            return createNewPresentation();
-        } else {
-            String presentationId = presCursor.getString(
-                    presCursor.getColumnIndexOrThrow(PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID)
-            );
-            PresentationData pres = new PresentationData(getApplicationContext(), presentationId);
-            mPresentationId = presentationId;
+        try {
+            while (!presCursor.isAfterLast()) {
+                String presentationId = presCursor.getString(
+                        presCursor.getColumnIndexOrThrow(PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID)
+                );
+                String modifiedDate = presCursor.getString(
+                        presCursor.getColumnIndexOrThrow(PresentationDataContract.PresentationEntry.COLUMN_NAME_DATE_MODIFIED)
+                );
 
-            // set up the answer clause
-            String[] answerSelectionValues = new String[] { String.valueOf(mPresentationId) };
+                PresentationData pres = new PresentationData(getApplicationContext(), presentationId, modifiedDate);
 
-            // fetch the answers
-            Cursor answerCursor = db.query(PresentationDataContract.PresentationAnswerEntry.TABLE_NAME, ansProjection, answerSelection, answerSelectionValues, null, null, PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_KEY, null);
+                // set up the answer clause
+                String[] answerSelectionValues = new String[] { String.valueOf(presentationId) };
 
-            pres.setAnswers(answerCursor);
+                // fetch the answers
+                Cursor answerCursor = db.query(PresentationDataContract.PresentationAnswerEntry.TABLE_NAME, ansProjection, answerSelection, answerSelectionValues, null, null, PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_KEY, null);
 
+                pres.setAnswers(answerCursor);
+
+                presies.add(pres);
+
+                presCursor.moveToNext();
+            }
+        } finally {
             presCursor.close();
-            return pres;
         }
+        return presies;
     }
 
     private PresentationData createNewPresentation() {
@@ -239,8 +375,7 @@ public class PresentationMainActivity extends AppCompatActivity implements
 
         String id = UUID.randomUUID().toString();
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String datetime = dateFormat.format(Calendar.getInstance().getTime());
+        String datetime = Utils.getDateTimeStamp();
 
         int color = R.color.colorPrimary;
 
@@ -251,16 +386,23 @@ public class PresentationMainActivity extends AppCompatActivity implements
         values.put(PresentationDataContract.PresentationEntry.COLUMN_NAME_COLOR, color); // TODO: custom colors
 
         db.insert(PresentationDataContract.PresentationEntry.TABLE_NAME, null, values);
-        mPresentationId = id;
-        return new PresentationData(getApplicationContext(), id);
+        return new PresentationData(getApplicationContext(), id, datetime);
     }
 
     private void resetPresentation() {
+        /*
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
         db.delete(PresentationDataContract.PresentationEntry.TABLE_NAME, PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID + "=?", new String[]{mPresentationId});
         db.delete(PresentationDataContract.PresentationAnswerEntry.TABLE_NAME, PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_PRESENTATION_ID + "=?", new String[]{mPresentationId});
 
         mPresentation = createNewPresentation();
+
+        mPromptListFragment.setPresentation(mPresentation);
+        mStepListFragment.setPresentation(mPresentation);
+
+        // this will reset the view
+        onStepListShown();
+        */
     }
 
     public void setOnLocationSelectedListener (LocationSelectedListener l) {
@@ -288,6 +430,7 @@ public class PresentationMainActivity extends AppCompatActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        mMenu = menu;
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_presentation_main, menu);
         return true;

@@ -39,10 +39,17 @@ public class PromptListView extends LinearLayout implements ListItemView.ListIte
 
     private float getCompletionPercentage() {
         if (getContext() instanceof PresentationMainActivity) {
-            return ((PresentationMainActivity) getContext()).getPresentation().getCompletionPercentage(mPromptData.get(0).getStep());
-        } else {
-            return 0;
+            PresentationData pres = ((PresentationMainActivity) getContext()).getSelectedPresentation();
+            if (pres != null) {
+                return pres.getCompletionPercentage(mPromptData.get(0).getStep());
+            }
         }
+        return 0;
+    }
+
+    public void clearData() {
+        mPromptData = null;
+        removeAllViews();
     }
 
     public void setData(ArrayList<Prompt> data) {
@@ -107,6 +114,8 @@ public class PromptListView extends LinearLayout implements ListItemView.ListIte
             }
             addView(view);
         }
+
+        requestLayout();
     }
 
     private void closeOpenItem () {
@@ -132,11 +141,18 @@ public class PromptListView extends LinearLayout implements ListItemView.ListIte
     public void onGoToNext(int position) {
         int posto = position + 1;
 
-        ListItemView view = (ListItemView) getChildAt(posto);
+        if (posto > getChildCount()) {
+            // next was clicked, so we should go to the next step
+            if (mListener!= null) {
+                mListener.onNextStep(mPromptData.get(1).getStep());
+            }
+        } else {
+            ListItemView view = (ListItemView) getChildAt(posto);
 
-        if (view != null && view instanceof ListItemPromptView) {
-            //smoothScrollTo(0, view.getTop() - 50);
-            ((ListItemPromptView) view).open();
+            if (view != null && view instanceof ListItemPromptView) {
+                //smoothScrollTo(0, view.getTop() - 50);
+                ((ListItemPromptView) view).open();
+            }
         }
     }
 
@@ -149,10 +165,10 @@ public class PromptListView extends LinearLayout implements ListItemView.ListIte
         } else if (thisOrder > 1) {
             if (((ListItemView) getChildAt(thisOrder - 1)).isFinishShown()) {
                 view.animateLineTop();
-                Log.d("SS", "This order " + thisOrder + " " + mPromptData.size());
-                if (thisOrder == mPromptData.size()) {
+                // size() - 2 is the Next button, because the order is 0 based
+                if (thisOrder == mPromptData.size() - 2) {
                     // if it's the last one, we can animate it AND the next button!
-                    ((ListItemView) getChildAt(thisOrder + 1)).animateLineTop();
+                    ((ListItemView) getChildAt(thisOrder + 1)).animateLineTop(Utils.PROMPT_PROGRESS_ANIMATION_DURATION);
                 }
             }
         }
@@ -166,5 +182,6 @@ public class PromptListView extends LinearLayout implements ListItemView.ListIte
 
     public interface PromptListListener {
         public void onSaveItem(Prompt prompt);
+        public void onNextStep(int step);
     }
 }

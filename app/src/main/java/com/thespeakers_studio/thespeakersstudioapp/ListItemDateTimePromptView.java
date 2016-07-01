@@ -96,7 +96,7 @@ public class ListItemDateTimePromptView extends ListItemPromptView implements Pr
         if (!timestamp.isEmpty()) {
             Calendar c = Calendar.getInstance();
             c.setTimeInMillis(Long.parseLong(timestamp));
-            return DateTimeHelper.getDateString(c) + " " + getContext().getResources().getString(R.string.datetime_at) + " " + DateTimeHelper.getTimeString(c);
+            return DateTimeHelper.getDateString(c) + "\n" + getContext().getResources().getString(R.string.datetime_at) + " " + DateTimeHelper.getTimeString(c);
         } else {
             return "";
         }

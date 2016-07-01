@@ -67,7 +67,9 @@ public class ListItemPromptView extends ListItemView {
         String text = mPrompt.getProcessedText();
         String answer = processAnswer();
 
-        setOnClickListener(this);
+        if (mPrompt.getType() != PresentationData.NONE) {
+            setOnClickListener(this);
+        }
 
         mCardView = (CardView) findViewById(R.id.card_view);
 
@@ -178,11 +180,6 @@ public class ListItemPromptView extends ListItemView {
 
     private void savePrompt() {
         ArrayList<PromptAnswer> answers = getUserInput();
-        /*
-        for(PromptAnswer answer : answers) {
-            mPrompt.addAnswer(answer);
-        }
-        */
         mPrompt.setAnswers(answers);
 
         setCardBackground(400);
@@ -314,6 +311,8 @@ public class ListItemPromptView extends ListItemView {
 
     private void closePrompt() {
         mPrompt.toggleOpen();
+
+        Utils.hideKeyboard(getContext(), this);
 
         fireItemClosed();
 

@@ -19,6 +19,20 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <!--
+            <fragment
+                android:id="@+id/step_list_fragment"
+                android:name="com.thespeakers_studio.thespeakersstudioapp.PresentationStepListFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <fragment
+                android:id="@+id/prompt_list_fragment"
+                android:name="com.thespeakers_studio.thespeakersstudioapp.PresentationPromptListFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+                -->
+
         </FrameLayout>
 
         <View

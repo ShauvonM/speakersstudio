@@ -23,12 +23,10 @@ public class ListItemNextView extends ListItemView {
 
     @Override
     void renderViews() {
-
         FloatingActionButton btn = (FloatingActionButton) findViewById(R.id.next_action_button);
         btn.setOnClickListener(this);
         btn.setEnabled(false);
         btn.setBackgroundTintList(ContextCompat.getColorStateList(getContext(), R.color.prompt_list_fab_states));
-
     }
 
     @Override
@@ -43,5 +41,6 @@ public class ListItemNextView extends ListItemView {
     @Override
     public void onClick(View v) {
         Log.d("SS", "Next was clicked.");
+        goToNext();
     }
 }

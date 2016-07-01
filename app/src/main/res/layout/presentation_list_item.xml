@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res/android"
+    style="@style/PresentationListCard">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/presentation_name"
+            style="@style/PresentationListCardName"
+            />
+
+        <TextView
+            android:id="@+id/presentation_modified"
+            style="@style/PresentationListCardModified"
+            />
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

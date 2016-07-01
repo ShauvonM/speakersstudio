@@ -89,13 +89,17 @@ public class ListItemContactinfoPromptView extends ListItemPromptView implements
     protected String processAnswer() {
         PromptAnswer name = mPrompt.getAnswerByKey("name");
         PromptAnswer company = mPrompt.getAnswerByKey("company");
-        if (name == null && company == null) {
-            return "";
-        } else if (name == null) {
-            return company.getValue();
-        } else {
-            return name.getValue();
+
+        String ret = "";
+        if (!name.getValue().isEmpty()) {
+            ret += name.getValue();
         }
+        if (!name.getValue().isEmpty() && !company.getValue().isEmpty()) {
+            ret += ", ";
+        }
+        ret += company.getValue();
+
+        return ret;
     }
 
     @Override

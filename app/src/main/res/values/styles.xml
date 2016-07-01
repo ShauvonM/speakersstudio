@@ -20,12 +20,45 @@
         <item name="android:textColor">@color/textColorInverse</item>
     </style>
 
+    <style name="PresentationListCard" parent="CardView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="cardCornerRadius">@dimen/prompt_corner_radius</item>
+        <item name="android:layout_margin">0dp</item>
+        <item name="cardBackgroundColor">@color/promptBG</item>
+        <item name="contentPadding">0dp</item>
+        <item name="android:foreground">?android:attr/selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+    </style>
+    <style name="PresentationListCardName">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/pres_list_name_size</item>
+        <item name="android:layout_marginTop">@dimen/pres_list_card_padding</item>
+        <item name="android:layout_marginLeft">@dimen/pres_list_card_padding</item>
+        <item name="android:layout_marginRight">@dimen/pres_list_card_padding</item>
+        <item name="android:layout_marginBottom">0dp</item>
+    </style>
+    <style name="PresentationListCardModified">
+        <item name="android:gravity">right</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_below">@id/presentation_name</item>
+        <item name="android:layout_alignRight">@id/presentation_name</item>
+        <item name="android:textSize">@dimen/pres_list_modified_size</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginLeft">@dimen/pres_list_card_padding</item>
+        <item name="android:layout_marginRight">0dp</item>
+        <item name="android:layout_marginBottom">@dimen/pres_list_card_padding</item>
+    </style>
+
     <style name="StepListItem">
         <item name="android:orientation">vertical</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:gravity">center</item>
+        <item name="android:layout_weight">0.25</item>
         <item name="android:layout_margin">0dp</item>
         <item name="android:padding">0dp</item>
         <item name="android:layout_centerHorizontal">true</item>

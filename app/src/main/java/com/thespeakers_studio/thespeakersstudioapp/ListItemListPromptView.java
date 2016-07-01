@@ -8,6 +8,8 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -19,7 +21,7 @@ import java.util.ArrayList;
 /**
  * Created by smcgi_000 on 6/8/2016.
  */
-public class ListItemListPromptView extends ListItemPromptView implements TextWatcher {
+public class ListItemListPromptView extends ListItemPromptView implements View.OnFocusChangeListener {
 
     private LinearLayout mListWrapper;
 
@@ -60,23 +62,12 @@ public class ListItemListPromptView extends ListItemPromptView implements TextWa
         super.renderViews();
     }
 
-    @Override
-    protected void promptSaved() {
-        // set the IDs where they need to be
-        for(int cnt = 0; cnt < mListWrapper.getChildCount(); cnt++) {
-            RelativeLayout layout = (RelativeLayout) mListWrapper.getChildAt(cnt);
-            //String id = (String) layout.getTag();
-            PromptAnswer answer = mPrompt.getAnswerByKey("list_" + cnt);
-            layout.setTag(answer.getId());
-        }
-    }
-
     private void inflateListItem (String text, String id) {
         LayoutInflater inflater = LayoutInflater.from(getContext());
 
         inflater.inflate(R.layout.presentation_prompt_card_list_item, mListWrapper, true);
 
-        RelativeLayout layout = (RelativeLayout) mListWrapper.getChildAt(mListWrapper.getChildCount() - 1);
+        final RelativeLayout layout = (RelativeLayout) mListWrapper.getChildAt(mListWrapper.getChildCount() - 1);
         EditText input = (EditText) layout.findViewById(R.id.prompt_input);
 
         // store the ID so it stays tied to this list item even if it changes position
@@ -91,7 +82,26 @@ public class ListItemListPromptView extends ListItemPromptView implements TextWa
         }
 
         // set up the text listener
-        input.addTextChangedListener(this);
+        /*
+        input.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                setSaveButtonIcon();
+                ((TextView) layout.findViewById(R.id.prompt_char_count)).setText(String.valueOf(s.length()));
+            }
+        });
+        */
+        input.setOnFocusChangeListener(this);
 
         // add a hint to the item
         //input.setHint("Item " + mListWrapper.getChildCount());
@@ -101,6 +111,13 @@ public class ListItemListPromptView extends ListItemPromptView implements TextWa
             InputFilter[] fa = new InputFilter[1];
             fa[0] = new InputFilter.LengthFilter(mPrompt.getCharLimit());
             input.setFilters(fa);
+
+            /*
+            // set the character count
+            ((TextView) layout.findViewById(R.id.prompt_char_count)).setText(String.valueOf(text.length()));
+            // set the character limit
+            ((TextView) layout.findViewById(R.id.prompt_char_max)).setText(String.valueOf(mPrompt.getCharLimit()));
+            */
         }
     }
     private void inflateListItem() {
@@ -161,21 +178,64 @@ public class ListItemListPromptView extends ListItemPromptView implements TextWa
             String id = (String) layout.getTag();
             String text = input.getText().toString().trim();
             if (!text.isEmpty()) {
-                answers.add(new PromptAnswer (id, "list_" + cnt, text, mPrompt.getId(), "", "", "", ""));
+                answers.add(new PromptAnswer (id, "list_" + cnt, text, mPrompt.getId()));
             }
         }
         return answers;
     }
 
     @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+    public void onFocusChange(View v, boolean hasFocus) {
+        final View output = ((RelativeLayout) v.getParent()).findViewById(R.id.list_item_char_readout);
+        if (hasFocus && mPrompt.getCharLimit() > 0) {
+            output.clearAnimation();
+            output.setAlpha(0);
 
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            output.measure(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            final int h = output.getMeasuredHeight();
 
-    @Override
-    public void afterTextChanged(Editable s) {
-        setSaveButtonIcon();
+            Animation showCharCountAnimation = new Animation() {
+                @Override
+                protected void applyTransformation(float interpolatedTime, Transformation t) {
+                    if (interpolatedTime < 1) {
+                        output.setAlpha(interpolatedTime);
+                        output.getLayoutParams().height = (int) (h * interpolatedTime);
+                    } else {
+                        output.setAlpha(1);
+                        output.getLayoutParams().height = LinearLayout.LayoutParams.WRAP_CONTENT;
+                    }
+                }
+
+                @Override
+                public boolean willChangeBounds() {
+                    return true;
+                }
+            };
+            showCharCountAnimation.setDuration(400);
+            output.setAnimation(showCharCountAnimation);
+        } else {
+            output.clearAnimation();
+            output.setAlpha(1);
+            final int h = output.getMeasuredHeight();
+            Animation hideCharCountAnimation = new Animation() {
+                @Override
+                protected void applyTransformation(float interpolatedTime, Transformation t) {
+                    if (interpolatedTime < 1) {
+                        output.setAlpha(1 - interpolatedTime);
+                        output.getLayoutParams().height = h - ((int) (h * interpolatedTime));
+                    } else {
+                        output.setAlpha(0);
+                        output.getLayoutParams().height = 0;
+                    }
+                }
+
+                @Override
+                public boolean willChangeBounds() {
+                    return true;
+                }
+            };
+            hideCharCountAnimation.setDuration(400);
+            output.setAnimation(hideCharCountAnimation);
+        }
     }
-
 }

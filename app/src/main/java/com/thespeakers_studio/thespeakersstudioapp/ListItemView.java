@@ -142,13 +142,16 @@ abstract class ListItemView extends RelativeLayout implements View.OnClickListen
         enable();
     }
 
-    protected void animateLineTop () {
+    protected void animateLineTop (int delay) {
         if (!mFinishShown) {
             mAnimateFinish = true;
-            mStartTime = System.currentTimeMillis();
+            mStartTime = System.currentTimeMillis() + delay;
             postInvalidate();
         }
         enable();
+    }
+    protected void animateLineTop () {
+        animateLineTop(0);
     }
 
     public boolean isFinishShown() {

@@ -3,8 +3,19 @@ package com.thespeakers_studio.thespeakersstudioapp;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Paint;
+import android.renderscript.ScriptGroup;
 import android.support.v4.content.ContextCompat;
+import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * Created by smcgi_000 on 5/10/2016.
@@ -73,5 +84,53 @@ public class Utils {
         paint.setShadowLayer(shadowBlur, 0, shadowY, ContextCompat.getColor(context, R.color.shadow));
 
         return paint;
+    }
+
+    public static void showKeyboard(Context context, View container) {
+        InputMethodManager mgr = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        mgr.showSoftInput(container, InputMethodManager.SHOW_IMPLICIT);
+    }
+
+    public static void hideKeyboard(Context context, View container) {
+        InputMethodManager mgr = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        mgr.hideSoftInputFromWindow(container.getWindowToken(), 0);
+    }
+
+    public static String getDateTimeStamp() {
+        SimpleDateFormat iso8601Format =
+                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+
+        String datetime = iso8601Format.format(Calendar.getInstance().getTime());
+
+        return datetime;
+    }
+
+    public static String formatDateTime(Context context, String timeToFormat) {
+        String finalDateTime = "";
+
+        SimpleDateFormat iso8601Format =
+                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+
+        Date date = null;
+        if (timeToFormat != null) {
+            try {
+                date = iso8601Format.parse(timeToFormat);
+            } catch (ParseException e) {
+                date = null;
+            }
+
+            if (date != null) {
+                long when = date.getTime();
+                int flags = 0;
+                flags |= DateUtils.FORMAT_SHOW_TIME;
+                flags |= DateUtils.FORMAT_SHOW_DATE;
+                flags |= DateUtils.FORMAT_ABBREV_MONTH;
+                flags |= DateUtils.FORMAT_SHOW_YEAR;
+
+                finalDateTime = DateUtils.formatDateTime(context,
+                        when + TimeZone.getDefault().getOffset(when), flags);
+            }
+        }
+        return finalDateTime;
     }
 }

@@ -23,8 +23,11 @@ public class Prompt {
     private boolean isOpen;
     private boolean required;
     private String referenceDefault;
+    private int referenceId;
 
-    public Prompt(int id, int step, int order, int type, String text, boolean req, int charLimit, String refDefault) {
+    private String answerId;
+
+    public Prompt(int id, int step, int order, int type, String text, boolean req, int charLimit, int ref, String refDefault) {
         this.id = id;
         this.step = step;
         this.order = order;
@@ -34,25 +37,35 @@ public class Prompt {
         this.charLimit = charLimit;
         this.isOpen = false;
         this.required = req;
+        this.referenceId = ref;
         this.referenceDefault = refDefault;
 
         this.answer = new ArrayList<>();
+
+        this.answerId = "";
     }
     // no req or char limit
     public Prompt(int id, int step, int order, int type, String text) {
-        this(id, step, order, type, text, true, 0, "");
+        this(id, step, order, type, text, true, 0, 0, "");
     }
     // with req but no charlimit
     public Prompt(int id, int step, int order, int type, String text, boolean req) {
-        this(id, step, order, type, text, req, 0, "");
+        this(id, step, order, type, text, req, 0, 0, "");
     }
     // with charlimit but no req
     public Prompt(int id, int step, int order, int type, String text, int charLimit) {
-        this(id, step, order, type, text, true, charLimit, "");
+        this(id, step, order, type, text, true, charLimit, 0, "");
     }
     // with charLimit and reference default, but no req
-    public Prompt(int id, int step, int order, int type, String text, int charLimit, String refDef) {
-        this(id, step, order, type, text, true, charLimit, refDef);
+    public Prompt(int id, int step, int order, int type, String text, int charLimit, int ref, String refDef) {
+        this(id, step, order, type, text, true, charLimit, ref, refDef);
+    }
+
+    public String getAnswerId() {
+        return this.answerId;
+    }
+    public void setAnswerId(String answerId) {
+        this.answerId = answerId;
     }
 
     public int getId() {
@@ -87,6 +100,20 @@ public class Prompt {
         return this.answer;
     }
 
+    public Prompt clone(String answerId) {
+        Prompt p = new Prompt(this.id, this.step, this.order, this.type, this.text, this.required, this.charLimit, this.referenceId, this.referenceDefault);
+        if (answerId.isEmpty()) {
+            p.setAnswers(this.getAnswer());
+        } else {
+            p.setAnswerId(answerId);
+            p.setAnswers(this.getAnswersByLinkId(answerId));
+        }
+        return p;
+    }
+    public Prompt clone() {
+        return clone("");
+    }
+
     public PromptAnswer getAnswerByKey(String key) {
         if (key.isEmpty()) {
             return new PromptAnswer();
@@ -111,65 +138,38 @@ public class Prompt {
         }
         return new PromptAnswer();
     }
-
-    public void setAnswers(ArrayList<PromptAnswer> answers) {
-        /*
-            for each answer on this prompt:
-
-            if it has no id, remove it
-
-            if it has an id, check it against answers {
-
-                if not in answers, set value to empty string
-
-            }
-
-            anything left in answers, call addAnswer
-         */
-
-        if (getAnswer().size() > answers.size()) {
-            for (PromptAnswer savedAnswer : getAnswer()) {
-                savedAnswer.setValue("");
+    public ArrayList<PromptAnswer> getAnswersByLinkId(String id) {
+        ArrayList<PromptAnswer> answers = new ArrayList<>();
+        for (PromptAnswer answer : getAnswer()) {
+            if (answer.getAnswerLinkId().equals(id)) {
+                answers.add(answer);
             }
         }
+        return answers;
+    }
+
+    public void setAnswers(ArrayList<PromptAnswer> answers) {
+        // when setting a new set of answers, we should first clear out all of the existing ones
+        // keep the ID's so the DB will know which ones to delete
+        for (PromptAnswer savedAnswer : getAnswer()) {
+            savedAnswer.setValue("");
+        }
+        // add answer will handle overwriting the existing dudes with new data where necessary
         for (PromptAnswer answer : answers) {
             addAnswer(answer);
         }
-
-        /*
-        for (PromptAnswer savedAnswer : getAnswer()) {
-            if (savedAnswer.getId().isEmpty()) {
-                // uh oh!
-                Log.e("SS", "An existing answer has no ID. How could that happen?");
-            } else {
-                boolean inAnswers = false;
-                for (int cnt = 0; cnt < answers.size(); cnt++) {
-                    PromptAnswer newAnswer = answers.get(cnt);
-                    if (newAnswer.getId().equals(savedAnswer.getId())) {
-                        cnt = answer.size();
-                        inAnswers = true;
-                    }
-                }
-
-                if (!inAnswers) {
-                    // this saved answer isn't in the new list we want to save, so kill it
-                    savedAnswer.setValue("");
-                }
-            }
-        }
-        if (answers.size() > 0) {
-            for (PromptAnswer answer : answers) {
-                addAnswer(answer);
-            }
-        }
-        */
     }
 
     public void addAnswer(PromptAnswer answer) {
+        if (answer == null) {
+            return;
+        }
         PromptAnswer existingByKey = getAnswerByKey(answer.getKey());
         PromptAnswer existingById = getAnswerById(answer.getId());
 
-        Log.d("SS", "Add answer '" + answer.getId() + "' " + answer.getKey() + " " + answer.getValue());
+        if (!this.getAnswerId().isEmpty()) {
+            answer.setAnswerLinkId(this.getAnswerId());
+        }
 
         if (!existingByKey.existsInDB() && !existingById.existsInDB()) {
             this.answer.add(answer);
@@ -177,6 +177,7 @@ public class Prompt {
             if (!existingById.existsInDB() || existingByKey.getId().equals(answer.getId())) {
                 // the answer we are saving is the same as the existing key, so we can just update
                 // the value
+                existingByKey.setAnswerLinkId(answer.getAnswerLinkId());
                 existingByKey.setValue(answer.getValue());
             } else {
                 /*
@@ -184,6 +185,7 @@ public class Prompt {
                 Therefore, we have to clear the value of the existing key, to remove it from the DB
                 And we have to set the new value and key to the answer with the given ID
                  */
+                existingByKey.setAnswerLinkId(answer.getAnswerLinkId());
                 existingByKey.setValue("");
                 existingById.setKey(answer.getKey());
                 existingById.setValue(answer.getValue());
@@ -221,6 +223,9 @@ public class Prompt {
         this.isOpen = !this.isOpen;
     }
 
+    public int getReferenceId() {
+        return referenceId;
+    }
     public String getReferenceDefault() {
         return referenceDefault;
     }

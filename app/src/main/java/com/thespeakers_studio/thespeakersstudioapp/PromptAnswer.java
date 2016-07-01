@@ -9,12 +9,13 @@ public class PromptAnswer {
     private String key;
     private String value;
     private int promptId;
+    private String answerLinkId;
     private String createdBy;
     private String modifiedBy;
     private String createdDate;
     private String modifiedDate;
 
-    public PromptAnswer (String id, String key, String value, int promptId, String createdBy, String modifiedBy, String createdDate, String modifiedDate) {
+    public PromptAnswer (String id, String key, String value, int promptId, String createdBy, String modifiedBy, String createdDate, String modifiedDate, String answerLinkId) {
         this.id = id;
         this.key = key;
         this.value = value;
@@ -23,14 +24,23 @@ public class PromptAnswer {
         this.modifiedBy = modifiedBy;
         this.createdDate = createdDate;
         this.modifiedBy = modifiedBy;
+        this.modifiedDate = modifiedDate;
+        this.answerLinkId = answerLinkId;
     }
 
+    // create an answer object from a key value pair, linked to a specific prompt
     public PromptAnswer (String key, String value, int promptId) {
-        this("", key, value, promptId, "", "", "", "");
+        this("", key, value, promptId, "", "", "", "", "");
     }
 
+    // create an answer object from an existing id
+    public PromptAnswer(String id, String key, String value, int promptId) {
+        this(id, key, value, promptId, "", "", "", "", "");
+    }
+
+    // create an empty answer
     public PromptAnswer () {
-        this("", "", "", -1, "", "", "", "");
+        this("", "", "", -1, "", "", "", "", "");
     }
 
     public boolean existsInDB() {
@@ -65,5 +75,12 @@ public class PromptAnswer {
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+    public String getAnswerLinkId() {
+        return answerLinkId;
+    }
+    public void setAnswerLinkId(String answerLinkId) {
+        this.answerLinkId = answerLinkId;
     }
 }
