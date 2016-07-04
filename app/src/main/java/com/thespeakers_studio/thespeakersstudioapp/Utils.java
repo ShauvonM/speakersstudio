@@ -96,9 +96,13 @@ public class Utils {
         mgr.hideSoftInputFromWindow(container.getWindowToken(), 0);
     }
 
+    public static String getIso8601Format() {
+        return "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+    }
+
     public static String getDateTimeStamp() {
         SimpleDateFormat iso8601Format =
-                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                new SimpleDateFormat(getIso8601Format(), Locale.getDefault());
 
         String datetime = iso8601Format.format(Calendar.getInstance().getTime());
 
@@ -109,7 +113,7 @@ public class Utils {
         String finalDateTime = "";
 
         SimpleDateFormat iso8601Format =
-                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                new SimpleDateFormat(getIso8601Format(), Locale.getDefault());
 
         Date date = null;
         if (timeToFormat != null) {
@@ -132,5 +136,22 @@ public class Utils {
             }
         }
         return finalDateTime;
+    }
+
+    public static String getDateString (Calendar c) {
+        String weekDay = c.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.US);
+        String month = c.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.US);
+        int dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
+        int year = c.get(Calendar.YEAR);
+
+        return weekDay + ", " + month + " " + dayOfMonth + ", " + year;
+    }
+
+    public static String getTimeString (Calendar c) {
+        int hours = c.get(Calendar.HOUR);
+        int mins = c.get(Calendar.MINUTE);
+        String ampm = c.getDisplayName(Calendar.AM_PM, Calendar.SHORT, Locale.US);
+
+        return hours + ":" + String.format("%02d", mins) + " " + ampm;
     }
 }

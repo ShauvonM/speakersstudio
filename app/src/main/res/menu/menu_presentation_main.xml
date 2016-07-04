@@ -1,6 +1,23 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".PresentationMain">
-    <item android:id="@+id/action_reset" android:title="@string/action_reset_presentation"
-        android:orderInCategory="100" app:showAsAction="never" />
+
+    <group android:id="@+id/menu_group_main">
+        <item android:id="@+id/menu_action_search" android:title="@string/search"
+            app:showAsAction="ifRoom" android:icon="@drawable/ic_search_white_24dp" />
+        <item android:id="@+id/menu_action_view" android:title="@string/change_view"
+            app:showAsAction="ifRoom" android:icon="@drawable/ic_view_agenda_white_24dp" />
+    </group>
+
+    // in a presentation
+    <group android:id="@+id/menu_group_presentation" android:visible="false">
+        <item android:id="@+id/menu_action_reset" android:title="@string/action_reset_presentation"
+            app:showAsAction="ifRoom" android:icon="@drawable/ic_assignment_late_white_24dp" />
+    </group>
+
+    // in a presentation
+    <group android:id="@+id/menu_group_selection" android:visible="false">
+        <item android:id="@+id/menu_action_delete" android:title="@string/delete_selected"
+            app:showAsAction="ifRoom" android:icon="@drawable/ic_clear_white_24dp" />
+    </group>
 </menu>

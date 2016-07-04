@@ -30,6 +30,10 @@
         <item name="android:foreground">?android:attr/selectableItemBackground</item>
         <item name="android:clickable">true</item>
     </style>
+        <style name="PresentationListCard.OneColumn">
+            <item name="android:layout_width">match_parent</item>
+            <item name="android:layout_marginBottom">@dimen/pres_list_card_padding</item>
+        </style>
     <style name="PresentationListCardName">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -39,6 +43,9 @@
         <item name="android:layout_marginRight">@dimen/pres_list_card_padding</item>
         <item name="android:layout_marginBottom">0dp</item>
     </style>
+        <style name="PresentationListCardName.OneColumn">
+            <item name="android:layout_width">match_parent</item>
+        </style>
     <style name="PresentationListCardModified">
         <item name="android:gravity">right</item>
         <item name="android:layout_width">wrap_content</item>
@@ -49,8 +56,18 @@
         <item name="android:layout_marginTop">0dp</item>
         <item name="android:layout_marginLeft">@dimen/pres_list_card_padding</item>
         <item name="android:layout_marginRight">0dp</item>
+    </style>
+    <style name="PresentationListCardProgress" parent="PresentationListCardModified">
+        <item name="android:layout_below">@id/presentation_modified</item>
         <item name="android:layout_marginBottom">@dimen/pres_list_card_padding</item>
     </style>
+        <style name="PresentationListCardProgress.OneColumn">
+            <item name="android:layout_alignLeft">@id/presentation_name</item>
+            <item name="android:layout_alignRight">@id/presentation_progress</item>
+            <item name="android:layout_below">@id/presentation_name</item>
+            <item name="android:layout_marginBottom">@dimen/pres_list_card_padding</item>
+            <item name="android:layout_marginLeft">0dp</item>
+        </style>
 
     <style name="StepListItem">
         <item name="android:orientation">vertical</item>

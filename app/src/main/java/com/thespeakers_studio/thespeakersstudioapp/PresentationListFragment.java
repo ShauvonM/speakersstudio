@@ -2,6 +2,7 @@ package com.thespeakers_studio.thespeakersstudioapp;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,6 +27,10 @@ public class PresentationListFragment extends Fragment implements
     private ArrayList<PresentationData> mPresentationList;
     private PresentationListAdapter mAdapter;
 
+    private boolean mIsTwoColumn;
+    private StaggeredGridLayoutManager mTwoColumnManager;
+    private LinearLayoutManager mOneColumnManager;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -42,32 +47,64 @@ public class PresentationListFragment extends Fragment implements
         // Inflate the layout for this fragment
         mView = (RelativeLayout) inflater.inflate(R.layout.fragment_presentation_list, container, false);
 
+        mTwoColumnManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        mOneColumnManager = new LinearLayoutManager(container.getContext(),
+                LinearLayoutManager.VERTICAL, false);
+
+        SharedPreferences sp = container.getContext().getSharedPreferences("presentation_list", 0);
+        mIsTwoColumn = sp.getBoolean("presentation_list_view_type", true);
+
         RecyclerView list = (RecyclerView) mView.findViewById(R.id.presentation_list);
         list.setHasFixedSize(true);
-        //LinearLayoutManager linearLayoutManager = new LinearLayoutManager(container.getContext());
-        //linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        //list.setLayoutManager(linearLayoutManager);
-        list.setLayoutManager(new StaggeredGridLayoutManager(
-                2,
-                StaggeredGridLayoutManager.VERTICAL));
-
         mAdapter = new PresentationListAdapter(mPresentationList, this);
+
+        toggleView(mIsTwoColumn);
+
         list.setAdapter(mAdapter);
         list.addItemDecoration(new PresentationListSpanItemDecoration(
                 container.getResources().getDimensionPixelSize(R.dimen.pres_list_card_padding)));
 
         mView.findViewById(R.id.fab).setOnClickListener(this);
 
+        showMessageIfEmpty();
+
         return mView;
+    }
+
+    public void toggleView(boolean set) {
+        RecyclerView list = (RecyclerView) mView.findViewById(R.id.presentation_list);
+        if (!set) {
+            mAdapter.setIsTwoColumn(false);
+            list.setLayoutManager(mOneColumnManager);
+            mIsTwoColumn = false;
+        } else {
+            mAdapter.setIsTwoColumn(true);
+            list.setLayoutManager(mTwoColumnManager);
+            mIsTwoColumn = true;
+        }
+    }
+    public boolean toggleView() {
+        toggleView(!mIsTwoColumn);
+        return mIsTwoColumn;
     }
 
     public void refresh() {
         if (mAdapter != null) {
             if (mPresentationList.size() > 0) {
-
+                // TODO: re-sort the list of presentations by modified date
             }
 
             mAdapter.notifyDataSetChanged();
+
+            showMessageIfEmpty();
+        }
+    }
+
+    public void showMessageIfEmpty() {
+        if (mPresentationList.size() == 0) {
+            mView.findViewById(R.id.no_presentations).setVisibility(View.VISIBLE);
+        } else {
+            mView.findViewById(R.id.no_presentations).setVisibility(View.GONE);
         }
     }
 
@@ -75,9 +112,32 @@ public class PresentationListFragment extends Fragment implements
         mPresentationList = data;
     }
 
+    public void deselectAll() {
+        mAdapter.deselectAll();
+        for (PresentationData pres : mPresentationList) {
+            pres.deselect();
+        }
+        refresh();
+    }
+
+    public int getSelectedCount() {
+        return mAdapter.getSelectedCount();
+    }
+
     @Override
     public void onPresentationSelected(String presentationId) {
+        mListener.onSelectPresentation(presentationId);
+    }
+
+    @Override
+    public void onPresentationDeselected(String presentationId) {
+        mListener.onDeselectPresentation(presentationId);
+    }
+
+    @Override
+    public boolean onPresentationOpened(String presentationId) {
         mListener.onOpenPresentation(presentationId);
+        return true;
     }
 
     @Override
@@ -90,5 +150,7 @@ public class PresentationListFragment extends Fragment implements
     public interface PresentationListFragmentHandler {
         public void onCreateNewPresentation();
         public void onOpenPresentation(String presentationId);
+        public void onSelectPresentation(String presentationId);
+        public void onDeselectPresentation(String presentationId);
     }
 }

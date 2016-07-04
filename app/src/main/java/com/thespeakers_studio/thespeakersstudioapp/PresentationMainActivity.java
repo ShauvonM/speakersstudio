@@ -3,15 +3,23 @@ package com.thespeakers_studio.thespeakersstudioapp;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.ColorDrawable;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -90,19 +98,41 @@ public class PresentationMainActivity extends AppCompatActivity implements
         showPresentationList();
     }
 
+    private void toggleCardViewType() {
+        if (mPresentationListFragment.isVisible()) {
+            boolean twoCol = mPresentationListFragment.toggleView();
+
+            SharedPreferences.Editor editor = getSharedPreferences("presentation_list", 0).edit();
+            editor.putBoolean("presentation_list_view_type", twoCol);
+            editor.commit();
+
+            if (twoCol) {
+                mMenu.findItem(R.id.menu_action_view).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_view_agenda_white_24dp));
+            } else {
+                mMenu.findItem(R.id.menu_action_view).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_view_quilt_white_24dp));
+            }
+        } else {
+            return;
+        }
+    }
+
     @Override
     public void onBackPressed() {
-        FragmentManager fm = getFragmentManager();
-        if (fm.getBackStackEntryCount() > 0) {
-            fm.popBackStack();
+        if (mPresentationListFragment.getSelectedCount() > 0) {
+            mPresentationListFragment.deselectAll();
+            deselect();
         } else {
-            super.onBackPressed();
+            FragmentManager fm = getFragmentManager();
+            if (fm.getBackStackEntryCount() > 0) {
+                fm.popBackStack();
+            } else {
+                super.onBackPressed();
+            }
         }
     }
 
     @Override
     public void onBackStackChanged() {
-        Log.d("SS", "Back stack changed " + mPresentationListFragment.isVisible() + " " + mStepListFragment.isVisible());
         Utils.hideKeyboard(this, findViewById(R.id.fragment_container));
         if (mPresentationListFragment.isVisible()) {
             onPresentationListShown();
@@ -113,11 +143,40 @@ public class PresentationMainActivity extends AppCompatActivity implements
         }
     }
 
+    private void showBackButton() {
+        ActionBar bar = getSupportActionBar();
+        if (bar != null) {
+            bar.setDisplayHomeAsUpEnabled(true);
+        }
+    }
+    private void hideBackButton() {
+        ActionBar bar = getSupportActionBar();
+        if (bar != null) {
+            bar.setDisplayHomeAsUpEnabled(false);
+        }
+    }
+
+    public void showMenuGroup(int id) {
+        if (mMenu == null) {
+            return;
+        }
+        mMenu.setGroupVisible(R.id.menu_group_main, false);
+        mMenu.setGroupVisible(R.id.menu_group_presentation, false);
+        mMenu.setGroupVisible(R.id.menu_group_selection, false);
+
+        mMenu.setGroupVisible(id, true);
+    }
+
     public void onPresentationListShown() {
         mPresentationListFragment.refresh();
         mPresentationId = null;
         setTitle();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        hideBackButton();
+
+        // reset the progress indication on the step list
+        mStepListFragment.resetProgress();
+
+        showMenuGroup(R.id.menu_group_main);
     }
 
     public void onStepListShown() {
@@ -125,16 +184,20 @@ public class PresentationMainActivity extends AppCompatActivity implements
         mStepListFragment.animateProgressHeight();
         mPromptListFragment.clearStep();
         setTitle();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        showBackButton();
+
+        showMenuGroup(R.id.menu_group_presentation);
     }
 
     public void onPromptListShown() {
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        showBackButton();
+
+        showMenuGroup(R.id.menu_group_presentation);
     }
 
     public PresentationData getSelectedPresentation() {
         for (PresentationData pres : mPresentations) {
-            if (pres.getId() == mPresentationId) {
+            if (pres.getId().equals(mPresentationId)) {
                 return pres;
             }
         }
@@ -143,10 +206,14 @@ public class PresentationMainActivity extends AppCompatActivity implements
 
     public void setTitle() {
         PresentationData pres = getSelectedPresentation();
+        ActionBar bar = getSupportActionBar();
+        if (bar == null) {
+            return;
+        }
         if (pres != null) {
-            getSupportActionBar().setTitle(pres.getTopic());
+            bar.setTitle(pres.getTopic());
         } else {
-            getSupportActionBar().setTitle(getResources().getString(R.string.saved_presentations));
+            bar.setTitle(getResources().getString(R.string.saved_presentations));
         }
     }
 
@@ -166,11 +233,51 @@ public class PresentationMainActivity extends AppCompatActivity implements
 
     @Override
     public void onOpenPresentation(String id) {
-        Log.d("SS", "Presentation " + id + " selected");
+        Log.d("SS", "Presentation " + id + " opened");
         mPresentationId = id;
         mStepListFragment.setPresentation(getSelectedPresentation());
         mPromptListFragment.setPresentation(getSelectedPresentation());
         showStepList();
+    }
+
+    @Override
+    public void onSelectPresentation(String presentationId) {
+        Log.d("SS", "Presentation " + presentationId + " selected");
+        ActionBar bar = getSupportActionBar();
+        if (bar == null) {
+            return;
+        }
+        bar.setTitle(String.valueOf(mPresentationListFragment.getSelectedCount()));
+        bar.setDisplayHomeAsUpEnabled(true);
+        bar.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.colorAccent)));
+
+        showMenuGroup(R.id.menu_group_selection);
+    }
+
+    @Override
+    public void onDeselectPresentation(String presentationId) {
+        Log.d("SS", "Presentation " + presentationId + " deselected");
+
+        ActionBar bar = getSupportActionBar();
+        if (bar == null) {
+            return;
+        }
+        bar.setTitle(String.valueOf(mPresentationListFragment.getSelectedCount()));
+
+        if (mPresentationListFragment.getSelectedCount() == 0) {
+            deselect();
+        }
+    }
+
+    private void deselect() {
+        ActionBar bar = getSupportActionBar();
+        if (bar == null) {
+            return;
+        }
+        setTitle();
+        bar.setDisplayHomeAsUpEnabled(false);
+        showMenuGroup(R.id.menu_group_main);
+        bar.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.colorPrimary)));
     }
 
     @Override
@@ -390,19 +497,81 @@ public class PresentationMainActivity extends AppCompatActivity implements
     }
 
     private void resetPresentation() {
-        /*
+        if (mPresentationId == null) {
+            return;
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.action_reset_presentation))
+                .setMessage(getString(R.string.confirm_reset_message))
+                .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        doResetPresentation();
+                    }
+                })
+                .setNegativeButton(getString(R.string.no), null)
+                .show();
+    }
+
+    private void doResetPresentation() {
+        if (mPresentationId == null) {
+            return;
+        }
+
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        db.delete(PresentationDataContract.PresentationEntry.TABLE_NAME, PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID + "=?", new String[]{mPresentationId});
         db.delete(PresentationDataContract.PresentationAnswerEntry.TABLE_NAME, PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_PRESENTATION_ID + "=?", new String[]{mPresentationId});
+        db.close();
 
-        mPresentation = createNewPresentation();
+        getSelectedPresentation().resetAnswers();
 
-        mPromptListFragment.setPresentation(mPresentation);
-        mStepListFragment.setPresentation(mPresentation);
+        showStepList();
+    }
 
-        // this will reset the view
-        onStepListShown();
-        */
+    private void deleteSelectedPresentations() {
+        int count = mPresentationListFragment.getSelectedCount();
+        if (count == 0) {
+            return;
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.action_reset_presentation))
+                .setMessage(getResources().getQuantityString(R.plurals.confirm_delete_message,
+                        count, count))
+                .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        doDeleteSelectedPresentations();
+                    }
+                })
+                .setNegativeButton(getString(R.string.no), null)
+                .show();
+    }
+
+    private void doDeleteSelectedPresentations() {
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        int[] remove = new int[mPresentationListFragment.getSelectedCount()];
+        int ri = 0;
+        int pi = 0;
+
+        for (PresentationData pres : mPresentations) {
+            if (pres.getIsSelected()) {
+                String id = pres.getId();
+                db.delete(PresentationDataContract.PresentationAnswerEntry.TABLE_NAME, PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_PRESENTATION_ID + "=?", new String[]{id});
+                db.delete(PresentationDataContract.PresentationEntry.TABLE_NAME, PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID + "=?", new String[]{id});
+                remove[ri] = pi;
+                ri++;
+            }
+            pi++;
+        }
+        db.close();
+
+        for(int i : remove) {
+            mPresentations.remove(i);
+        }
+
+        mPresentationListFragment.deselectAll();
+        deselect();
     }
 
     public void setOnLocationSelectedListener (LocationSelectedListener l) {
@@ -445,8 +614,17 @@ public class PresentationMainActivity extends AppCompatActivity implements
 
         //noinspection SimplifiableIfStatement
         switch(id) {
-            case R.id.action_reset:
+            case R.id.menu_action_search:
+                Toast.makeText(PresentationMainActivity.this, "Search isn't implemented yet", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.menu_action_view:
+                toggleCardViewType();
+                break;
+            case R.id.menu_action_reset:
                 resetPresentation();
+                break;
+            case R.id.menu_action_delete:
+                deleteSelectedPresentations();
                 break;
             case android.R.id.home:
                 onBackPressed();

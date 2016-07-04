@@ -180,7 +180,7 @@ public class StepListView extends LinearLayout {
         //getProgressHeight();
         if (mGoToProgressHeight != mCurrentDisplayedProgressHeight) {
             // animate to there
-            int duration = (int) ((Utils.PROMPT_PROGRESS_ANIMATION_DURATION * 3) * Math.abs((double)mProgressHeightDelta / (double)300));
+            int duration = (int) ((Utils.PROMPT_PROGRESS_ANIMATION_DURATION * 2) * Math.abs((double)mProgressHeightDelta / (double)300));
 
             long elapsedTime = System.currentTimeMillis() - mStartTime;
             if (elapsedTime > duration) {
@@ -260,6 +260,10 @@ public class StepListView extends LinearLayout {
         mProgressInvalid = true;
 
         invalidate();
+    }
+
+    public void resetProgressHeight() {
+        mCurrentDisplayedProgressHeight = 0;
     }
 
     private void drawStepLine (Canvas canvas, int step, int width, float leftM, float rightM) {

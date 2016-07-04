@@ -148,6 +148,10 @@ public class Prompt {
         return answers;
     }
 
+    public void resetAnswers() {
+        this.answer = new ArrayList<>();
+    }
+
     public void setAnswers(ArrayList<PromptAnswer> answers) {
         // when setting a new set of answers, we should first clear out all of the existing ones
         // keep the ID's so the DB will know which ones to delete

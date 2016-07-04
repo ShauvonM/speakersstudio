@@ -20,6 +20,7 @@ public class PresentationData {
     private ArrayList<Prompt> mPrompts;
     private String mPresentationId;
     private String mModifiedDate;
+    private boolean mIsSelected;
 
     public static final int PRESENTATION_TOPIC = 1; // the ID of the prompt that "names" the presentation
     public static final int PRESENTATION_HEADER = 0;
@@ -70,6 +71,18 @@ public class PresentationData {
         mPrompts.add(new Prompt(21, 4, 4, PARAGRAPH,  "How does \"%l\" connect to the Audience?", 140,          17, ""));
         mPrompts.add(new Prompt(22, 4, 5, TEXT,       "What story can you connect to \"%l?\"", 50,              17, ""));
         mPrompts.add(new Prompt(23, 4, 6, PARAGRAPH,  "How do you transition from %l to %n ?", 140,         17, ""));
+
+        mIsSelected = false;
+    }
+
+    public void select() {
+        mIsSelected = true;
+    }
+    public void deselect() {
+        mIsSelected = false;
+    }
+    public boolean getIsSelected() {
+        return mIsSelected;
     }
 
     public String getId() {
@@ -197,6 +210,12 @@ public class PresentationData {
         return selection;
     }
 
+    public void resetAnswers() {
+        for (Prompt p : mPrompts) {
+            p.resetAnswers();
+        }
+    }
+
     public void setAnswers (Cursor answerCursor) {
         answerCursor.moveToFirst();
         try {
@@ -264,7 +283,17 @@ public class PresentationData {
 
     // pass no step to get the completion of the entire presentation
     public float getCompletionPercentage() {
-        return getCompletionPercentage(1);
+        float per = 0;
+        for(int c = 1; c < 5; c++) {
+            float thisper = getCompletionPercentage(c);
+            if (thisper < 1) {
+                per += (thisper / 4);
+                return per;
+            } else {
+                per += 0.25;
+            }
+        }
+        return per;
     }
 
 }

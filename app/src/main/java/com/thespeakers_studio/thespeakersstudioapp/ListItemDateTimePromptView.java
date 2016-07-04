@@ -79,14 +79,14 @@ public class ListItemDateTimePromptView extends ListItemPromptView implements Pr
             dateField.setOnClickListener(this);
 
             // set the current date in the date area
-            dateField.setText(DateTimeHelper.getDateString(c));
+            dateField.setText(Utils.getDateString(c));
         }
         if (findViewById(R.id.prompt_timepicker_button) != null) {
             TextView timeField = (TextView) findViewById(R.id.prompt_timepicker_button);
             timeField.setOnClickListener(this);
 
             // set the current date in the date area
-            timeField.setText(DateTimeHelper.getTimeString(c));
+            timeField.setText(Utils.getTimeString(c));
         }
     }
 
@@ -96,7 +96,7 @@ public class ListItemDateTimePromptView extends ListItemPromptView implements Pr
         if (!timestamp.isEmpty()) {
             Calendar c = Calendar.getInstance();
             c.setTimeInMillis(Long.parseLong(timestamp));
-            return DateTimeHelper.getDateString(c) + "\n" + getContext().getResources().getString(R.string.datetime_at) + " " + DateTimeHelper.getTimeString(c);
+            return Utils.getDateString(c) + "\n" + getContext().getResources().getString(R.string.datetime_at) + " " + Utils.getTimeString(c);
         } else {
             return "";
         }

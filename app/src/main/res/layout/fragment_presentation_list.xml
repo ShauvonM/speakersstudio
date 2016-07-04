@@ -15,6 +15,16 @@
         android:padding="@dimen/activity_vertical_margin"
         />
 
+    <TextView
+        android:id="@+id/no_presentations"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textSize="15dp"
+        android:text="@string/no_presentations"
+        />
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"

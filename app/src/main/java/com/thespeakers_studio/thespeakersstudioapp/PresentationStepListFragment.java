@@ -70,6 +70,12 @@ public class PresentationStepListFragment extends Fragment implements View.OnCli
         }
     }
 
+    public void resetProgress() {
+        if (mView != null) {
+            ((StepListView) mView.findViewById(R.id.step_list)).resetProgressHeight();
+        }
+    }
+
     public void animateProgressHeight() {
         int currentStep = 0;
         float currentStepProgress = 0;

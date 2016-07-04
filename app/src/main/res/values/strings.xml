@@ -51,4 +51,21 @@
         <item>@string/specify_duration</item>
     </string-array>
 
+    <string name="search">Search</string>
+    <string name="change_view">Change View</string>
+    <string name="delete_selected">Delete Selected</string>
+
+    <string name="confirm_reset_message">Are you sure you want to clear everything saved for this presentation? There is no turning back.</string>
+    <plurals name="confirm_delete_message">
+        <item quantity="one">Are you sure you want to delete this presentation? You won\'t get it back.</item>
+        <item quantity="other">Are you sure you want to delete these %d presentations? You won\'t get them back.</item>
+    </plurals>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
+    <string name="progress_output">%1$s%% Complete</string>
+    <string name="modified_output">Modified: %1$s</string>
+
+    <string name="no_presentations">You have no saved presentations.</string>
+
 </resources>

@@ -1,8 +1,11 @@
 package com.thespeakers_studio.thespeakersstudioapp;
 
+import android.app.ActionBar;
 import android.graphics.Rect;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.text.Layout;
 import android.view.View;
 
 /**
@@ -21,11 +24,15 @@ public class PresentationListSpanItemDecoration extends RecyclerView.ItemDecorat
                                RecyclerView parent, RecyclerView.State state) {
         super.getItemOffsets(outRect, view, parent, state);
 
-        int spanIndex = ((StaggeredGridLayoutManager.LayoutParams) view.getLayoutParams()).getSpanIndex();
+        if (view.getLayoutParams() instanceof StaggeredGridLayoutManager.LayoutParams) {
+            int spanIndex = ((StaggeredGridLayoutManager.LayoutParams) view.getLayoutParams()).getSpanIndex();
 
-        outRect.top = 0;
-        outRect.left = 0;
-        outRect.bottom = space;
-        outRect.right = spanIndex == 0 ? space : 0;
+            outRect.top = 0;
+            outRect.left = 0;
+            outRect.bottom = space;
+            outRect.right = spanIndex == 0 ? space : 0;
+        } else {
+            outRect.bottom = space;
+        }
     }
 }

@@ -18,6 +18,11 @@
             style="@style/PresentationListCardModified"
             />
 
+        <TextView
+            android:id="@+id/presentation_progress"
+            style="@style/PresentationListCardProgress"
+            />
+
     </RelativeLayout>
 
 </android.support.v7.widget.CardView>
