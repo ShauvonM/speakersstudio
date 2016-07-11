@@ -1,13 +1,15 @@
 package com.thespeakers_studio.thespeakersstudioapp;
 
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 /**
  * Created by smcgi_000 on 5/9/2016.
@@ -22,6 +24,12 @@ public class PresentationStepListFragment extends Fragment implements View.OnCli
 
     public interface OnStepSelectedListener {
         public void onStepSelected(int step);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
     }
 
     @Override
@@ -51,6 +59,21 @@ public class PresentationStepListFragment extends Fragment implements View.OnCli
         return mView;
     }
 
+    private void checkCompletion() {
+        if (mPresentation == null) {
+            return;
+        }
+
+        float completion = mPresentation.getCompletionPercentage();
+        if (completion == 1) {
+            mView.findViewById(R.id.button_outline).setEnabled(true);
+            mView.findViewById(R.id.button_outline).setBackgroundColor(ContextCompat.getColor(getContext(), R.color.completedPromptBG));
+        } else {
+            mView.findViewById(R.id.button_outline).setEnabled(false);
+            mView.findViewById(R.id.button_outline).setBackgroundColor(ContextCompat.getColor(getContext(), R.color.common_google_signin_btn_text_dark_disabled));
+        }
+    }
+
     public void setPresentation(PresentationData presentation) {
         mPresentation = presentation;
     }
@@ -77,15 +100,10 @@ public class PresentationStepListFragment extends Fragment implements View.OnCli
     }
 
     public void animateProgressHeight() {
-        int currentStep = 0;
-        float currentStepProgress = 0;
-        for (int step = 1; step < 5; step++) {
-            if (mPresentation.getCompletionPercentage(step) < 1) {
-                currentStep = step;
-                currentStepProgress = mPresentation.getCompletionPercentage(step);
-                step = 5;
-            }
-        }
+        checkCompletion();
+
+        int currentStep = mPresentation.getCurrentStep();
+        float currentStepProgress = mPresentation.getCompletionPercentage(currentStep);
 
         ((StepListView) mView.findViewById(R.id.step_list)).setProgressHeight(currentStep, currentStepProgress);
     }
@@ -106,7 +124,7 @@ public class PresentationStepListFragment extends Fragment implements View.OnCli
                 mStepSelectedListener.onStepSelected(4);
                 break;
             case (R.id.button_outline):
-                Log.d("SS", "Outline button clicked");
+                mStepSelectedListener.onStepSelected(5);
                 break;
         }
     }

@@ -82,7 +82,6 @@ public class ListItemListPromptView extends ListItemPromptView implements View.O
         }
 
         // set up the text listener
-        /*
         input.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -97,11 +96,10 @@ public class ListItemListPromptView extends ListItemPromptView implements View.O
             @Override
             public void afterTextChanged(Editable s) {
                 setSaveButtonIcon();
-                ((TextView) layout.findViewById(R.id.prompt_char_count)).setText(String.valueOf(s.length()));
+                //((TextView) layout.findViewById(R.id.prompt_char_count)).setText(String.valueOf(s.length()));
             }
         });
-        */
-        input.setOnFocusChangeListener(this);
+        //input.setOnFocusChangeListener(this);
 
         // add a hint to the item
         //input.setHint("Item " + mListWrapper.getChildCount());
@@ -186,6 +184,7 @@ public class ListItemListPromptView extends ListItemPromptView implements View.O
 
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
+        /*
         final View output = ((RelativeLayout) v.getParent()).findViewById(R.id.list_item_char_readout);
         if (hasFocus && mPrompt.getCharLimit() > 0) {
             output.clearAnimation();
@@ -237,5 +236,6 @@ public class ListItemListPromptView extends ListItemPromptView implements View.O
             hideCharCountAnimation.setDuration(400);
             output.setAnimation(hideCharCountAnimation);
         }
+        */
     }
 }

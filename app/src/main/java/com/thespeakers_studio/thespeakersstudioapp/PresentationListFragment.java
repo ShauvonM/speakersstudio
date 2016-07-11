@@ -1,6 +1,6 @@
 package com.thespeakers_studio.thespeakersstudioapp;
 
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -32,6 +32,12 @@ public class PresentationListFragment extends Fragment implements
     private LinearLayoutManager mOneColumnManager;
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
+
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
@@ -52,7 +58,7 @@ public class PresentationListFragment extends Fragment implements
                 LinearLayoutManager.VERTICAL, false);
 
         SharedPreferences sp = container.getContext().getSharedPreferences("presentation_list", 0);
-        mIsTwoColumn = sp.getBoolean("presentation_list_view_type", true);
+        mIsTwoColumn = sp.getBoolean("presentation_list_view_type", false);
 
         RecyclerView list = (RecyclerView) mView.findViewById(R.id.presentation_list);
         list.setHasFixedSize(true);
@@ -110,6 +116,9 @@ public class PresentationListFragment extends Fragment implements
 
     public void setPresentationData(ArrayList<PresentationData> data) {
         mPresentationList = data;
+    }
+    public ArrayList<PresentationData> getPresentationData() {
+        return mPresentationList;
     }
 
     public void deselectAll() {

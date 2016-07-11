@@ -2,7 +2,7 @@ package com.thespeakers_studio.thespeakersstudioapp;
 
 import android.content.Context;
 import android.support.v7.app.ActionBar;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.transition.Transition;
 import android.transition.TransitionValues;
@@ -24,7 +24,15 @@ public class PresentationPromptListFragment extends Fragment implements PromptLi
     private PresentationData mPresentation;
     private ArrayList<Prompt> mPromptData;
 
+    private int mStep;
+
     private PromptListView mPromptList;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -45,6 +53,10 @@ public class PresentationPromptListFragment extends Fragment implements PromptLi
         mPromptList = (PromptListView) mView.findViewById(R.id.prompt_list);
         mPromptList.setPromptListListener(this);
 
+        if (mStep > 0) {
+            setStep(mStep);
+        }
+
         return mView;
     }
 
@@ -53,9 +65,14 @@ public class PresentationPromptListFragment extends Fragment implements PromptLi
     }
 
     public void setStep (int step) {
+        mStep = step;
         mPromptData = mPresentation.getPromptsForStep(step);
         Log.d("SS", "Step count: " + mPromptData.size());
         mPromptList.setData(mPromptData);
+    }
+
+    public int getStep() {
+        return mStep;
     }
 
     public void clearStep() {

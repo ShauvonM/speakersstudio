@@ -138,14 +138,23 @@ public class PresentationData {
                 processedText = p.getText().replace("%t", value);
             } else if (refPrompt.getType() == LIST) {
                 Pattern refRegex = Pattern.compile("%l([0-9]+)");
+                Pattern nextRegex = Pattern.compile("%n([0-9]+)");
                 Matcher refMatcher = refRegex.matcher(p.getText());
+                Matcher nextMatcher = nextRegex.matcher(p.getText());
+
+                processedText = p.getText();
+                ArrayList<PromptAnswer> refAnswers = refPrompt.getAnswer();
+
                 if (refMatcher.find()) {
-                    int index = Integer.parseInt(refMatcher.group(1));
-                    ArrayList<PromptAnswer> refAnswers = refPrompt.getAnswer();
-                    processedText = p.getText().replace("%l" + index,
-                            refAnswers.get(index).getValue());
-                } else {
-                    processedText = p.getText();
+                    int refI = Integer.parseInt(refMatcher.group(1));
+                    processedText = processedText.replace("%l" + refI,
+                            refAnswers.get(refI).getValue());
+                }
+
+                if (nextMatcher.find()) {
+                    int nextI = Integer.parseInt(nextMatcher.group(1));
+                    processedText = processedText.replace("%n" + nextI,
+                            refAnswers.get(nextI).getValue());
                 }
             }
 
@@ -175,10 +184,13 @@ public class PresentationData {
                         np.setOrder(np.getOrder() + orderPadding);
                         orderPadding++;
 
+                        // add the prompt if it includes a "%n" in it, but not for the last one,
+                        // because there isn't a next answer to include
                         if (np.getText().indexOf("%n") > -1 && index < ref.getAnswer().size() - 1) {
                             np.setText(np.getText().replace("%n", "%n" + (index + 1)));
                             selection.add(np.getOrder(), processPrompt(np));
                         } else if (np.getText().indexOf("%n") == -1) {
+                            // if there is no "%n" we can insert it no matter what
                             selection.add(np.getOrder(), processPrompt(np));
                         }
                     }
@@ -262,6 +274,17 @@ public class PresentationData {
         } finally {
             answerCursor.close();
         }
+    }
+
+    public int getCurrentStep() {
+        int currentStep = 0;
+        for (int step = 1; step < 5; step++) {
+            if (getCompletionPercentage(step) < 1 || step == 4) {
+                currentStep = step;
+                step = 5;
+            }
+        }
+        return currentStep;
     }
 
     public float getCompletionPercentage(int step) {

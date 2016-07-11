@@ -35,7 +35,8 @@
             android:layout_alignRight="@id/prompt_input"
             android:layout_marginTop="-3dp"
             android:layout_marginRight="5dp"
-            android:alpha="0">
+            android:alpha="0"
+            android:visibility="gone">
             <TextView
                 android:id="@+id/prompt_char_count"
                 android:layout_width="wrap_content"

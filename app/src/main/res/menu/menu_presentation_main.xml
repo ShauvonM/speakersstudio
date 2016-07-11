@@ -15,9 +15,13 @@
             app:showAsAction="ifRoom" android:icon="@drawable/ic_assignment_late_white_24dp" />
     </group>
 
-    // in a presentation
+    // selecting multiple presentations
     <group android:id="@+id/menu_group_selection" android:visible="false">
         <item android:id="@+id/menu_action_delete" android:title="@string/delete_selected"
             app:showAsAction="ifRoom" android:icon="@drawable/ic_clear_white_24dp" />
+    </group>
+
+    <group android:id="@+id/menu_outline" android:visible="false">
+
     </group>
 </menu>

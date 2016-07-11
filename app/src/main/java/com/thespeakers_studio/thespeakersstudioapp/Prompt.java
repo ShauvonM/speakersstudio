@@ -120,7 +120,7 @@ public class Prompt {
         }
         ArrayList<PromptAnswer> answers = getAnswer();
         for (PromptAnswer answer : answers) {
-            if (answer.getKey().equals(key)) {
+            if (answer.getKey().equals(key) && !answer.getValue().isEmpty()) {
                 return answer;
             }
         }
@@ -168,33 +168,20 @@ public class Prompt {
         if (answer == null) {
             return;
         }
-        PromptAnswer existingByKey = getAnswerByKey(answer.getKey());
+
         PromptAnswer existingById = getAnswerById(answer.getId());
 
-        if (!this.getAnswerId().isEmpty()) {
-            answer.setAnswerLinkId(this.getAnswerId());
+        // if we are saving a thing with an existing ID, we will just update that ID
+        // this is for list items, so we don't lose track of IDs
+        if (existingById.existsInDB()) {
+            existingById.setValue(answer.getValue());
+            existingById.setKey(answer.getKey());
+            existingById.setAnswerLinkId(this.getAnswerId());
+        } else {
+            // if the ID doesn't already exist, we can just save this
+            doAddAnswer(answer);
         }
 
-        if (!existingByKey.existsInDB() && !existingById.existsInDB()) {
-            this.answer.add(answer);
-        } else {
-            if (!existingById.existsInDB() || existingByKey.getId().equals(answer.getId())) {
-                // the answer we are saving is the same as the existing key, so we can just update
-                // the value
-                existingByKey.setAnswerLinkId(answer.getAnswerLinkId());
-                existingByKey.setValue(answer.getValue());
-            } else {
-                /*
-                We are saving an existing item to a new key.
-                Therefore, we have to clear the value of the existing key, to remove it from the DB
-                And we have to set the new value and key to the answer with the given ID
-                 */
-                existingByKey.setAnswerLinkId(answer.getAnswerLinkId());
-                existingByKey.setValue("");
-                existingById.setKey(answer.getKey());
-                existingById.setValue(answer.getValue());
-            }
-        }
         Collections.sort(this.answer, new Comparator<PromptAnswer>() {
             @Override
             public int compare(PromptAnswer lhs, PromptAnswer rhs) {
@@ -202,9 +189,12 @@ public class Prompt {
             }
         });
     }
-    public void addAnswer(String key, String value) {
-        PromptAnswer answer = new PromptAnswer(key, value, getId());
-        addAnswer(answer);
+    private void doAddAnswer(PromptAnswer answer) {
+        if (!this.getAnswerId().isEmpty()) {
+            answer.setAnswerLinkId(this.getAnswerId());
+        }
+
+        this.answer.add(answer);
     }
 
     public boolean getRequired() { return this.required; }

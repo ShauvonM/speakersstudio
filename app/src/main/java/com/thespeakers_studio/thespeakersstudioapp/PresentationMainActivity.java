@@ -1,7 +1,8 @@
 package com.thespeakers_studio.thespeakersstudioapp;
 
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.os.PersistableBundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -50,12 +51,24 @@ public class PresentationMainActivity extends AppCompatActivity implements
     private PresentationListFragment mPresentationListFragment;
     private PresentationStepListFragment mStepListFragment;
     private PresentationPromptListFragment mPromptListFragment;
+    private PresentationOutlineFragment mOutlineFragment;
 
     private Menu mMenu;
+    private String mCurrentFragment;
+
+    static final String TAG_PRESENTATION_LIST = "presentation_list";
+    static final String TAG_STEP_LIST = "step_list";
+    static final String TAG_PROMPT_LIST = "prompt_list";
+    static final String TAG_OUTLINE = "presentation_outline";
+
+    static final String STATE_PRESENTATION_ID = "presentationId";
+    static final String STATE_FRAGMENT = "openFragment";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Log.d("SS", "On Create!");
         setContentView(R.layout.activity_presentation_main);
 
         mGoogleApiClient = new GoogleApiClient
@@ -67,35 +80,77 @@ public class PresentationMainActivity extends AppCompatActivity implements
 
         mDbHelper = new PresentationDbHelper(getApplicationContext());
 
-        mPresentations = loadPresentations();
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         setTitle();
 
-        if (savedInstanceState != null) {
-            return;
+        if (savedInstanceState == null) {
+            mPresentationId = null;
+        } else {
+            mPresentationId = savedInstanceState.getString(STATE_PRESENTATION_ID);
         }
 
-        mPresentationId = null;
+        FragmentManager fm = getSupportFragmentManager();
+        fm.addOnBackStackChangedListener(this);
 
-        mPresentationListFragment = new PresentationListFragment();
-        mPresentationListFragment.setPresentationData(mPresentations);
+        mPresentationListFragment = (PresentationListFragment) fm.findFragmentByTag(TAG_PRESENTATION_LIST);
+        mStepListFragment = (PresentationStepListFragment) fm.findFragmentByTag(TAG_STEP_LIST);
+        mPromptListFragment = (PresentationPromptListFragment) fm.findFragmentByTag(TAG_PROMPT_LIST);
+        mOutlineFragment = (PresentationOutlineFragment) fm.findFragmentByTag(TAG_OUTLINE);
 
-        mStepListFragment = new PresentationStepListFragment();
-        mPromptListFragment = new PresentationPromptListFragment();
+        FragmentTransaction ft = fm.beginTransaction();
 
-        getFragmentManager().addOnBackStackChangedListener(this);
+        mPresentations = loadPresentations();
 
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.add(R.id.fragment_container, mPresentationListFragment, "presentation_list");
-        ft.add(R.id.fragment_container, mStepListFragment, "step_list");
-        ft.add(R.id.fragment_container, mPromptListFragment, "prompt_list");
+        if (mPresentationListFragment == null) {
+            mPresentationListFragment = new PresentationListFragment();
+            mPresentationListFragment.setPresentationData(mPresentations);
+            ft.add(R.id.fragment_container, mPresentationListFragment, TAG_PRESENTATION_LIST);
+        }
+
+        if (mStepListFragment == null) {
+            mStepListFragment = new PresentationStepListFragment();
+            ft.add(R.id.fragment_container, mStepListFragment, TAG_STEP_LIST);
+        }
+
+        if (mPromptListFragment == null) {
+            mPromptListFragment = new PresentationPromptListFragment();
+            ft.add(R.id.fragment_container, mPromptListFragment, TAG_PROMPT_LIST);
+        }
+
+        if (mOutlineFragment == null) {
+            mOutlineFragment = new PresentationOutlineFragment();
+            ft.add(R.id.fragment_container, mOutlineFragment, TAG_OUTLINE);
+        }
+
         ft.commit();
 
-        //showStepList();
-        showPresentationList();
+        if (savedInstanceState == null) {
+            showPresentationList();
+        } else {
+            switch(savedInstanceState.getString(STATE_FRAGMENT)) {
+                case TAG_PROMPT_LIST:
+                    onPromptListShown();
+                    break;
+                case TAG_STEP_LIST:
+                    onStepListShown();
+                    break;
+                case TAG_OUTLINE:
+                    onOutlineShown();
+                default:
+                    onPresentationListShown();
+                    break;
+            }
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putString(STATE_PRESENTATION_ID, mPresentationId);
+        outState.putString(STATE_FRAGMENT, mCurrentFragment);
+
+        super.onSaveInstanceState(outState);
     }
 
     private void toggleCardViewType() {
@@ -122,7 +177,7 @@ public class PresentationMainActivity extends AppCompatActivity implements
             mPresentationListFragment.deselectAll();
             deselect();
         } else {
-            FragmentManager fm = getFragmentManager();
+            FragmentManager fm = getSupportFragmentManager();
             if (fm.getBackStackEntryCount() > 0) {
                 fm.popBackStack();
             } else {
@@ -168,6 +223,7 @@ public class PresentationMainActivity extends AppCompatActivity implements
     }
 
     public void onPresentationListShown() {
+        mCurrentFragment = TAG_PRESENTATION_LIST;
         mPresentationListFragment.refresh();
         mPresentationId = null;
         setTitle();
@@ -180,22 +236,33 @@ public class PresentationMainActivity extends AppCompatActivity implements
     }
 
     public void onStepListShown() {
+        mCurrentFragment = TAG_STEP_LIST;
         // we are on the step list
         mStepListFragment.animateProgressHeight();
         mPromptListFragment.clearStep();
         setTitle();
         showBackButton();
-
         showMenuGroup(R.id.menu_group_presentation);
     }
 
     public void onPromptListShown() {
+        mCurrentFragment = TAG_PROMPT_LIST;
+        setTitle();
         showBackButton();
-
         showMenuGroup(R.id.menu_group_presentation);
     }
 
+    public void onOutlineShown() {
+        mCurrentFragment = TAG_OUTLINE;
+        setTitle();
+        showBackButton();
+        showMenuGroup(R.id.menu_outline);
+    }
+
     public PresentationData getSelectedPresentation() {
+        if (mPresentations == null) {
+            return null;
+        }
         for (PresentationData pres : mPresentations) {
             if (pres.getId().equals(mPresentationId)) {
                 return pres;
@@ -210,10 +277,14 @@ public class PresentationMainActivity extends AppCompatActivity implements
         if (bar == null) {
             return;
         }
-        if (pres != null) {
-            bar.setTitle(pres.getTopic());
+        if (mCurrentFragment != null && mCurrentFragment.equals(TAG_OUTLINE)) {
+            bar.setTitle(getResources().getString(R.string.outline));
         } else {
-            bar.setTitle(getResources().getString(R.string.saved_presentations));
+            if (pres != null) {
+                bar.setTitle(pres.getTopic());
+            } else {
+                bar.setTitle(getResources().getString(R.string.saved_presentations));
+            }
         }
     }
 
@@ -222,9 +293,10 @@ public class PresentationMainActivity extends AppCompatActivity implements
     }
 
     private void showPresentationList() {
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.hide(mPromptListFragment);
         ft.hide(mStepListFragment);
+        ft.hide(mOutlineFragment);
         ft.show(mPresentationListFragment);
         ft.commit();
 
@@ -237,6 +309,7 @@ public class PresentationMainActivity extends AppCompatActivity implements
         mPresentationId = id;
         mStepListFragment.setPresentation(getSelectedPresentation());
         mPromptListFragment.setPresentation(getSelectedPresentation());
+        mOutlineFragment.setPresentation(getSelectedPresentation());
         showStepList();
     }
 
@@ -264,7 +337,7 @@ public class PresentationMainActivity extends AppCompatActivity implements
         }
         bar.setTitle(String.valueOf(mPresentationListFragment.getSelectedCount()));
 
-        if (mPresentationListFragment.getSelectedCount() == 0) {
+        if (mPresentationListFragment.getSelectedCount() <= 0) {
             deselect();
         }
     }
@@ -291,9 +364,9 @@ public class PresentationMainActivity extends AppCompatActivity implements
     }
 
     private void showStepList() {
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
 
         ft.hide(mPresentationListFragment);
         ft.show(mStepListFragment);
@@ -304,20 +377,35 @@ public class PresentationMainActivity extends AppCompatActivity implements
 
     public void onStepSelected(int step) {
         Log.d("SS", "Step " + step + " selected");
-        showStep(step);
+        if (step < 5) {
+            showStep(step);
+        } else {
+            showOutline();
+        }
     }
 
     private void showStep(int step) {
         mPromptListFragment.setStep(step);
 
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
 
         ft.hide(mStepListFragment);
         ft.show(mPromptListFragment);
 
         ft.addToBackStack("step_" + step);
+        ft.commit();
+    }
+
+    private void showOutline() {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+
+        ft.hide(mStepListFragment);
+        ft.show(mOutlineFragment);
+
+        ft.addToBackStack("outline");
         ft.commit();
     }
 
@@ -391,9 +479,9 @@ public class PresentationMainActivity extends AppCompatActivity implements
 
     @Override
     public void onNextStep(int step) {
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
 
         final int nextStep = step + 1;
         if (nextStep < 5) {
@@ -602,6 +690,15 @@ public class PresentationMainActivity extends AppCompatActivity implements
         mMenu = menu;
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_presentation_main, menu);
+
+        SharedPreferences sp = getSharedPreferences("presentation_list", 0);
+        boolean twoCol = sp.getBoolean("presentation_list_view_type", false);
+        if (twoCol) {
+            mMenu.findItem(R.id.menu_action_view).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_view_agenda_white_24dp));
+        } else {
+            mMenu.findItem(R.id.menu_action_view).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_view_quilt_white_24dp));
+        }
+
         return true;
     }
 

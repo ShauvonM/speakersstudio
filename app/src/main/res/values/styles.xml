@@ -13,6 +13,7 @@
         <item name="android:textColor">@color/textColorPrimary</item>
         <item name="android:textColorPrimaryInverse">@color/textColorInverse</item>
         <item name="android:colorBackground">@color/windowBackground</item>
+        <item name="colorButtonNormal">@color/completedPromptBG</item>
     </style>
     <style name="AppTheme.ActionBar" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
     </style>
@@ -121,6 +122,9 @@
         <item name="android:layout_marginBottom">0dp</item>
         <item name="android:textStyle">normal</item>
         <item name="android:padding">@dimen/default_padding</item>
+        <item name="android:textColor">@drawable/outline_button_text</item>
+        <item name="android:clickable">true</item>
+        <item name="android:foreground">?android:attr/selectableItemBackground</item>
     </style>
 
     <!--
