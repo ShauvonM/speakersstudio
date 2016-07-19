@@ -195,6 +195,8 @@ public class PresentationMainActivity extends AppCompatActivity implements
             onStepListShown();
         } else if (mPromptListFragment.isVisible()) {
             onPromptListShown();
+        } else if (mOutlineFragment.isVisible()) {
+            onOutlineShown();
         }
     }
 
@@ -277,6 +279,9 @@ public class PresentationMainActivity extends AppCompatActivity implements
         if (bar == null) {
             return;
         }
+
+        Log.d("SS", "current fragment: " + mCurrentFragment);
+
         if (mCurrentFragment != null && mCurrentFragment.equals(TAG_OUTLINE)) {
             bar.setTitle(getResources().getString(R.string.outline));
         } else {
@@ -309,7 +314,6 @@ public class PresentationMainActivity extends AppCompatActivity implements
         mPresentationId = id;
         mStepListFragment.setPresentation(getSelectedPresentation());
         mPromptListFragment.setPresentation(getSelectedPresentation());
-        mOutlineFragment.setPresentation(getSelectedPresentation());
         showStepList();
     }
 
@@ -399,11 +403,15 @@ public class PresentationMainActivity extends AppCompatActivity implements
     }
 
     private void showOutline() {
+        mOutlineFragment.setOutline(Outline.fromPresentation(this, getSelectedPresentation()));
+
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
 
         ft.hide(mStepListFragment);
         ft.show(mOutlineFragment);
+
+        mOutlineFragment.render();
 
         ft.addToBackStack("outline");
         ft.commit();
@@ -723,6 +731,11 @@ public class PresentationMainActivity extends AppCompatActivity implements
             case R.id.menu_action_delete:
                 deleteSelectedPresentations();
                 break;
+            case R.id.menu_action_edit_outline:
+                Toast.makeText(PresentationMainActivity.this, "You can't edit outlines just yet", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.menu_action_outline_view:
+                Toast.makeText(PresentationMainActivity.this, "The timeline view isn't ready yet", Toast.LENGTH_SHORT).show();
             case android.R.id.home:
                 onBackPressed();
                 break;

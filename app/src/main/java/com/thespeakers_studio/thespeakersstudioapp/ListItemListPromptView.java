@@ -150,21 +150,7 @@ public class ListItemListPromptView extends ListItemPromptView implements View.O
     @Override
     protected String processAnswer() {
         ArrayList<PromptAnswer> answers = mPrompt.getAnswer();
-        String text = "";
-        for(int cnt = 0; cnt < answers.size(); cnt++) {
-            PromptAnswer answer = answers.get(cnt);
-
-            if (!answer.getValue().isEmpty()) {
-                if (cnt > 0) {
-                    text += ", ";
-                    if (cnt == answers.size() - 1) {
-                        text += getResources().getString(R.string.list_and) + " ";
-                    }
-                }
-                text += answer.getValue();
-            }
-        }
-        return text;
+        return Utils.processAnswerList(answers, getResources());
     }
 
     @Override

@@ -73,30 +73,8 @@ public class ListItemDurationPromptView extends ListItemPromptView implements Ad
 
     @Override
     protected String processAnswer() {
-        String text;
         String duration = mPrompt.getAnswerByKey("duration").getValue();
-        if (duration.isEmpty()) {
-            return "";
-        }
-
-        switch (duration) {
-            case "5":
-                text = getResources().getString(R.string.five_minutes);
-                break;
-            case "10":
-                text = getResources().getString(R.string.ten_minutes);
-                break;
-            case "20":
-                text = getResources().getString(R.string.twenty_minutes);
-                break;
-            case "30":
-                text = getResources().getString(R.string.thirty_minutes);
-                break;
-            default:
-                text = duration + " " + getResources().getString(R.string.minutes);
-                break;
-        }
-        return text;
+        return Utils.getDurationString(duration, getResources());
     }
 
     @Override

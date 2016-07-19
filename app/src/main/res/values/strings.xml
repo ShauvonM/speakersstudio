@@ -39,7 +39,7 @@
     <string name="twenty_minutes">Twenty Minutes</string>
     <string name="thirty_minutes">Thirty Minutes</string>
     <string name="specify_duration">Specify Duration...</string>
-    <string name="minutes">Minutes</string>
+    <string name="minutes">Minutes</string><!-- TODO: put a %1$s in here to include the time -->
 
     <string name="list_and">and</string>
 
@@ -67,5 +67,10 @@
     <string name="modified_output">Modified: %1$s</string>
 
     <string name="no_presentations">You have no saved presentations.</string>
+
+    <string name="outline_item_intro">Intro</string>
+    <string name="outline_item_conclusion">Conclusion</string>
+    <string name="outline_item_mention">Mention %1$s</string>
+    <string name="outline_duration">(%1$d Minutes)</string>
 
 </resources>

@@ -36,4 +36,16 @@
     <dimen name="prompt_spacing_bottom">5dp</dimen>
     <dimen name="prompt_corner_radius">5dp</dimen>
 
+    <dimen name="outline_title_size">24dp</dimen>
+    <dimen name="outline_subtitle_size">14dp</dimen>
+    <dimen name="outline_text_size">18dp</dimen>
+    <dimen name="outline_duration_size">14dp</dimen>
+    <dimen name="outline_list_padding">20dp</dimen>
+    <dimen name="outline_list_bullet_spacing">10dp</dimen>
+    <dimen name="outline_main_bullet_size">20dp</dimen>
+    <dimen name="outline_bullet_size">20dp</dimen>
+    <dimen name="outline_list_spacing">10dp</dimen>
+    <dimen name="outline_list_item_spacing">4dp</dimen>
+    <dimen name="outline_list_tab">5dp</dimen>
+
 </resources>

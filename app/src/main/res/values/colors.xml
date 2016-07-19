@@ -22,5 +22,10 @@
     <color name="completedPromptBGRipple">#0aacbd</color>
     <color name="progressBG">#47A447</color>
 
+    <!-- outline colors -->
+    <color name="outlineBG">#FFFFFF</color>
+    <color name="outlineText">#757575</color>
+
+    <color name="outlineColor1">#2196f3</color>
 
 </resources>

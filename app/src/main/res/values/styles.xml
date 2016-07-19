@@ -196,4 +196,24 @@
         <item name="android:layout_margin">@dimen/default_padding</item>
     </style>
 
+    <style name="PresentationOutline">
+        <item name="android:textColor">@color/outlineText</item>
+        <item name="android:textColorPrimaryInverse">@android:color/white</item>
+        <item name="android:background">@color/outlineBG</item>
+    </style>
+        <style name="PresentationOutline.Text">
+            <item name="android:textColor">@color/outlineText</item>
+            <item name="android:textSize">@dimen/outline_text_size</item>
+        </style>
+        <style name="PresentationOutline.Text.Title">
+            <item name="android:textSize">@dimen/outline_title_size</item>
+            <item name="android:gravity">center</item>
+        </style>
+        <style name="PresentationOutline.Text.Title.Sub">
+            <item name="android:textSize">@dimen/outline_subtitle_size</item>
+        </style>
+        <style name="PresentationOutline.Text.Duration">
+            <item name="android:textSize">@dimen/outline_duration_size</item>
+        </style>
+
 </resources>

@@ -10,12 +10,16 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.TreeMap;
 
 /**
  * Created by smcgi_000 on 5/10/2016.
@@ -153,5 +157,67 @@ public class Utils {
         String ampm = c.getDisplayName(Calendar.AM_PM, Calendar.SHORT, Locale.US);
 
         return hours + ":" + String.format("%02d", mins) + " " + ampm;
+    }
+
+    public static String getDateTimeString (String timestamp, Resources r) {
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(Long.parseLong(timestamp));
+        return Utils.getDateString(c) + "\n" + r.getString(R.string.datetime_at) + " " + Utils.getTimeString(c);
+    }
+
+    public static String getDurationString (String duration, Resources r) {
+        String text;
+        if (duration.isEmpty()) {
+            return "";
+        }
+
+        switch (duration) {
+            case "5":
+                text = r.getString(R.string.five_minutes);
+                break;
+            case "10":
+                text = r.getString(R.string.ten_minutes);
+                break;
+            case "20":
+                text = r.getString(R.string.twenty_minutes);
+                break;
+            case "30":
+                text = r.getString(R.string.thirty_minutes);
+                break;
+            default:
+                text = duration + " " + r.getString(R.string.minutes);
+                break;
+        }
+        return text;
+    }
+    public static String getDurationString (int duration, Resources r) {
+        return getDurationString(String.valueOf(duration), r);
+    }
+
+    public static void sortOutlineList (ArrayList<OutlineItem> items) {
+        Collections.sort(items, new Comparator<OutlineItem>() {
+            @Override
+            public int compare(OutlineItem lhs, OutlineItem rhs) {
+                return lhs.getOrder() - rhs.getOrder();
+            }
+        });
+    }
+
+    public static String processAnswerList (ArrayList<PromptAnswer> answers, Resources r) {
+        String text = "";
+        for(int cnt = 0; cnt < answers.size(); cnt++) {
+            PromptAnswer answer = answers.get(cnt);
+
+            if (!answer.getValue().isEmpty()) {
+                if (cnt > 0) {
+                    text += ", ";
+                    if (cnt == answers.size() - 1) {
+                        text += r.getString(R.string.list_and) + " ";
+                    }
+                }
+                text += answer.getValue();
+            }
+        }
+        return text;
     }
 }

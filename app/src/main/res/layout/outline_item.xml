@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:id="@+id/list_main_bullet"
+        android:text="1."
+        style="@style/PresentationOutline.Text" />
+    <TextView
+        android:id="@+id/list_topic"
+        android:layout_toRightOf="@id/list_main_bullet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/outline_list_bullet_spacing"
+        style="@style/PresentationOutline.Text"
+        android:text="Intro" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/list_duration"
+        android:text="(5 minutes)"
+        style="@style/PresentationOutline.Text.Duration"
+        android:layout_toRightOf="@id/list_topic"
+        android:layout_alignBaseline="@id/list_topic"
+        android:layout_marginLeft="@dimen/outline_list_bullet_spacing"
+        />
+
+    <LinearLayout
+        android:id="@+id/outline_sub_item_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/list_topic"
+        android:layout_alignLeft="@id/list_topic"
+        android:orientation="vertical"
+        android:paddingTop="@dimen/outline_list_spacing"
+        android:paddingLeft="@dimen/outline_list_tab">
+
+    </LinearLayout>
+
+</RelativeLayout>

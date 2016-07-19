@@ -22,6 +22,11 @@
     </group>
 
     <group android:id="@+id/menu_outline" android:visible="false">
-
+        <item android:id="@+id/menu_action_edit_outline" android:title="Edit Outline"
+            app:showAsAction="ifRoom" android:icon="@drawable/ic_create_white_24dp" />
+        <item android:id="@+id/menu_action_save_outline" android:title="Save Outline to Google Drive"
+            app:showAsAction="ifRoom" android:icon="@drawable/ic_insert_drive_file_white_24dp" />
+        <item android:id="@+id/menu_action_outline_view" android:title="Change View"
+            app:showAsAction="ifRoom" android:icon="@drawable/ic_view_carousel_white_24dp" />
     </group>
 </menu>

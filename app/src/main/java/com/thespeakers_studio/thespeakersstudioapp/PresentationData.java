@@ -1,6 +1,7 @@
 package com.thespeakers_studio.thespeakersstudioapp;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.util.Log;
 
@@ -22,7 +23,12 @@ public class PresentationData {
     private String mModifiedDate;
     private boolean mIsSelected;
 
+    // TODO: Is this the best way to remember all these ids?
     public static final int PRESENTATION_TOPIC = 1; // the ID of the prompt that "names" the presentation
+    public static final int PRESENTATION_DURATION = 8; // the ID of the duration prompt
+    public static final int PRESENTATION_DATE = 4;
+    public static final int PRESENTATION_TOPICS = 17;
+
     public static final int PRESENTATION_HEADER = 0;
     public static final int PRESENTATION_NEXT = 24;
     public static final int PRESENTATION_LIST_ERROR = 25;
@@ -70,7 +76,7 @@ public class PresentationData {
         mPrompts.add(new Prompt(20, 4, 3, PARAGRAPH,  "Why is \"%l\" important?", 140,                          17, ""));
         mPrompts.add(new Prompt(21, 4, 4, PARAGRAPH,  "How does \"%l\" connect to the Audience?", 140,          17, ""));
         mPrompts.add(new Prompt(22, 4, 5, TEXT,       "What story can you connect to \"%l?\"", 50,              17, ""));
-        mPrompts.add(new Prompt(23, 4, 6, PARAGRAPH,  "How do you transition from %l to %n ?", 140,         17, ""));
+        mPrompts.add(new Prompt(23, 4, 6, PARAGRAPH,  "How do you transition from %l to %n ?", 140,             17, ""));
 
         mIsSelected = false;
     }
@@ -103,6 +109,10 @@ public class PresentationData {
         return processPrompt(mPrompts.get(index));
     }
 
+    public ArrayList<PromptAnswer> getAnswer(int promptId) {
+        return getPromptById(promptId).getAnswer();
+    }
+
     public String getAnswerByKey(int promptId, String answerKey) {
         Prompt p = getPromptById(promptId);
         return p.getAnswerByKey(answerKey).getValue();
@@ -115,6 +125,14 @@ public class PresentationData {
         } else{
             return topic;
         }
+    }
+
+    public int getDuration() {
+        return Integer.parseInt(getAnswerByKey(PRESENTATION_DURATION, "duration"));
+    }
+
+    public String getDate() {
+        return getAnswerByKey(PRESENTATION_DATE, "timestamp");
     }
 
     public void setModifiedDate(String date) {
@@ -318,5 +336,6 @@ public class PresentationData {
         }
         return per;
     }
+
 
 }
