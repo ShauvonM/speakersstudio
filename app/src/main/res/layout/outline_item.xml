@@ -11,24 +11,27 @@
         android:id="@+id/list_main_bullet"
         android:text="1."
         style="@style/PresentationOutline.Text" />
-    <TextView
-        android:id="@+id/list_topic"
-        android:layout_toRightOf="@id/list_main_bullet"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/outline_list_bullet_spacing"
-        style="@style/PresentationOutline.Text"
-        android:text="Intro" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/list_duration"
-        android:text="(5 minutes)"
+        android:text="1:23"
         style="@style/PresentationOutline.Text.Duration"
-        android:layout_toRightOf="@id/list_topic"
-        android:layout_alignBaseline="@id/list_topic"
+        android:layout_alignParentRight="true"
+        android:layout_alignBaseline="@id/list_main_bullet"
         android:layout_marginLeft="@dimen/outline_list_bullet_spacing"
         />
+
+    <TextView
+        android:id="@+id/list_topic"
+        android:layout_toRightOf="@id/list_main_bullet"
+        android:layout_toLeftOf="@id/list_duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/outline_list_bullet_spacing"
+        style="@style/PresentationOutline.Text"
+        android:text="This is a really long string of text to show just how long this string of text can go." />
 
     <LinearLayout
         android:id="@+id/outline_sub_item_wrapper"

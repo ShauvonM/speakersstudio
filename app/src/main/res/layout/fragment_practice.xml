@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@color/outlineBG"
+        app:cardCornerRadius="0dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            android:padding="0dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/practice_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/presentation_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/outlineText"
+                    android:text="Title"
+                    android:textSize="20dp"/>
+
+                <TextView
+                    android:id="@+id/presentation_duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/outlineText"
+                    android:layout_marginBottom="10dp"
+                    android:text="20 minutes" />
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/checkbox_delay"
+                    android:checked="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/outlineText"
+                    android:text="Wait five seconds before starting the timer?"/>
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/checkbox_show_timer"
+                    android:checked="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/outlineText"
+                    android:text="Display time as presentation is running?"/>
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/checkbox_show_warning"
+                    android:checked="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/outlineText"
+                    android:text="Show a warning when you have 5 minutes left?"/>
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/checkbox_track"
+                    android:checked="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/outlineText"
+                    android:text="Track your timing in this practice?"/>
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/checkbox_vibrate"
+                    android:checked="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/outlineText"
+                    android:text="Use vibration to signify time intervals?"/>
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/checkbox_record"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/outlineText"
+                    android:text="Record video and audio of this practice?"/>
+
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/checkbox_disable_phone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/outlineText"
+                    android:layout_below="@id/checkbox_delay"
+                    android:text="Disable phone during this practice?"/>
+
+            </LinearLayout>
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/button_start_practice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/practice_settings"
+                android:src="@drawable/ic_play_arrow_white_24dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginBottom="20dp"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="56dp"
+                android:gravity="center"
+                android:textColor="@color/outlineText"
+                android:layout_marginRight="@dimen/fab_margin"
+                android:layout_toLeftOf="@id/button_start_practice"
+                android:layout_alignBottom="@id/button_start_practice"
+                android:text="Start" />
+
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>

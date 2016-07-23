@@ -150,6 +150,16 @@ public class PresentationListFragment extends Fragment implements
     }
 
     @Override
+    public void onPresentationPracticeSelected(String presentationId) {
+        mListener.onPracticePresentation(presentationId);
+    }
+
+    @Override
+    public void onPresentationDeleteSelected(String presentationId) {
+        mListener.onDeletePresentation(presentationId);
+    }
+
+    @Override
     public void onClick(View v) {
         if (v.getId() == R.id.fab) {
             mListener.onCreateNewPresentation();
@@ -161,5 +171,7 @@ public class PresentationListFragment extends Fragment implements
         public void onOpenPresentation(String presentationId);
         public void onSelectPresentation(String presentationId);
         public void onDeselectPresentation(String presentationId);
+        public void onPracticePresentation(String presentationId);
+        public void onDeletePresentation(String presentationId);
     }
 }

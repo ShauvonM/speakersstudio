@@ -38,7 +38,6 @@ public class OutlineHelper {
 
     // utility method to get either "1. 2. 3." "a. b. c." or "i. ii. iii. iv." etc
     public String getBullet(int level, int index) {
-        Log.d("SS", "index " + index);
         switch(level) {
             case 1:
                 return String.valueOf(index) + ".";

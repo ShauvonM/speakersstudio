@@ -35,6 +35,16 @@
             <item name="android:layout_width">match_parent</item>
             <item name="android:layout_marginBottom">@dimen/pres_list_card_padding</item>
         </style>
+    <style name="PresentationListCardSubmenu">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:src">@drawable/ic_more_vert_white_24dp</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:layout_alignParentTop">true</item>
+        <item name="android:layout_alignParentRight">true</item>
+        <item name="android:layout_marginTop">5dp</item>
+        <item name="android:layout_marginRight">1dp</item>
+    </style>
     <style name="PresentationListCardName">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -43,6 +53,7 @@
         <item name="android:layout_marginLeft">@dimen/pres_list_card_padding</item>
         <item name="android:layout_marginRight">@dimen/pres_list_card_padding</item>
         <item name="android:layout_marginBottom">0dp</item>
+        <item name="android:layout_toLeftOf">@id/presentation_submenu</item>
     </style>
         <style name="PresentationListCardName.OneColumn">
             <item name="android:layout_width">match_parent</item>

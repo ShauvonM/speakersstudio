@@ -220,4 +220,27 @@ public class Utils {
         }
         return text;
     }
+
+    public static String getTimeStringFromMillis (long millis, Resources r) {
+        int secs = (int) (millis / 1000);
+        if (millis % 1000 > 1) {
+            secs += 1;
+        }
+        int mins = secs / 60;
+        secs = secs % 60;
+
+        return String.format(r.getString(R.string.timer_output), mins, secs);
+    }
+
+    public static String secondsFromMillis (long millis) {
+        int secs = (int) (millis / 1000);
+        if (millis % 1000 > 1) {
+            secs += 1;
+        }
+        return "" + secs;
+    }
+
+    public static long roundToThousand (long num) {
+        return Math.round((float)(num / 1000)) * 1000;
+    }
 }

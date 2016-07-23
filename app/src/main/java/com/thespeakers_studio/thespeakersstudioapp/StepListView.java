@@ -188,7 +188,7 @@ public class StepListView extends LinearLayout {
             }
             float interval = ((float) elapsedTime) / ((float) duration);
 
-            Log.d("SS", "Elapsed time " + elapsedTime + " " + mCurrentDisplayedProgressHeight + " " + mProgressHeightDelta + " " + interval);
+            //Log.d("SS", "Elapsed time " + elapsedTime + " " + mCurrentDisplayedProgressHeight + " " + mProgressHeightDelta + " " + interval);
             drawProgress(canvas, mCurrentDisplayedProgressHeight + (int)(mProgressHeightDelta * interval));
 
             if (elapsedTime < duration) {

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class OutlineItem {
     private ArrayList<OutlineItem> mSubItems;
     private String mText;
-    private int mDuration;
+    private long mDuration;
     private int mOrder;
 
     public OutlineItem (String t, int o, ArrayList<OutlineItem> items) {
@@ -29,7 +29,8 @@ public class OutlineItem {
     public void setOrder (int order) {
         mOrder = order;
     }
-    public void setDuration (int dur) {
+
+    public void setDuration (long dur) {
         mDuration = dur;
     }
 
@@ -39,10 +40,18 @@ public class OutlineItem {
     public int getOrder() {
         return mOrder;
     }
+
     public ArrayList<OutlineItem> getSubItems() {
         return mSubItems;
     }
-    public int getDuration () {
+    public OutlineItem getSubItem(int index) {
+        return mSubItems.get(index);
+    }
+    public int getSubItemCount() {
+        return mSubItems.size();
+    }
+
+    public long getDuration () {
         return mDuration;
     }
 

@@ -73,4 +73,11 @@
     <string name="outline_item_mention">Mention %1$s</string>
     <string name="outline_duration">(%1$d Minutes)</string>
 
+    <string name="practice_presentation">Practice Presentation</string>
+
+    <string name="get_ready">Get ready...</string>
+    <string name="timer_output">%1$d:%2$02d</string>
+    <string name="paused">Paused</string>
+    <string name="five_minutes_left">Five Minutes Left</string>
+
 </resources>

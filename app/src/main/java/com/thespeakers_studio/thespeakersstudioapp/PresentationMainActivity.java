@@ -1,6 +1,8 @@
 package com.thespeakers_studio.thespeakersstudioapp;
 
-import android.os.PersistableBundle;
+import android.content.pm.ActivityInfo;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.content.ContentValues;
@@ -15,7 +17,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -39,7 +40,9 @@ public class PresentationMainActivity extends AppCompatActivity implements
         PresentationStepListFragment.OnStepSelectedListener,
         PresentationPromptListFragment.PromptSaveListener,
         GoogleApiClient.OnConnectionFailedListener,
-        FragmentManager.OnBackStackChangedListener {
+        FragmentManager.OnBackStackChangedListener,
+        PresentationOutlineFragment.OutlineInterface,
+        PresentationPracticeFragment.PracticeInterface {
 
     private PresentationDbHelper mDbHelper;
     private ArrayList<PresentationData> mPresentations;
@@ -60,6 +63,8 @@ public class PresentationMainActivity extends AppCompatActivity implements
     static final String TAG_STEP_LIST = "step_list";
     static final String TAG_PROMPT_LIST = "prompt_list";
     static final String TAG_OUTLINE = "presentation_outline";
+    static final String TAG_PRACTICE = "presentation_practice";
+    static final String TAG_PRACTICE_RUN = "presentation_practice_run";
 
     static final String STATE_PRESENTATION_ID = "presentationId";
     static final String STATE_FRAGMENT = "openFragment";
@@ -91,6 +96,8 @@ public class PresentationMainActivity extends AppCompatActivity implements
             mPresentationId = savedInstanceState.getString(STATE_PRESENTATION_ID);
         }
 
+        Log.d("SS", "selected id: " + mPresentationId);
+
         FragmentManager fm = getSupportFragmentManager();
         fm.addOnBackStackChangedListener(this);
 
@@ -107,21 +114,25 @@ public class PresentationMainActivity extends AppCompatActivity implements
             mPresentationListFragment = new PresentationListFragment();
             mPresentationListFragment.setPresentationData(mPresentations);
             ft.add(R.id.fragment_container, mPresentationListFragment, TAG_PRESENTATION_LIST);
+            ft.hide(mPresentationListFragment);
         }
 
         if (mStepListFragment == null) {
             mStepListFragment = new PresentationStepListFragment();
             ft.add(R.id.fragment_container, mStepListFragment, TAG_STEP_LIST);
+            ft.hide(mStepListFragment);
         }
 
         if (mPromptListFragment == null) {
             mPromptListFragment = new PresentationPromptListFragment();
             ft.add(R.id.fragment_container, mPromptListFragment, TAG_PROMPT_LIST);
+            ft.hide(mPromptListFragment);
         }
 
         if (mOutlineFragment == null) {
             mOutlineFragment = new PresentationOutlineFragment();
             ft.add(R.id.fragment_container, mOutlineFragment, TAG_OUTLINE);
+            ft.hide(mOutlineFragment);
         }
 
         ft.commit();
@@ -129,19 +140,7 @@ public class PresentationMainActivity extends AppCompatActivity implements
         if (savedInstanceState == null) {
             showPresentationList();
         } else {
-            switch(savedInstanceState.getString(STATE_FRAGMENT)) {
-                case TAG_PROMPT_LIST:
-                    onPromptListShown();
-                    break;
-                case TAG_STEP_LIST:
-                    onStepListShown();
-                    break;
-                case TAG_OUTLINE:
-                    onOutlineShown();
-                default:
-                    onPresentationListShown();
-                    break;
-            }
+            mCurrentFragment = savedInstanceState.getString(STATE_FRAGMENT);
         }
     }
 
@@ -188,15 +187,55 @@ public class PresentationMainActivity extends AppCompatActivity implements
 
     @Override
     public void onBackStackChanged() {
+        FragmentManager fm = getSupportFragmentManager();
+        String name;
+        if (fm.getBackStackEntryCount() == 0) {
+            name = TAG_PRESENTATION_LIST;
+        } else {
+            name = fm.getBackStackEntryAt(fm.getBackStackEntryCount()-1).getName();
+        }
         Utils.hideKeyboard(this, findViewById(R.id.fragment_container));
-        if (mPresentationListFragment.isVisible()) {
-            onPresentationListShown();
-        } else if (mStepListFragment.isVisible()) {
-            onStepListShown();
-        } else if (mPromptListFragment.isVisible()) {
-            onPromptListShown();
-        } else if (mOutlineFragment.isVisible()) {
-            onOutlineShown();
+        mCurrentFragment = name;
+        handleCurrentFragment();
+    }
+
+    private void handleCurrentFragment() {
+        switch (mCurrentFragment) {
+            case TAG_STEP_LIST:
+                onStepListShown();
+                break;
+            case TAG_PROMPT_LIST:
+                onPromptListShown();
+                break;
+            case TAG_OUTLINE:
+                onOutlineShown();
+                break;
+            case TAG_PRACTICE:
+                onPracticeShown();
+                break;
+            default:
+                onPresentationListShown();
+                break;
+        }
+    }
+
+    private void hideCurrentFragment(FragmentTransaction ft) {
+        switch (mCurrentFragment) {
+            case TAG_STEP_LIST:
+                ft.hide(mStepListFragment);
+                break;
+            case TAG_PROMPT_LIST:
+                ft.hide(mPromptListFragment);
+                break;
+            case TAG_OUTLINE:
+                ft.hide(mOutlineFragment);
+                break;
+            case TAG_PRACTICE:
+                // TODO: we never navigate from this one, really?
+                break;
+            default:
+                ft.hide(mPresentationListFragment);
+                break;
         }
     }
 
@@ -220,6 +259,8 @@ public class PresentationMainActivity extends AppCompatActivity implements
         mMenu.setGroupVisible(R.id.menu_group_main, false);
         mMenu.setGroupVisible(R.id.menu_group_presentation, false);
         mMenu.setGroupVisible(R.id.menu_group_selection, false);
+        mMenu.setGroupVisible(R.id.menu_group_outline, false);
+        mMenu.setGroupVisible(R.id.menu_group_practice, false);
 
         mMenu.setGroupVisible(id, true);
     }
@@ -238,7 +279,6 @@ public class PresentationMainActivity extends AppCompatActivity implements
     }
 
     public void onStepListShown() {
-        mCurrentFragment = TAG_STEP_LIST;
         // we are on the step list
         mStepListFragment.animateProgressHeight();
         mPromptListFragment.clearStep();
@@ -248,17 +288,21 @@ public class PresentationMainActivity extends AppCompatActivity implements
     }
 
     public void onPromptListShown() {
-        mCurrentFragment = TAG_PROMPT_LIST;
         setTitle();
         showBackButton();
         showMenuGroup(R.id.menu_group_presentation);
     }
 
     public void onOutlineShown() {
-        mCurrentFragment = TAG_OUTLINE;
         setTitle();
         showBackButton();
-        showMenuGroup(R.id.menu_outline);
+        showMenuGroup(R.id.menu_group_outline);
+    }
+
+    public void onPracticeShown() {
+        setTitle();
+        showBackButton();
+        showMenuGroup(R.id.menu_group_practice);
     }
 
     public PresentationData getSelectedPresentation() {
@@ -280,15 +324,15 @@ public class PresentationMainActivity extends AppCompatActivity implements
             return;
         }
 
-        Log.d("SS", "current fragment: " + mCurrentFragment);
-
         if (mCurrentFragment != null && mCurrentFragment.equals(TAG_OUTLINE)) {
-            bar.setTitle(getResources().getString(R.string.outline));
+            bar.setTitle(R.string.outline);
+        } else if (mCurrentFragment != null && mCurrentFragment.equals(TAG_PRACTICE)) {
+            bar.setTitle(R.string.practice_presentation);
         } else {
             if (pres != null) {
                 bar.setTitle(pres.getTopic());
             } else {
-                bar.setTitle(getResources().getString(R.string.saved_presentations));
+                bar.setTitle(R.string.saved_presentations);
             }
         }
     }
@@ -299,9 +343,6 @@ public class PresentationMainActivity extends AppCompatActivity implements
 
     private void showPresentationList() {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.hide(mPromptListFragment);
-        ft.hide(mStepListFragment);
-        ft.hide(mOutlineFragment);
         ft.show(mPresentationListFragment);
         ft.commit();
 
@@ -315,6 +356,19 @@ public class PresentationMainActivity extends AppCompatActivity implements
         mStepListFragment.setPresentation(getSelectedPresentation());
         mPromptListFragment.setPresentation(getSelectedPresentation());
         showStepList();
+    }
+
+    @Override
+    public void onPracticePresentation(String id) {
+        mPresentationId = id;
+        mStepListFragment.setPresentation(getSelectedPresentation());
+        mPromptListFragment.setPresentation(getSelectedPresentation());
+        onPracticeClicked(Outline.fromPresentation(this, getSelectedPresentation()));
+    }
+
+    @Override
+    public void onDeletePresentation(String id) {
+        deleteSelectedPresentations(id);
     }
 
     @Override
@@ -372,10 +426,11 @@ public class PresentationMainActivity extends AppCompatActivity implements
 
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
 
-        ft.hide(mPresentationListFragment);
+        //ft.hide(mPresentationListFragment);
+        hideCurrentFragment(ft);
         ft.show(mStepListFragment);
 
-        ft.addToBackStack("presentation_" + mPresentationId);
+        ft.addToBackStack(TAG_STEP_LIST);
         ft.commit();
     }
 
@@ -395,10 +450,11 @@ public class PresentationMainActivity extends AppCompatActivity implements
 
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
 
-        ft.hide(mStepListFragment);
+        //ft.hide(mStepListFragment);
+        hideCurrentFragment(ft);
         ft.show(mPromptListFragment);
 
-        ft.addToBackStack("step_" + step);
+        ft.addToBackStack(TAG_PROMPT_LIST);
         ft.commit();
     }
 
@@ -408,13 +464,47 @@ public class PresentationMainActivity extends AppCompatActivity implements
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
 
-        ft.hide(mStepListFragment);
+        //ft.hide(mStepListFragment);
+        hideCurrentFragment(ft);
         ft.show(mOutlineFragment);
 
         mOutlineFragment.render();
 
-        ft.addToBackStack("outline");
+        ft.addToBackStack(TAG_OUTLINE);
         ft.commit();
+    }
+
+    @Override
+    public void onPracticeClicked(Outline outline) {
+        PresentationPracticeFragment fragment = new PresentationPracticeFragment();
+        fragment.setOutline(outline);
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+        //ft.hide(mOutlineFragment);
+        hideCurrentFragment(ft);
+        ft.add(R.id.fragment_container, fragment, TAG_PRACTICE);
+        ft.show(fragment);
+
+        ft.addToBackStack(TAG_PRACTICE);
+        ft.commit();
+    }
+
+    @Override
+    public void onStartPractice(Outline outline, boolean delay, boolean displayTimer, boolean showWarning, boolean track, boolean vibrate, boolean recordVideo, boolean disablePhone) {
+        PresentationPracticeDialog dialog = new PresentationPracticeDialog();
+        dialog.setup(outline, delay, displayTimer, showWarning, track, vibrate);
+        /*
+        dialog.setInterface(new PresentationPracticeDialog.PresentationPracticeDialogInterface() {
+            @Override
+            public void onDialogDismissed() {
+                //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+            }
+        });
+        */
+
+        dialog.show(getSupportFragmentManager(), TAG_PRACTICE_RUN);
+        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 
     @Override
@@ -502,10 +592,11 @@ public class PresentationMainActivity extends AppCompatActivity implements
             });
         }
 
-        ft.hide(mPromptListFragment);
+        //ft.hide(mPromptListFragment);
+        hideCurrentFragment(ft);
         ft.show(mStepListFragment);
 
-        ft.addToBackStack("step_list");
+        ft.addToBackStack(TAG_STEP_LIST);
 
         ft.commit();
     }
@@ -598,7 +689,6 @@ public class PresentationMainActivity extends AppCompatActivity implements
         }
 
         new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.action_reset_presentation))
                 .setMessage(getString(R.string.confirm_reset_message))
                 .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
                     @Override
@@ -624,37 +714,44 @@ public class PresentationMainActivity extends AppCompatActivity implements
         showStepList();
     }
 
-    private void deleteSelectedPresentations() {
-        int count = mPresentationListFragment.getSelectedCount();
-        if (count == 0) {
-            return;
+    private void deleteSelectedPresentations(final String id) {
+        int count;
+        if (id == null) {
+            count = mPresentationListFragment.getSelectedCount();
+            if (count == 0) {
+                return;
+            }
+        } else {
+            count = 1;
         }
 
         new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.action_reset_presentation))
                 .setMessage(getResources().getQuantityString(R.plurals.confirm_delete_message,
                         count, count))
                 .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        doDeleteSelectedPresentations();
+                        doDeleteSelectedPresentations(id);
                     }
                 })
                 .setNegativeButton(getString(R.string.no), null)
                 .show();
     }
+    private void deleteSelectedPresentations() {
+        deleteSelectedPresentations(null);
+    }
 
-    private void doDeleteSelectedPresentations() {
+    private void doDeleteSelectedPresentations(String id) {
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        int[] remove = new int[mPresentationListFragment.getSelectedCount()];
+        int[] remove = new int[id == null ? mPresentationListFragment.getSelectedCount() : 1];
         int ri = 0;
         int pi = 0;
 
         for (PresentationData pres : mPresentations) {
-            if (pres.getIsSelected()) {
-                String id = pres.getId();
-                db.delete(PresentationDataContract.PresentationAnswerEntry.TABLE_NAME, PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_PRESENTATION_ID + "=?", new String[]{id});
-                db.delete(PresentationDataContract.PresentationEntry.TABLE_NAME, PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID + "=?", new String[]{id});
+            if (pres.getIsSelected() || pres.getId().equals(id)) {
+                String thisid = pres.getId();
+                db.delete(PresentationDataContract.PresentationAnswerEntry.TABLE_NAME, PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_PRESENTATION_ID + "=?", new String[]{thisid});
+                db.delete(PresentationDataContract.PresentationEntry.TABLE_NAME, PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID + "=?", new String[]{thisid});
                 remove[ri] = pi;
                 ri++;
             }
@@ -706,6 +803,8 @@ public class PresentationMainActivity extends AppCompatActivity implements
         } else {
             mMenu.findItem(R.id.menu_action_view).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_view_quilt_white_24dp));
         }
+
+        handleCurrentFragment();
 
         return true;
     }

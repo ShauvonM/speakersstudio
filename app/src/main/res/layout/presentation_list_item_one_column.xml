@@ -8,6 +8,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <ImageButton
+            android:id="@+id/presentation_submenu"
+            style="@style/PresentationListCardSubmenu"
+            />
+
         <TextView
             android:id="@+id/presentation_name"
             style="@style/PresentationListCardName.OneColumn"

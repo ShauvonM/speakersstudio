@@ -87,4 +87,14 @@ public class PresentationListAdapter extends RecyclerView.Adapter<PresentationLi
             return false;
         }
     }
+
+    @Override
+    public void onPresentationPracticeSelected(String presentationId) {
+        mHandler.onPresentationPracticeSelected(presentationId);
+    }
+
+    @Override
+    public void onPresentationDeleteSelected(String presentationId) {
+        mHandler.onPresentationDeleteSelected(presentationId);
+    }
 }

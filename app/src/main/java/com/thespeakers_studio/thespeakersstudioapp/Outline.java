@@ -28,6 +28,17 @@ public class Outline {
         return mItems;
     }
 
+    public OutlineItem getItem(int index) {
+        if (index >= mItems.size()) {
+            return null;
+        }
+        Utils.sortOutlineList(mItems);
+        return mItems.get(index);
+    }
+    public int getItemCount() {
+        return mItems.size();
+    }
+
     public void addItem(OutlineItem item) {
         mItems.add(item);
     }
@@ -44,6 +55,11 @@ public class Outline {
         return Utils.getDurationString(mPresentation.getDuration(), mContext.getResources());
     }
 
+    public long getDurationMillis() {
+        int mins = mPresentation.getDuration();
+        return (mins * 60) * 1000;
+    }
+
     public String getDate() {
         return Utils.getDateTimeString(mPresentation.getDate(), mContext.getResources())
                 .replace("\n", " ");
@@ -54,7 +70,9 @@ public class Outline {
         Outline outline = new Outline(context);
         outline.setPresentation(pres);
         Resources r = context.getResources();
-        int duration = Integer.parseInt(pres.getAnswerByKey(PresentationData.PRESENTATION_DURATION, "duration"));
+
+        int durationMinutes = Integer.parseInt(pres.getAnswerByKey(PresentationData.PRESENTATION_DURATION, "duration"));
+        long durationMillis = (durationMinutes * 60) * 1000;
 
         ArrayList<PromptAnswer> topics = pres.getAnswer(PresentationData.PRESENTATION_TOPICS);
 
@@ -64,15 +82,15 @@ public class Outline {
             TOPICS: 75% (divided among topics)
             CONCLUSION: 12.5%
         */
-        int topicDuration = (int) Math.floor((duration * 0.75) / topics.size());
-        int introDuration = (int) Math.floor((duration - (topicDuration * topics.size())) / 2);
+        long topicDuration = (long) Math.floor((durationMillis * 0.75) / topics.size());
+        long introDuration = (long) Math.floor((durationMillis - (topicDuration * topics.size())) / 2);
 
         // add the intro section
         OutlineItem introItem = new OutlineItem(r.getString(R.string.outline_item_intro), 0);
         introItem.setDuration(introDuration);
 
         // add all of the items we want to throw into the intro
-        introItem = outline.loadSubItemsFromPrompts(OUTLINE_INTRO_ITEMS, introItem);
+        introItem = outline.loadSubItemsFromPrompts(OUTLINE_INTRO_ITEMS, introItem, introDuration);
         outline.addItem(introItem);
 
         // now the three topics
@@ -90,18 +108,30 @@ public class Outline {
 
             int subOrder = 0;
             topicItem.setDuration(topicDuration);
+            long durationTally = 0l;
 
+            ArrayList<PromptAnswer> subItemList = new ArrayList<>();
             for (Prompt p : topicSubItems) {
-                ArrayList<PromptAnswer> answers = p.getAnswersByLinkId(t.getId());
-                for (PromptAnswer a : answers) {
-                    OutlineItem subitem = new OutlineItem();
-                    subitem.setText(a.getValue());
-                    subitem.setOrder(subOrder);
-                    // TODO: duration?
+                subItemList.addAll(p.getAnswersByLinkId(t.getId()));
+            }
 
-                    topicItem.addSubItem(subitem);
-                    subOrder++;
+            long subItemDuration = Math.round((topicDuration / subItemList.size()) / 1000) * 1000;
+            long subItemLeftover = topicDuration - (subItemDuration * subItemList.size());
+
+            for (PromptAnswer a : subItemList) {
+                OutlineItem subitem = new OutlineItem();
+                subitem.setText(a.getValue());
+                subitem.setOrder(subOrder);
+
+                long thisDuration = subItemDuration;
+                if (subItemLeftover >= 1000) {
+                    thisDuration += 1000;
+                    subItemLeftover -= 1000;
                 }
+                subitem.setDuration(thisDuration);
+
+                topicItem.addSubItem(subitem);
+                subOrder++;
             }
 
             outline.addItem(topicItem);
@@ -113,29 +143,48 @@ public class Outline {
         conclusionItem.setDuration(introDuration);
 
         // add all of the items we want to throw into the conclusion
-        conclusionItem = outline.loadSubItemsFromPrompts(Outline.OUTLINE_CONC_ITEMS, conclusionItem);
+        conclusionItem = outline.loadSubItemsFromPrompts(Outline.OUTLINE_CONC_ITEMS, conclusionItem, introDuration);
         outline.addItem(conclusionItem);
 
         return outline;
     }
 
-    private OutlineItem loadSubItemsFromPrompts(int[] promptIDs, OutlineItem parent) {
+    private OutlineItem loadSubItemsFromPrompts(int[] promptIDs, OutlineItem parent, long duration) {
         Resources r = mContext.getResources();
+
+        long subItemDuration = Math.round((duration / promptIDs.length) / 1000) * 1000;
+        long subItemLeftover = duration - (subItemDuration * promptIDs.length);
+
         for (int i = 0; i < promptIDs.length; i++) {
             int type = mPresentation.getPromptById(promptIDs[i]).getType();
             OutlineItem thisItem = new OutlineItem();
             thisItem.setOrder(i);
+
+            /*
+            if (i < promptIDs.length - 1) {
+                long thisduration = Math.round((duration / promptIDs.length) / 1000) * 1000;
+                thisItem.setDuration(thisduration);
+                durationTally += thisduration;
+            } else {
+                thisItem.setDuration(duration - durationTally);
+            }
+            */
+            long thisDuration = subItemDuration;
+            if (subItemLeftover >= 1000) {
+                thisDuration += 1000;
+                subItemLeftover -= 1000;
+            }
+            thisItem.setDuration(thisDuration);
+
             if (type == PresentationData.TEXT || type == PresentationData.PARAGRAPH) {
                 thisItem.setText(
-                        mPresentation.getAnswerByKey(Outline.OUTLINE_CONC_ITEMS[i], "text"));
-                // TODO: duration?
+                        mPresentation.getAnswerByKey(promptIDs[i], "text"));
 
                 parent.addSubItem(thisItem);
             } else if (type == PresentationData.LIST) {
                 thisItem.setText(String.format(r.getString(R.string.outline_item_mention),
                                 Utils.processAnswerList(
-                                        mPresentation.getAnswer(
-                                                Outline.OUTLINE_INTRO_ITEMS[i]), r)));
+                                        mPresentation.getAnswer(promptIDs[i]), r)));
 
                 parent.addSubItem(thisItem);
             }
