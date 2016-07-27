@@ -1,4 +1,6 @@
 <resources>
+    <string name="about">About</string>
+    <string name="curious">Curious for more?</string>
     <string name="app_name">The Speaker\'s Studio App</string>
     <string name="saved_presentations">Saved Presentations</string>
     <string name="action_reset_presentation">Reset Presentation</string>
@@ -18,6 +20,7 @@
     <string name="history">History</string>
     <string name="sharing">Sharing</string>
     <string name="share">Share</string>
+    <string name="stories">Stories</string>
     <string name="not_shared">Not Shared</string>
     <string name="attachments">Attachments</string>
     <string name="step_1">Step 1</string>
@@ -51,6 +54,13 @@
         <item>@string/specify_duration</item>
     </string-array>
 
+    <string name="drawer_open">The navigation drawer is opened</string>
+    <string name="drawer_close">The navigation drawer is closed</string>
+    <string name="tools_text_account_information_username">Username</string>
+    <string name="tools_text_account_information_email">user@email.com</string>
+    <string name="tag_nav_drawer_main_entry">nav_drawer_main_entry</string>
+    <string name="tag_nav_drawer_special_entry">nav_drawer_special_entry</string>
+
     <string name="search">Search</string>
     <string name="change_view">Change View</string>
     <string name="delete_selected">Delete Selected</string>
@@ -79,5 +89,12 @@
     <string name="timer_output">%1$d:%2$02d</string>
     <string name="paused">Paused</string>
     <string name="five_minutes_left">Five Minutes Left</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 
 </resources>

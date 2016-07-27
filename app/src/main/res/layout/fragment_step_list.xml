@@ -4,6 +4,8 @@
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/default_padding">
 
+    <include layout="@layout/toolbar" android:id="@+id/toolbar" />
+
     <Button
         android:id="@+id/button_outline"
         android:layout_alignParentBottom="true"
@@ -11,7 +13,7 @@
         style="@style/StepListButton"
         />
 
-    <com.thespeakers_studio.thespeakersstudioapp.StepListView
+    <com.thespeakers_studio.thespeakersstudioapp.view.StepListView
         android:id="@+id/step_list"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -19,7 +21,7 @@
         android:orientation="vertical"
         android:paddingBottom="@dimen/step_list_padding"
         android:layout_margin="0dp"
-        android:layout_alignParentTop="true"
+        android:layout_below="@id/toolbar"
         android:layout_above="@id/button_outline"
         >
 
@@ -79,6 +81,12 @@
                 />
         </LinearLayout>
 
-    </com.thespeakers_studio.thespeakersstudioapp.StepListView>
+    </com.thespeakers_studio.thespeakersstudioapp.view.StepListView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/toolbar_shadow"
+        android:background="@drawable/toolbar_dropshadow"
+        android:layout_below="@id/toolbar"/>
 
 </RelativeLayout>

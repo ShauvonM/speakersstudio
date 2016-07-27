@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.thespeakers_studio.thespeakersstudioapp.view.ScrimInsetsFrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_activity_navigation_drawer_rootLayout"
+    style="@style/ScrimInsetsLayout"
+    tools:context=".activity.PresentationMainActivity"
+    tools:layout_marginEnd="?actionBarSize"
+    tools:layout_marginRight="?actionBarSize">
+
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@color/navigation_drawer_background">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- HEADER -->
+            <android.support.percent.PercentRelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/navigation_drawer_header">
+
+                <FrameLayout
+                    android:clickable="true"
+                    android:foreground="@drawable/nav_drawer_header_foreground"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_aspectRatio="178%"
+                    app:layout_widthPercent="100%">
+
+                    <ImageView
+                        android:id="@+id/navigation_drawer_user_account_picture_cover"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/image_nav_drawer_account_background"
+                        tools:ignore="ContentDescription" />
+
+                </FrameLayout>
+
+                <LinearLayout
+                    android:id="@+id/navigation_drawer_account_section"
+                    android:gravity="bottom"
+                    android:orientation="vertical"
+                    android:paddingBottom="@dimen/spacing_8"
+                    android:paddingEnd="@dimen/vertical_keyline_first"
+                    android:paddingLeft="@dimen/vertical_keyline_first"
+                    android:paddingRight="@dimen/vertical_keyline_first"
+                    android:paddingStart="@dimen/vertical_keyline_first"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_aspectRatio="178%"
+                    app:layout_widthPercent="100%">
+
+                    <ImageView
+                        android:id="@+id/navigation_drawer_user_account_picture_profile"
+                        android:layout_width="@dimen/nav_drawer_profile_image_size"
+                        android:layout_height="@dimen/nav_drawer_profile_image_size"
+                        app:srcCompat="@drawable/ic_account_circle_white_64dp"
+                        tools:ignore="ContentDescription" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/spacing_56">
+
+                        <TextView
+                            android:id="@+id/navigation_drawer_account_information_display_name"
+                            style="@style/Body2.White.Primary"
+                            android:text="@string/tools_text_account_information_username" />
+
+                        <TextView
+                            android:id="@+id/navigation_drawer_account_information_email"
+                            style="@style/Body1.White.Primary"
+                            android:text="@string/tools_text_account_information_email" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </android.support.percent.PercentRelativeLayout>
+            <!-- end of HEADER -->
+
+            <!-- BODY -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="@dimen/spacing_8"
+                android:paddingTop="@dimen/spacing_8">
+
+                <FrameLayout
+                    android:id="@+id/navigation_drawer_items_list_linearLayout_presentations"
+                    style="@style/NavDrawerRowLayout.Main"
+                    tools:background="@color/nav_drawer_row_selected">
+
+                    <ImageView
+                        android:id="@+id/navigation_drawer_items_list_icon_presentations"
+                        style="@style/NavDrawerRowItemIcon"
+                        app:srcCompat="@drawable/ic_record_voice_over_white_24dp"
+                        tools:ignore="ContentDescription"
+                        tools:tint="@color/nav_drawer_item_icon_selected" />
+
+                    <TextView
+                        android:id="@+id/navigation_drawer_items_textView_presentations"
+                        style="@style/NavDrawerRowText"
+                        android:text="@string/presentations"
+                        android:textColor="@color/nav_drawer_item_text_selected" />
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/navigation_drawer_items_list_linearLayout_timer"
+                    style="@style/NavDrawerRowLayout.Main">
+
+                    <ImageView
+                        android:id="@+id/navigation_drawer_items_list_icon_timer"
+                        style="@style/NavDrawerRowItemIcon"
+                        app:srcCompat="@drawable/ic_alarm_white_24dp"
+                        tools:ignore="ContentDescription"
+                        tools:tint="@color/nav_drawer_item_icon_default" />
+
+                    <TextView
+                        android:id="@+id/navigation_drawer_items_textView_timer"
+                        style="@style/NavDrawerRowText"
+                        android:text="@string/timer" />
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/navigation_drawer_items_list_linearLayout_stories"
+                    style="@style/NavDrawerRowLayout.Main">
+
+                    <ImageView
+                        android:id="@+id/navigation_drawer_items_list_icon_stories"
+                        style="@style/NavDrawerRowItemIcon"
+                        app:srcCompat="@drawable/ic_chrome_reader_mode_white_24dp"
+                        tools:ignore="ContentDescription"
+                        tools:tint="@color/nav_drawer_item_icon_default" />
+
+                    <TextView
+                        android:id="@+id/navigation_drawer_items_textView_stories"
+                        style="@style/NavDrawerRowText"
+                        android:text="@string/stories" />
+
+                </FrameLayout>
+
+                <include layout="@layout/divider" />
+
+                <FrameLayout
+                    android:id="@+id/navigation_drawer_items_list_linearLayout_curious"
+                    style="@style/NavDrawerRowLayout.Secondary">
+
+                    <ImageView
+                        android:id="@+id/navigation_drawer_items_list_icon_curious"
+                        style="@style/NavDrawerRowItemIcon"
+                        app:srcCompat="@drawable/ic_help_white_24dp"
+                        tools:ignore="ContentDescription"
+                        tools:tint="@color/nav_drawer_item_icon_default" />
+
+                    <TextView
+                        android:id="@+id/navigation_drawer_items_textView_curious"
+                        style="@style/NavDrawerRowText"
+                        android:text="@string/curious" />
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/navigation_drawer_items_list_linearLayout_settings"
+                    style="@style/NavDrawerRowLayout.Secondary">
+
+                    <ImageView
+                        android:id="@+id/navigation_drawer_items_list_icon_settings"
+                        style="@style/NavDrawerRowItemIcon"
+                        app:srcCompat="@drawable/ic_settings_white_24dp"
+                        tools:ignore="ContentDescription"
+                        tools:tint="@color/nav_drawer_item_icon_default" />
+
+                    <TextView
+                        android:id="@+id/navigation_drawer_items_textView_settings"
+                        style="@style/NavDrawerRowText"
+                        android:text="@string/action_settings" />
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/navigation_drawer_items_list_linearLayout_about"
+                    style="@style/NavDrawerRowLayout.Secondary">
+
+                    <ImageView
+                        android:id="@+id/navigation_drawer_items_list_icon_about"
+                        style="@style/NavDrawerRowItemIcon"
+                        app:srcCompat="@drawable/ic_info_white_24dp"
+                        tools:ignore="ContentDescription"
+                        tools:tint="@color/nav_drawer_item_icon_default" />
+
+                    <TextView
+                        android:id="@+id/navigation_drawer_items_textView_about"
+                        style="@style/NavDrawerRowText"
+                        android:text="@string/about" />
+
+                </FrameLayout>
+
+            </LinearLayout>
+            <!-- end of BODY -->
+
+        </LinearLayout>
+
+    </ScrollView>
+
+ 
+</com.thespeakers_studio.thespeakersstudioapp.view.ScrimInsetsFrameLayout>

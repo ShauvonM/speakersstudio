@@ -127,7 +127,7 @@ PATH=
 
 OS: Windows 8 , 64 bit Build 9200 
 
-CPU:total 4 (4 cores per cpu, 1 threads per core) family 6 model 58 stepping 9, cmov, cx8, fxsr, mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, popcnt, avx, aes, erms, tsc, tscinvbit, tscinv
+CPU:total 4 (4 cores per cpu, 1 threads per core) family 6 com.thespeakers_studio.thespeakersstudioapp.model 58 stepping 9, cmov, cx8, fxsr, mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, popcnt, avx, aes, erms, tsc, tscinvbit, tscinv
 
 Memory: 4k page, physical 16723760k(5410660k free), swap 24750908k(5044k free)
 

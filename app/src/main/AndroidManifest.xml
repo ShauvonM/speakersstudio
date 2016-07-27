@@ -4,14 +4,17 @@
 
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <!-- To access Google+ APIs: -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".PresentationMainActivity"
-            android:label="@string/app_name">
+            android:name=".activity.PresentationMainActivity"
+            android:theme="@style/AppTheme.WithNavDrawer">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -22,6 +25,13 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBGR6wo_gS7l5y8_ZfnZQG0wqKRlIrvM5w" />
+
+        <!-- surface -->
+        <!--
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCGhEcr6eWY7Nn5RhIBAF5l3RXArqnOuLo" />
+        -->
 
     </application>
 

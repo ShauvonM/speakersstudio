@@ -1,17 +1,16 @@
 package com.thespeakers_studio.thespeakersstudioapp;
 
-import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+
+import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
 
 /**
  * Created by smcgi_000 on 7/1/2016.

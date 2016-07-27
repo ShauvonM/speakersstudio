@@ -1,9 +1,9 @@
 <resources>
+
+    <!-- Base application theme.
     <style name="AppTheme" parent="AppTheme.Base">
 
     </style>
-
-    <!-- Base application theme. -->
     <style name="AppTheme.Base" parent="Theme.AppCompat.Light">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
@@ -20,6 +20,78 @@
     <style name="AppTheme.ActionBar.Popup" parent="ThemeOverlay.AppCompat.Light">
         <item name="android:textColor">@color/textColorInverse</item>
     </style>
+    -->
+
+
+    <!-- Text -->
+    <style name="Body1" parent="TextAppearance.AppCompat.Body1">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">wrap_content</item>
+    </style>
+
+    <style name="Body2" parent="TextAppearance.AppCompat.Body2">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">wrap_content</item>
+    </style>
+
+    <style name="Body1.White" />
+
+    <style name="Body2.White" />
+
+    <style name="Body2.Black" />
+
+    <style name="Body1.White.Primary">
+        <item name="android:textColor">@color/textColorPrimary</item>
+    </style>
+
+    <style name="Body2.White.Primary">
+        <item name="android:textColor">@color/textColorPrimary</item>
+    </style>
+
+    <style name="Body2.Black.Primary">
+        <item name="android:textColor">@color/textColorInverse</item>
+    </style>
+
+    <!-- Navigation Drawer -->
+    <style name="NavDrawerRowLayout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:background">@drawable/nav_drawer_row_background</item>
+        <item name="android:gravity">start|center_vertical</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:clickable">true</item>
+    </style>
+
+    <style name="NavDrawerRowLayout.Main">
+        <item name="android:tag">@string/tag_nav_drawer_main_entry</item>
+    </style>
+
+    <style name="NavDrawerRowLayout.Secondary">
+        <item name="android:tag">@string/tag_nav_drawer_special_entry</item>
+    </style>
+
+    <style name="NavDrawerRowItemIcon">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:layout_marginLeft">@dimen/vertical_keyline_first</item>
+    </style>
+
+    <style name="NavDrawerRowText" parent="Body2.Black.Primary">
+        <item name="android:textColor">@color/textColorInverse</item>
+        <item name="android:layout_gravity">start|center_vertical</item>
+        <item name="android:layout_marginLeft">@dimen/vertical_keyline_second</item>
+    </style>
+
+
+    <!-- ScrimInsetLayout -->
+    <style name="ScrimInsetsLayout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:fitsSystemWindows">true</item>
+        <item name="android:layout_gravity">start</item>
+        <item name="appInsetForeground">@color/nav_drawer_inset_foreground</item>
+    </style>
 
     <style name="PresentationListCard" parent="CardView">
         <item name="android:layout_width">wrap_content</item>
@@ -31,10 +103,12 @@
         <item name="android:foreground">?android:attr/selectableItemBackground</item>
         <item name="android:clickable">true</item>
     </style>
-        <style name="PresentationListCard.OneColumn">
-            <item name="android:layout_width">match_parent</item>
-            <item name="android:layout_marginBottom">@dimen/pres_list_card_padding</item>
-        </style>
+
+    <style name="PresentationListCard.OneColumn">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_marginBottom">@dimen/pres_list_card_padding</item>
+    </style>
+
     <style name="PresentationListCardSubmenu">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -45,6 +119,7 @@
         <item name="android:layout_marginTop">5dp</item>
         <item name="android:layout_marginRight">1dp</item>
     </style>
+
     <style name="PresentationListCardName">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -54,10 +129,13 @@
         <item name="android:layout_marginRight">@dimen/pres_list_card_padding</item>
         <item name="android:layout_marginBottom">0dp</item>
         <item name="android:layout_toLeftOf">@id/presentation_submenu</item>
+        <item name="android:textColor">@color/textColorPrimary</item>
     </style>
-        <style name="PresentationListCardName.OneColumn">
-            <item name="android:layout_width">match_parent</item>
-        </style>
+
+    <style name="PresentationListCardName.OneColumn">
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
     <style name="PresentationListCardModified">
         <item name="android:gravity">right</item>
         <item name="android:layout_width">wrap_content</item>
@@ -68,18 +146,22 @@
         <item name="android:layout_marginTop">0dp</item>
         <item name="android:layout_marginLeft">@dimen/pres_list_card_padding</item>
         <item name="android:layout_marginRight">0dp</item>
+        <item name="android:textColor">@color/textColorPrimary</item>
     </style>
+
     <style name="PresentationListCardProgress" parent="PresentationListCardModified">
         <item name="android:layout_below">@id/presentation_modified</item>
         <item name="android:layout_marginBottom">@dimen/pres_list_card_padding</item>
+        <item name="android:textColor">@color/textColorPrimary</item>
     </style>
-        <style name="PresentationListCardProgress.OneColumn">
-            <item name="android:layout_alignLeft">@id/presentation_name</item>
-            <item name="android:layout_alignRight">@id/presentation_progress</item>
-            <item name="android:layout_below">@id/presentation_name</item>
-            <item name="android:layout_marginBottom">@dimen/pres_list_card_padding</item>
-            <item name="android:layout_marginLeft">0dp</item>
-        </style>
+
+    <style name="PresentationListCardProgress.OneColumn">
+        <item name="android:layout_alignLeft">@id/presentation_name</item>
+        <item name="android:layout_alignRight">@id/presentation_progress</item>
+        <item name="android:layout_below">@id/presentation_name</item>
+        <item name="android:layout_marginBottom">@dimen/pres_list_card_padding</item>
+        <item name="android:layout_marginLeft">0dp</item>
+    </style>
 
     <style name="StepListItem">
         <item name="android:orientation">vertical</item>
@@ -109,6 +191,7 @@
         <item name="android:layout_marginBottom">-5dp</item>
         <item name="android:paddingLeft">@dimen/step_list_item_padding_horizontal</item>
     </style>
+
     <style name="StepListText">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -163,6 +246,7 @@
         <item name="cardBackgroundColor">@color/promptBG</item>
         <item name="contentPadding">0dp</item>
     </style>
+
     <style name="PromptCardContents">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">match_parent</item>
@@ -175,6 +259,7 @@
         <item name="cardBackgroundColor">@color/stepListBG</item>
         <item name="android:layout_marginTop">@dimen/prompt_header_margin_top</item>
     </style>
+
     <style name="PromptCard.Next" parent="PromptCard">
         <item name="android:layout_marginBottom">@dimen/prompt_spacing_top</item>
     </style>
@@ -197,11 +282,13 @@
         <item name="android:textSize">@dimen/prompt_font_size</item>
         <item name="android:textStyle">normal</item>
     </style>
+
     <style name="PromptLabel" parent="PromptText">
         <item name="android:padding">0dp</item>
         <item name="android:shadowDy">2</item>
         <item name="android:textSize">@dimen/prompt_label_font_size</item>
     </style>
+
     <style name="PromptDateTimeFields" parent="PromptText">
         <item name="android:textSize">@dimen/prompt_datetime_size</item>
         <item name="android:layout_margin">@dimen/default_padding</item>
@@ -212,19 +299,27 @@
         <item name="android:textColorPrimaryInverse">@android:color/white</item>
         <item name="android:background">@color/outlineBG</item>
     </style>
-        <style name="PresentationOutline.Text">
-            <item name="android:textColor">@color/outlineText</item>
-            <item name="android:textSize">@dimen/outline_text_size</item>
-        </style>
-        <style name="PresentationOutline.Text.Title">
-            <item name="android:textSize">@dimen/outline_title_size</item>
-            <item name="android:gravity">center</item>
-        </style>
-        <style name="PresentationOutline.Text.Title.Sub">
-            <item name="android:textSize">@dimen/outline_subtitle_size</item>
-        </style>
-        <style name="PresentationOutline.Text.Duration">
-            <item name="android:textSize">@dimen/outline_duration_size</item>
-        </style>
+
+    <style name="PresentationOutline.Text">
+        <item name="android:textColor">@color/outlineText</item>
+        <item name="android:textSize">@dimen/outline_text_size</item>
+    </style>
+
+    <style name="PresentationOutline.Text.Title">
+        <item name="android:textSize">@dimen/outline_title_size</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="PresentationOutline.Text.Title.Sub">
+        <item name="android:textSize">@dimen/outline_subtitle_size</item>
+    </style>
+
+    <style name="PresentationOutline.Text.Duration">
+        <item name="android:textSize">@dimen/outline_duration_size</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 </resources>
