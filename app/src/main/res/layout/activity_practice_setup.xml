@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/drawer_layout"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:paddingTop="0dp"
+    android:paddingBottom="0dp"
+    tools:context=".activity.PracticeSetupActivity"
+    android:fitsSystemWindows="true">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.thespeakers_studio.thespeakersstudioapp.ui.SmartScrollView
+            android:id="@+id/headerbar_scroll"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:overScrollMode="never">
+
+            <com.thespeakers_studio.thespeakersstudioapp.ui.ToolbarShadowFrameLayout
+                android:id="@+id/main_content"
+                android:background="@color/windowBackground"
+                app:shadowDrawable="@drawable/header_shadow"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <!-- content goes here -->
+                <FrameLayout
+                    android:id="@+id/content_wrapper"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/no_presentations"
+                        android:visibility="visible"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:textSize="15dp"
+                        android:text="@string/no_saved_practices"
+                        />
+
+                </FrameLayout>
+                <!-- end of content -->
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/HeaderBar"
+                    android:id="@+id/headerbar"
+                    android:clickable="true"
+                    android:orientation="vertical">
+
+                    <include layout="@layout/toolbar" />
+
+                    <!-- header bar stuff goes here -->
+                    <FrameLayout
+                        android:id="@+id/headerbar_details"
+                        android:minHeight="0dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="0dp"
+                        android:padding="0dp"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:id="@+id/practice_settings"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_normal"
+                            android:layout_marginBottom="@dimen/spacing_normal"
+                            android:layout_marginLeft="20dp"
+                            android:layout_marginRight="20dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/presentation_name"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Title"
+                                android:textSize="20dp"/>
+
+                            <TextView
+                                android:id="@+id/presentation_duration"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="10dp"
+                                android:text="20 minutes" />
+
+                            <android.support.v7.widget.AppCompatCheckBox
+                                android:id="@+id/checkbox_delay"
+                                android:checked="true"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Wait five seconds before starting the timer?"/>
+
+                            <android.support.v7.widget.AppCompatCheckBox
+                                android:id="@+id/checkbox_show_timer"
+                                android:checked="true"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Display time as presentation is running?"/>
+
+                            <android.support.v7.widget.AppCompatCheckBox
+                                android:id="@+id/checkbox_show_warning"
+                                android:checked="true"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Show a warning when you have 5 minutes left?"/>
+
+                            <android.support.v7.widget.AppCompatCheckBox
+                                android:id="@+id/checkbox_track"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Track your timing in this practice?"/>
+
+                            <android.support.v7.widget.AppCompatCheckBox
+                                android:id="@+id/checkbox_vibrate"
+                                android:checked="true"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Use vibration to signify time intervals?"/>
+
+                            <android.support.v7.widget.AppCompatCheckBox
+                                android:id="@+id/checkbox_record"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Record video and audio of this practice?"/>
+
+                            <android.support.v7.widget.AppCompatCheckBox
+                                android:id="@+id/checkbox_disable_phone"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Disable phone during this practice?"/>
+
+                        </LinearLayout>
+
+                    </FrameLayout>
+                    <!-- end of header bar -->
+
+                </LinearLayout>
+
+            </com.thespeakers_studio.thespeakersstudioapp.ui.ToolbarShadowFrameLayout>
+
+        </com.thespeakers_studio.thespeakersstudioapp.ui.SmartScrollView>
+
+        <FrameLayout
+            android:id="@+id/fab_practice_wrapper"
+            android:layout_gravity="top|right"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/fab_practice"
+                android:layout_width="@dimen/fab_button"
+                android:layout_height="@dimen/fab_button"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_play_arrow_white_24dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:scaleType="center"
+                app:fabSize="normal"
+                android:layout_margin="@dimen/fab_margin"
+                />
+        </FrameLayout>
+
+    </FrameLayout>
+
+    <include layout="@layout/navigation_drawer" />
+
+</android.support.v4.widget.DrawerLayout>

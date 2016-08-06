@@ -77,6 +77,7 @@
     <string name="modified_output">Modified: %1$s</string>
 
     <string name="no_presentations">You have no saved presentations.</string>
+    <string name="no_saved_practices">You have no saved practices.</string>
 
     <string name="outline_item_intro">Intro</string>
     <string name="outline_item_conclusion">Conclusion</string>
@@ -96,5 +97,9 @@
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <!-- Accessibility description for navigation drawer -->
+    <string name="navdrawer_description_a11y">Navigation Drawer used to switch between major
+        features of the application</string>
 
 </resources>

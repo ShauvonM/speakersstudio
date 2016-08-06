@@ -1,11 +1,10 @@
 package com.thespeakers_studio.thespeakersstudioapp.fragment;
 
+import android.graphics.drawable.TransitionDrawable;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +12,9 @@ import android.view.ViewGroup;
 
 import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
 import com.thespeakers_studio.thespeakersstudioapp.R;
-import com.thespeakers_studio.thespeakersstudioapp.view.StepListView;
+import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
+import com.thespeakers_studio.thespeakersstudioapp.ui.StepListView;
+import com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils;
 
 /**
  * Created by smcgi_000 on 5/9/2016.
@@ -21,9 +22,10 @@ import com.thespeakers_studio.thespeakersstudioapp.view.StepListView;
 public class PresentationStepListFragment extends Fragment implements View.OnClickListener,
         StepListView.OnProgressAnimationListener {
 
-    public static final String TAG = "step_list";
+    public static final String TAG = LogUtils.makeLogTag(PresentationStepListFragment.class);
 
     private View mView;
+    private StepListView mStepListView;
     OnStepSelectedListener mStepSelectedListener;
     StepListView.OnProgressAnimationListener mProgressAnimationListener;
     private PresentationData mPresentation;
@@ -45,7 +47,7 @@ public class PresentationStepListFragment extends Fragment implements View.OnCli
         try {
             mStepSelectedListener = (OnStepSelectedListener) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement OnHeadlineSelectedListener");
+            throw new ClassCastException(context.toString() + " must implement OnStepSelectedListener");
         }
     }
 
@@ -54,18 +56,31 @@ public class PresentationStepListFragment extends Fragment implements View.OnCli
         // Inflate the layout for this fragment
         mView = inflater.inflate(R.layout.fragment_step_list, container, false);
 
-        // ActionBar
-        Toolbar toolbar = (Toolbar) mView.findViewById(R.id.toolbar);
+        mStepListView = (StepListView) findViewById(R.id.step_list);
 
-        mView.findViewById(R.id.step_1).setOnClickListener(this);
-        mView.findViewById(R.id.step_2).setOnClickListener(this);
-        mView.findViewById(R.id.step_3).setOnClickListener(this);
-        mView.findViewById(R.id.step_4).setOnClickListener(this);
-        mView.findViewById(R.id.button_outline).setOnClickListener(this);
+        setButtonClick(R.id.step_1);
+        setButtonClick(R.id.step_2);
+        setButtonClick(R.id.step_3);
+        setButtonClick(R.id.step_4);
+        setButtonClick(R.id.button_outline);
 
-        ((StepListView) mView.findViewById(R.id.step_list)).setProgressAnimationListener(this);
+        mStepListView.setProgressAnimationListener(this);
 
         return mView;
+    }
+
+    private View findViewById(int id) {
+        if (mView == null) {
+            return null;
+        }
+        return mView.findViewById(id);
+    }
+
+    private void setButtonClick(int id) {
+        View v = findViewById(id);
+        if (v != null) {
+            v.setOnClickListener(this);
+        }
     }
 
     private void checkCompletion() {
@@ -74,12 +89,18 @@ public class PresentationStepListFragment extends Fragment implements View.OnCli
         }
 
         float completion = mPresentation.getCompletionPercentage();
-        if (completion == 1) {
-            mView.findViewById(R.id.button_outline).setEnabled(true);
-            mView.findViewById(R.id.button_outline).setBackgroundColor(ContextCompat.getColor(getContext(), R.color.completedPromptBG));
-        } else {
-            mView.findViewById(R.id.button_outline).setEnabled(false);
-            mView.findViewById(R.id.button_outline).setBackgroundColor(ContextCompat.getColor(getContext(), R.color.common_google_signin_btn_text_dark_disabled));
+        View button = findViewById(R.id.button_outline);
+        TransitionDrawable transition = (TransitionDrawable) button.getBackground();
+        if (button != null) {
+            if (completion == 1) {
+                button.setEnabled(true);
+                //button.setBackgroundColor(ContextCompat.getColor(this, R.color.outlineBG));
+                transition.startTransition(SettingsUtils.OUTLINE_BUTTON_TRANSITION_DURATION);
+            } else {
+                button.setEnabled(false);
+                //button.setBackgroundColor(ContextCompat.getColor(this, R.color.common_google_signin_btn_text_dark_disabled));
+                transition.reverseTransition(SettingsUtils.OUTLINE_BUTTON_TRANSITION_DURATION);
+            }
         }
     }
 
@@ -103,8 +124,8 @@ public class PresentationStepListFragment extends Fragment implements View.OnCli
     }
 
     public void resetProgress() {
-        if (mView != null) {
-            ((StepListView) mView.findViewById(R.id.step_list)).resetProgressHeight();
+        if (mStepListView != null) {
+            mStepListView.resetProgressHeight();
         }
     }
 
@@ -114,7 +135,7 @@ public class PresentationStepListFragment extends Fragment implements View.OnCli
         int currentStep = mPresentation.getCurrentStep();
         float currentStepProgress = mPresentation.getCompletionPercentage(currentStep);
 
-        ((StepListView) mView.findViewById(R.id.step_list)).setProgressHeight(currentStep, currentStepProgress);
+        mStepListView.setProgressHeight(currentStep, currentStepProgress);
     }
 
     @Override

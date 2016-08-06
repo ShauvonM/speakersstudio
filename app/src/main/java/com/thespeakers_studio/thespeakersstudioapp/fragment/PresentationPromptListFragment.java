@@ -9,22 +9,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.thespeakers_studio.thespeakersstudioapp.activity.PresentationPromptListActivity;
 import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
 import com.thespeakers_studio.thespeakersstudioapp.model.Prompt;
-import com.thespeakers_studio.thespeakersstudioapp.view.PromptListView;
+import com.thespeakers_studio.thespeakersstudioapp.ui.PromptListView;
 import com.thespeakers_studio.thespeakersstudioapp.R;
 
 import java.util.ArrayList;
+
+import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.makeLogTag;
 
 /**
  * Created by smcgi_000 on 5/10/2016.
  */
 public class PresentationPromptListFragment extends Fragment implements PromptListView.PromptListListener {
 
-    public static final String TAG = "prompt_list";
+    public static final String TAG = makeLogTag(PresentationPromptListFragment.class);
 
     private View mView;
-    private ActionBar mToolbar;
     private PromptSaveListener mPromptSaveListener;
 
     private PresentationData mPresentation;
@@ -56,7 +58,7 @@ public class PresentationPromptListFragment extends Fragment implements PromptLi
         // Inflate the layout for this fragment
         mView = inflater.inflate(R.layout.fragment_prompt_list, container, false);
 
-        mPromptList = (PromptListView) mView.findViewById(R.id.prompt_list);
+        mPromptList = (PromptListView) findViewById(R.id.prompt_list);
         mPromptList.setPromptListListener(this);
 
         if (mStep > 0) {
@@ -66,25 +68,47 @@ public class PresentationPromptListFragment extends Fragment implements PromptLi
         return mView;
     }
 
+    private View findViewById(int id) {
+        if (mView == null) {
+            return null;
+        }
+        return mView.findViewById(id);
+    }
+
+    public void setMargin(int margin) {
+        if (mPromptList == null) {
+            return;
+        }
+
+        ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams)
+                mPromptList.getLayoutParams();
+        if (mlp.topMargin != margin) {
+            mlp.topMargin = margin;
+            mPromptList.setLayoutParams(mlp);
+        }
+    }
+
     public void setPresentation(PresentationData presentation) {
         mPresentation = presentation;
     }
 
     public void setStep (int step) {
+        resetStep();
         mStep = step;
         mPromptData = mPresentation.getPromptsForStep(step);
         Log.d("SS", "Step count: " + mPromptData.size());
         mPromptList.setData(mPromptData);
     }
 
-    public int getStep() {
-        return mStep;
+    private void resetStep() {
+        if (mPromptList == null) {
+            return;
+        }
+        mPromptList.clearData();
     }
 
-    public void clearStep() {
-        mPromptData = null;
-        mPromptList.clearData();
-        mView.findViewById(R.id.prompt_list_wrapper).scrollTo(0, 0);
+    public int getStep() {
+        return mStep;
     }
 
     @Override

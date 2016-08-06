@@ -2,10 +2,8 @@
 <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:local="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/toolbar_actionbar"
     android:layout_width="match_parent"
-    android:layout_height="?attr/actionBarSize"
-    android:background="?attr/colorPrimary"
-    tools:context="com.thespeakers_studio.thespeakersstudioapp.activity.PresentationMainActivity"
-    tools:layout_marginTop="24dp"
-    local:theme="@style/AppTheme.ActionBar"
-    local:popupTheme="@style/AppTheme.ActionBar.Popup" />
+    android:layout_height="?actionBarSize"
+    local:theme="@style/ActionBarThemeOverlay"
+    local:popupTheme="@style/ActionBarPopupThemeOverlay" />

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.thespeakers_studio.thespeakersstudioapp.ui.SmartScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/headerbar_scroll"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:overScrollMode="never"
+    >
+
+    <com.thespeakers_studio.thespeakersstudioapp.ui.ToolbarShadowFrameLayout
+        android:id="@+id/main_content"
+        android:background="@color/windowBackground"
+        app:shadowDrawable="@drawable/header_shadow"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- content goes here -->
+            <com.thespeakers_studio.thespeakersstudioapp.ui.PromptListView
+                android:id="@+id/prompt_list"
+                android:orientation="vertical"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent" />
+        <!-- /content -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/HeaderBar"
+            android:id="@+id/headerbar"
+            android:clickable="true"
+            android:orientation="vertical">
+
+            <include layout="@layout/toolbar" />
+
+            <com.thespeakers_studio.thespeakersstudioapp.ui.PromptListHeaderView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/headerbar_details"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:orientation="vertical"
+                app:progressColor="@color/progressBG"
+                app:minimumHeight="@dimen/spacing_normal"
+                >
+
+                <TextView
+                    android:id="@+id/step_label"
+                    android:text="@string/step_1"
+                    style="@style/StepListLabel"
+
+                    android:paddingLeft="60dp"
+                    android:layout_marginTop="@dimen/spacing_normal"
+                    />
+                <TextView
+                    android:id="@+id/step_name"
+                    android:text="@string/details"
+                    style="@style/StepListText"
+
+                    android:textSize="@dimen/prompt_list_header_size_main"
+                    android:paddingLeft="60dp"
+                    android:layout_marginBottom="@dimen/spacing_normal"
+                    />
+
+            </com.thespeakers_studio.thespeakersstudioapp.ui.PromptListHeaderView>
+
+        </LinearLayout>
+
+    </com.thespeakers_studio.thespeakersstudioapp.ui.ToolbarShadowFrameLayout>
+
+</com.thespeakers_studio.thespeakersstudioapp.ui.SmartScrollView>

@@ -1,22 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.thespeakers_studio.thespeakersstudioapp.view.ScrimInsetsFrameLayout
+<com.thespeakers_studio.thespeakersstudioapp.ui.ScrimInsetsScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_activity_navigation_drawer_rootLayout"
     style="@style/ScrimInsetsLayout"
-    tools:context=".activity.PresentationMainActivity"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:layout_gravity="start"
+    android:fitsSystemWindows="true"
     tools:layout_marginEnd="?actionBarSize"
-    tools:layout_marginRight="?actionBarSize">
+    tools:layout_marginRight="?actionBarSize"
+    android:background="@color/navigation_drawer_background"
+    app:appInsetForeground="#4000">
 
     <ScrollView
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:background="@color/navigation_drawer_background">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
             <!-- HEADER -->
@@ -66,7 +70,8 @@
 
                     <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="@dimen/spacing_56">
+                        android:layout_height="@dimen/spacing_56"
+                        android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/navigation_drawer_account_information_display_name"
@@ -87,12 +92,14 @@
 
             <!-- BODY -->
             <LinearLayout
+                android:id="@+id/navigation_drawer_item_list"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:paddingBottom="@dimen/spacing_8"
                 android:paddingTop="@dimen/spacing_8">
 
+                <!--
                 <FrameLayout
                     android:id="@+id/navigation_drawer_items_list_linearLayout_presentations"
                     style="@style/NavDrawerRowLayout.Main"
@@ -149,7 +156,7 @@
 
                 </FrameLayout>
 
-                <include layout="@layout/divider" />
+                <include layout="@layout/nav_drawer_separator" />
 
                 <FrameLayout
                     android:id="@+id/navigation_drawer_items_list_linearLayout_curious"
@@ -204,6 +211,7 @@
                         android:text="@string/about" />
 
                 </FrameLayout>
+                -->
 
             </LinearLayout>
             <!-- end of BODY -->
@@ -213,4 +221,4 @@
     </ScrollView>
 
  
-</com.thespeakers_studio.thespeakersstudioapp.view.ScrimInsetsFrameLayout>
+</com.thespeakers_studio.thespeakersstudioapp.ui.ScrimInsetsScrollView>

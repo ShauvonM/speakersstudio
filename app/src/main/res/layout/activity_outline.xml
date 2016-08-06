@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:local="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.thespeakers_studio.thespeakersstudioapp.ui.SmartScrollView
+        android:id="@+id/headerbar_scroll"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:overScrollMode="never">
+
+        <com.thespeakers_studio.thespeakersstudioapp.ui.ToolbarShadowFrameLayout
+            android:id="@+id/main_content"
+            android:background="@color/outlineBG"
+            app:shadowDrawable="@drawable/header_shadow"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- content goes here -->
+            <LinearLayout
+                android:id="@+id/content_wrapper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/outline_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_normal"
+                    android:text="Title"
+                    style="@style/PresentationOutline.Text.Title"/>
+
+                <TextView
+                    android:id="@+id/outline_duration"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Duration"
+                    style="@style/PresentationOutline.Text.Title.Sub"/>
+
+                <TextView
+                    android:id="@+id/outline_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/spacing_normal"
+                    android:text="Date"
+                    style="@style/PresentationOutline.Text.Title.Sub"/>
+
+                <LinearLayout
+                    android:id="@+id/outline_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/outline_list_padding"
+                    android:paddingRight="@dimen/outline_list_padding"
+                    android:paddingBottom="@dimen/outline_list_padding_bottom"
+                    android:orientation="vertical">
+                </LinearLayout>
+
+            </LinearLayout>
+            <!-- end of content -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/HeaderBar"
+                android:id="@+id/headerbar"
+                android:clickable="true"
+                android:orientation="vertical">
+
+                <include layout="@layout/toolbar_outline" />
+
+                <!-- header bar stuff goes here -->
+
+            </LinearLayout>
+
+        </com.thespeakers_studio.thespeakersstudioapp.ui.ToolbarShadowFrameLayout>
+
+    </com.thespeakers_studio.thespeakersstudioapp.ui.SmartScrollView>
+
+    <FrameLayout
+        android:id="@+id/fab_practice_wrapper"
+        android:layout_gravity="bottom|right"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_practice"
+            android:layout_width="@dimen/fab_button"
+            android:layout_height="@dimen/fab_button"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_record_voice_over_white_24dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:scaleType="center"
+            app:fabSize="normal"
+            android:layout_margin="@dimen/fab_margin"
+            />
+    </FrameLayout>
+
+</FrameLayout>

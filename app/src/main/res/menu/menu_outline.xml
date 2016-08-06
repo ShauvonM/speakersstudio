@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".PresentationMain">
+
+    <item android:id="@+id/menu_action_edit_outline" android:title="Edit Outline"
+        app:showAsAction="ifRoom" android:icon="@drawable/ic_create_black_24dp" />
+    <item android:id="@+id/menu_action_save_outline" android:title="Save Outline to Google Drive"
+        app:showAsAction="ifRoom" android:icon="@drawable/ic_insert_drive_file_black_24dp" />
+    <item android:id="@+id/menu_action_outline_view" android:title="Change View"
+        app:showAsAction="ifRoom" android:icon="@drawable/ic_view_carousel_black_24dp" />
+
+</menu>

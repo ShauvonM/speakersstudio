@@ -186,7 +186,7 @@ public class PresentationData {
         // add the header
         selection.add(getPromptById(PRESENTATION_HEADER));
 
-        int orderPadding = 0;
+        int orderPadding = -1;
         boolean skipRedundant = false;
         for (Prompt p : mPrompts) {
             if (p.getStep() == step && p.getId() != PRESENTATION_HEADER) {
@@ -247,7 +247,7 @@ public class PresentationData {
     public void setAnswers (Cursor answerCursor) {
         answerCursor.moveToFirst();
         try {
-            while (answerCursor.isAfterLast() == false) {
+            while (!answerCursor.isAfterLast()) {
                 String answerValue = answerCursor.getString(
                         answerCursor.getColumnIndexOrThrow(PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_VALUE)
                 );
@@ -307,17 +307,22 @@ public class PresentationData {
         ArrayList<Prompt> prompts = getPromptsForStep(step);
         int count = prompts.size();
         int progress = 0;
-        // skip the first one, because that's the header
-        for(int cnt = 1; cnt < count; cnt++) {
+        int skips = 0;
+        for(int cnt = 0; cnt < count; cnt++) {
             Prompt thisPrompt = prompts.get(cnt);
-            if (thisPrompt.getAnswer().size() > 0) {
-                progress++;
+            int type = thisPrompt.getType();
+            if (type == HEADER || type == NEXT || type == NONE) {
+                skips++;
             } else {
-                cnt = count + 1;
+                if (thisPrompt.getAnswer().size() > 0) {
+                    progress++;
+                } else {
+                    cnt = count + 1;
+                }
             }
         }
-        // subtract 2 from the count because we have the header and next items
-        return (float) progress / (float) (count - 2);
+        // subtract skipped items from the count because we have the header and next items
+        return (float) progress / (float) (count - skips);
     }
 
     // pass no step to get the completion of the entire presentation

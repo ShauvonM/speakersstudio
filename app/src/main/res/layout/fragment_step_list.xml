@@ -4,26 +4,17 @@
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/default_padding">
 
-    <include layout="@layout/toolbar" android:id="@+id/toolbar" />
-
     <Button
         android:id="@+id/button_outline"
         android:layout_alignParentBottom="true"
         android:text="@string/outline"
         style="@style/StepListButton"
+        android:background="@drawable/transition_outline_button"
         />
 
-    <com.thespeakers_studio.thespeakersstudioapp.view.StepListView
-        android:id="@+id/step_list"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:orientation="vertical"
-        android:paddingBottom="@dimen/step_list_padding"
-        android:layout_margin="0dp"
-        android:layout_below="@id/toolbar"
-        android:layout_above="@id/button_outline"
-        >
+    <com.thespeakers_studio.thespeakersstudioapp.ui.StepListView
+        style="@style/StepListView"
+        android:id="@+id/step_list">
 
         <LinearLayout
             android:id="@+id/step_1"
@@ -36,7 +27,7 @@
                 android:id="@+id/step_1_text"
                 android:text="@string/details"
                 style="@style/StepListText"
-                />
+            />
         </LinearLayout>
 
         <LinearLayout
@@ -64,7 +55,7 @@
                 android:id="@+id/step_3_text"
                 android:text="@string/specifics"
                 style="@style/StepListText"
-                />
+            />
         </LinearLayout>
 
         <LinearLayout
@@ -78,15 +69,9 @@
                 android:id="@+id/step_4_text"
                 android:text="@string/content"
                 style="@style/StepListText"
-                />
+            />
         </LinearLayout>
 
-    </com.thespeakers_studio.thespeakersstudioapp.view.StepListView>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/toolbar_shadow"
-        android:background="@drawable/toolbar_dropshadow"
-        android:layout_below="@id/toolbar"/>
+    </com.thespeakers_studio.thespeakersstudioapp.ui.StepListView>
 
 </RelativeLayout>

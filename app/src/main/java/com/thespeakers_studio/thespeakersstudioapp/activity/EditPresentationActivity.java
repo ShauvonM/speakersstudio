@@ -1,0 +1,471 @@
+package com.thespeakers_studio.thespeakersstudioapp.activity;
+
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.thespeakers_studio.thespeakersstudioapp.R;
+import com.thespeakers_studio.thespeakersstudioapp.fragment.PresentationPromptListFragment;
+import com.thespeakers_studio.thespeakersstudioapp.fragment.PresentationStepListFragment;
+import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
+import com.thespeakers_studio.thespeakersstudioapp.model.Prompt;
+import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
+import com.thespeakers_studio.thespeakersstudioapp.ui.PromptListHeaderView;
+import com.thespeakers_studio.thespeakersstudioapp.ui.StepListView;
+import com.thespeakers_studio.thespeakersstudioapp.utils.AnalyticsHelper;
+import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
+
+import java.util.ArrayList;
+
+import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
+import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGE;
+import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.makeLogTag;
+
+/**
+ * Created by smcgi_000 on 8/1/2016.
+ */
+public class EditPresentationActivity extends BaseActivity implements
+        FragmentManager.OnBackStackChangedListener,
+        PresentationStepListFragment.OnStepSelectedListener,
+        PresentationPromptListFragment.PromptSaveListener,
+        GoogleApiClient.OnConnectionFailedListener {
+
+    public static final String INTENT_PRESENTATION_ID = "presentation_id";
+
+    private static final String TAG = makeLogTag(EditPresentationActivity.class);
+    private static final String SCREEN_LABEL = "Presentation Step List";
+
+    private static final String STATE_PRESENTATION_ID = "presentation_id";
+    private static final String STATE_STEP = "step";
+
+    private PresentationData mPresentation;
+    private int mCurrentStep;
+
+    private View mFragmentContainer;
+
+    private PresentationStepListFragment mStepListFragment;
+    private PresentationPromptListFragment mPromptListFragment;
+
+    private ArrayList<LocationSelectedListener> mLocationListeners = new ArrayList<>();
+
+    public interface LocationSelectedListener {
+        public void onLocationSelected(Place p);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_edit_presentation);
+
+        AnalyticsHelper.sendScreenView(SCREEN_LABEL);
+
+        mFragmentContainer = findViewById(R.id.fragment_container);
+
+        if (savedInstanceState == null) {
+            setPresentationId(getIntent().getStringExtra(INTENT_PRESENTATION_ID));
+        } else {
+            setPresentationId(savedInstanceState.getString(STATE_PRESENTATION_ID));
+        }
+
+        Intent i = getIntent();
+
+        if (mPresentation == null) {
+            LOGE(TAG, "I couldn't figure out what presentation you wanted");
+            return;
+        }
+
+        FragmentManager fm = getSupportFragmentManager();
+        fm.addOnBackStackChangedListener(this);
+
+        mStepListFragment =
+                (PresentationStepListFragment)
+                        fm.findFragmentByTag(PresentationStepListFragment.TAG);
+
+        mPromptListFragment =
+                (PresentationPromptListFragment)
+                        fm.findFragmentByTag(PresentationPromptListFragment.TAG);
+
+        FragmentTransaction ft = fm.beginTransaction();
+
+        if (mStepListFragment == null) {
+            mStepListFragment = new PresentationStepListFragment();
+            mStepListFragment.setPresentation(mPresentation);
+            ft.add(R.id.fragment_container, mStepListFragment,
+                    PresentationStepListFragment.TAG);
+            ft.hide(mStepListFragment);
+        }
+
+        if (mPromptListFragment == null) {
+            mPromptListFragment = new PresentationPromptListFragment();
+            mPromptListFragment.setPresentation(mPresentation);
+            ft.add(R.id.fragment_container, mPromptListFragment,
+                    PresentationPromptListFragment.TAG);
+            ft.hide(mPromptListFragment);
+        }
+
+        ft.commit();
+
+        if (savedInstanceState != null) {
+            mCurrentStep = savedInstanceState.getInt(STATE_STEP);
+        } else {
+            mCurrentStep = 0;
+        }
+        onStepSelected(mCurrentStep);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+    }
+
+    private void setPresentationId(String id) {
+        if (id != null) {
+            LOGD(TAG, "Opening presentation " + id);
+
+            mPresentation = mDbHelper.loadPresentationById(id);
+            setTitle(mPresentation.getTopic());
+        }
+    }
+
+    @Override
+    public void setTitle(CharSequence title) {
+        if (title.length() == 0) {
+            super.setTitle(R.string.new_presentation);
+        } else {
+            super.setTitle(title);
+        }
+    }
+
+    @Override
+    protected void setLayoutPadding(int actionBarSize) {
+        ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams)
+                mFragmentContainer.getLayoutParams();
+        if (mlp.topMargin != actionBarSize) {
+            mlp.topMargin = actionBarSize;
+            mFragmentContainer.setLayoutParams(mlp);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        mMenu = menu;
+        MenuInflater inflater = getMenuInflater();
+        int menuId = R.menu.menu_in_presentation;
+        inflater.inflate(menuId, menu);
+
+        onBackStackChanged();
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch(id) {
+            case R.id.menu_action_reset:
+                resetPresentation();
+                break;
+            case android.R.id.home:
+                //onBackPressed();
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+    @Override
+    public void onBackStackChanged() {
+        Utils.hideKeyboard(this, findViewById(R.id.fragment_container));
+        if (mStepListFragment != null && mStepListFragment.isVisible()) {
+            hideHeaderDetails();
+            // TODO: use a handler to delay this?
+            mStepListFragment.animateProgressHeight();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putString(STATE_PRESENTATION_ID, mPresentation.getId());
+        outState.putInt(STATE_STEP, mCurrentStep);
+
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        setPresentationId(data.getStringExtra(INTENT_PRESENTATION_ID));
+        switch(requestCode) {
+            case Utils.REQUEST_CODE_PROMPT_LIST:
+                //mNextStep = data.getIntExtra(PresentationPromptListActivity.INTENT_STEP, 0);
+                break;
+            case Utils.REQUEST_CODE_OUTLINE:
+                break;
+            case Utils.REQUEST_CODE_LOCATION_SELECTED:
+                if (resultCode == RESULT_OK) {
+                    Place place = PlaceAutocomplete.getPlace(this, data);
+                    for(LocationSelectedListener l : mLocationListeners) {
+                        l.onLocationSelected(place);
+                    }
+                    Log.i("SS", "Place: " + place.getName());
+                } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
+                    Status status = PlaceAutocomplete.getStatus(this, data);
+                    // TODO: handle this
+                    Log.i("SS", status.getStatusMessage());
+                } else if (resultCode == RESULT_CANCELED) {
+                    // the user canceled the thing
+                }
+                break;
+        }
+    }
+
+    public void addLocationCallback(LocationSelectedListener listener) {
+        if (!mLocationListeners.contains(listener)) {
+            mLocationListeners.add(listener);
+        }
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        // TODO: handle google api connection errors
+    }
+
+    @Override
+    public void onStepSelected(int step) {
+        mCurrentStep = step;
+        if (step == 0) {
+            showStepList();
+        } else {
+            openStep(step);
+        }
+    }
+
+    @Override
+    protected int getMinHeaderHeight() {
+        if (mStepListFragment == null || mStepListFragment.isVisible()) {
+            return 0;
+        } else {
+            return ((PromptListHeaderView) mHeaderDetails).getMinHeight();
+        }
+    }
+
+    @Override
+    public void onPromptSave(Prompt prompt) {
+        mDbHelper.savePrompt(mPresentation.getId(), prompt);
+        animateHeaderProgress();
+        setTitle(mPresentation.getTopic());
+    }
+
+    @Override
+    public void onNextStep(int step) {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+
+        final int nextStep = step + 1;
+        mStepListFragment.setOnProgressAnimationListener(new StepListView.OnProgressAnimationListener() {
+            @Override
+            public void onProgressAnimationFinished() {
+                openStep(nextStep);
+                mStepListFragment.clearOnProgressAnimationListener();
+            }
+        });
+
+        ft.hide(mPromptListFragment);
+        ft.show(mStepListFragment);
+
+        ft.addToBackStack(PresentationStepListFragment.TAG);
+
+        ft.commit();
+    }
+
+    private void showStepList() {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+        ft.show(mStepListFragment);
+        ft.commit();
+    }
+
+    private void openStep(int step) {
+        if (step == 5) {
+            Intent intent = new Intent(getApplicationContext(), OutlineActivity.class);
+            //int code = OutlineActivity.REQUEST_CODE;
+            intent.putExtra(EditPresentationActivity.INTENT_PRESENTATION_ID, mPresentation.getId());
+            //startActivityForResult(intent, code);
+            createBackStack(intent);
+        } else {
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+            ft.hide(mStepListFragment);
+            mPromptListFragment.setStep(step);
+            ft.show(mPromptListFragment);
+
+            ft.addToBackStack(PresentationPromptListFragment.TAG);
+            ft.commit();
+
+            setupHeaderDetails(step);
+        }
+        LOGD(TAG, "Open step " + step);
+    }
+
+    private void setupHeaderDetails(int step) {
+        String headerText;
+        String label;
+        switch(step) {
+            case 1:
+                headerText = getString(R.string.details);
+                label = getString(R.string.step_1);
+                break;
+            case 2:
+                headerText = getString(R.string.landscape);
+                label = getString(R.string.step_2);
+                break;
+            case 3:
+                headerText = getString(R.string.specifics);
+                label = getString(R.string.step_3);
+                break;
+            case 4:
+                headerText = getString(R.string.content);
+                label = getString(R.string.step_4);
+                break;
+            default:
+                return;
+        }
+
+        ((TextView) findViewById(R.id.step_label)).setText(label);
+        ((TextView) findViewById(R.id.step_name)).setText(headerText);
+
+        showHeaderDetails();
+        animateHeaderProgress();
+    }
+
+    private void animateHeaderProgress() {
+        ((PromptListHeaderView) mHeaderDetails)
+                .animateFillFactor(mPresentation.getCompletionPercentage(mCurrentStep));
+    }
+
+    // animates the header opening, which shows the selected step
+    private void showHeaderDetails() {
+        ((PromptListHeaderView) mHeaderDetails).reset();
+        mHeaderDetails.measure(LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+
+        final int detailsHeight = mHeaderDetails.getMeasuredHeight();
+        final int actionBarSize = Utils.calculateActionBarSize(this);
+        final int fullHeaderHeight = actionBarSize + detailsHeight;
+
+        Animation showHeaderAnimation = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                int h = (int) (detailsHeight * interpolatedTime);
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)
+                        mHeaderDetails.getLayoutParams();
+                params.height = h;
+                mHeaderDetails.setLayoutParams(params);
+
+                /// /(actionBarSize + ((int) (detailsHeight * interpolatedTime)));
+                mPromptListFragment.setMargin(h);
+            }
+        };
+        showHeaderAnimation.setDuration(SettingsUtils.PROMPT_PROGRESS_ANIMATION_DURATION);
+        showHeaderAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {}
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {}
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                mHeaderDetailsHeightPixels = detailsHeight;
+                mHeaderHeightPixels = fullHeaderHeight;
+                mHeaderDetails.clearAnimation();
+                onScrollChanged(0,0);
+            }
+        });
+
+        mHeaderDetails.startAnimation(showHeaderAnimation);
+    }
+
+    private void hideHeaderDetails() {
+        final int actionBarSize = Utils.calculateActionBarSize(this);
+        final int detailsHeight = mHeaderDetails.getMeasuredHeight();
+
+        Animation hideHeaderAnimation = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                int h = detailsHeight - ((int) (detailsHeight * interpolatedTime));
+
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)
+                        mHeaderDetails.getLayoutParams();
+                params.height = h;
+                mHeaderDetails.setLayoutParams(params);
+            }
+        };
+        hideHeaderAnimation.setDuration(SettingsUtils.PROMPT_PROGRESS_ANIMATION_DURATION);
+        hideHeaderAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {}
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {}
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                mHeaderDetailsHeightPixels = 0;
+                mHeaderHeightPixels = actionBarSize;
+                mHeaderDetails.clearAnimation();
+                onScrollChanged(0,0);
+            }
+        });
+
+        mHeaderDetails.startAnimation(hideHeaderAnimation);
+    }
+
+    private void resetPresentation() {
+        if (mPresentation == null) {
+            return;
+        }
+
+        new AlertDialog.Builder(this)
+                .setMessage(getString(R.string.confirm_reset_message))
+                .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        doResetPresentation();
+                    }
+                })
+                .setNegativeButton(getString(R.string.no), null)
+                .show();
+    }
+
+    private void doResetPresentation() {
+        if (mPresentation == null) {
+            return;
+        }
+        mDbHelper.resetPresentation(mPresentation);
+    }
+}

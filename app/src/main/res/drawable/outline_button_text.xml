@@ -6,7 +6,7 @@
         />
     <item
         android:state_enabled="true"
-        android:color="@color/textColorPrimary"
+        android:color="@color/outlineText"
         />
     <item android:color="@color/textColorPrimary" />
 </selector>

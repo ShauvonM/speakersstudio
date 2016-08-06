@@ -8,14 +8,12 @@
     android:paddingTop="0dp"
     android:paddingBottom="0dp">
 
-    <include layout="@layout/toolbar" android:id="@+id/toolbar" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/presentation_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="@dimen/activity_vertical_margin"
-        android:layout_below="@id/toolbar"
         />
 
     <TextView
@@ -26,14 +24,7 @@
         android:gravity="center"
         android:textSize="15dp"
         android:text="@string/no_presentations"
-        android:layout_below="@id/toolbar" />
-
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/toolbar_shadow"
-        android:background="@drawable/toolbar_dropshadow"
-        android:layout_below="@id/toolbar"/>
+         />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

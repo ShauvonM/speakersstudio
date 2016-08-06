@@ -1,4 +1,19 @@
 <resources>
+
+    <!-- standard metrics -->
+    <dimen name="spacing_normal">8dp</dimen>
+    <dimen name="spacing_micro">4dp</dimen>
+    <dimen name="padding_normal">16dp</dimen>
+
+    <dimen name="fab_elevation">8dp</dimen>
+    <dimen name="fab_press_translation_z">6dp</dimen>
+    <dimen name="headerbar_elevation">4dp</dimen>
+    <dimen name="max_header_elevation">@dimen/headerbar_elevation</dimen>
+    <dimen name="card_elevation">2dp</dimen>
+
+    <dimen name="fab_button">56dp</dimen>
+    <dimen name="fab_margin">15dp</dimen>
+
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
@@ -22,11 +37,11 @@
     <dimen name="elevation_app_bar">4dp</dimen>
     <dimen name="elevation_nav_drawer">16dp</dimen>
 
-
     <dimen name="toolbar_shadow">10dp</dimen>
 
     <dimen name="default_padding">5dp</dimen>
-    <dimen name="fab_margin">15dp</dimen>
+
+    <dimen name="pres_list_padding">16dp</dimen>
 
     <dimen name="pres_list_card_width">160dp</dimen>
     <dimen name="pres_list_card_padding">10dp</dimen>
@@ -42,6 +57,9 @@
     <dimen name="step_list_item_padding_horizontal">20dp</dimen>
 
     <dimen name="step_list_line_width">1dp</dimen>
+
+
+    <dimen name="prompt_list_header_size_main">32dp</dimen>
 
     <dimen name="prompt_list_line_width">10dp</dimen>
 

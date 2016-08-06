@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ImageView
+        android:id="@+id/nav_drawer_item_icon"
+        style="@style/NavDrawerRowItemIcon"
+        app:srcCompat="@drawable/ic_record_voice_over_white_24dp" />
+
+    <TextView
+        android:id="@+id/nav_drawer_item_title"
+        style="@style/NavDrawerRowText"
+        android:text="@string/presentations" />
+
+</merge>

@@ -1,82 +1,69 @@
 package com.thespeakers_studio.thespeakersstudioapp.activity;
 
-import android.graphics.drawable.Drawable;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.content.ContentValues;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.app.ActivityOptions;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
+import android.view.ViewPropertyAnimator;
+import android.widget.FrameLayout;
+import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.Places;
-import com.google.android.gms.location.places.ui.PlaceAutocomplete;
-
-import com.thespeakers_studio.thespeakersstudioapp.model.Outline;
+import com.thespeakers_studio.thespeakersstudioapp.adapter.PresentationListSpanItemDecoration;
+import com.thespeakers_studio.thespeakersstudioapp.ui.PresentationListViewHolder;
+import com.thespeakers_studio.thespeakersstudioapp.adapter.PresentationListAdapter;
 import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
-import com.thespeakers_studio.thespeakersstudioapp.data.PresentationDataContract;
-import com.thespeakers_studio.thespeakersstudioapp.data.PresentationDbHelper;
-import com.thespeakers_studio.thespeakersstudioapp.fragment.PresentationListFragment;
-import com.thespeakers_studio.thespeakersstudioapp.fragment.PresentationOutlineFragment;
-import com.thespeakers_studio.thespeakersstudioapp.fragment.PresentationPracticeDialog;
-import com.thespeakers_studio.thespeakersstudioapp.fragment.PresentationPracticeFragment;
-import com.thespeakers_studio.thespeakersstudioapp.fragment.PresentationPromptListFragment;
-import com.thespeakers_studio.thespeakersstudioapp.fragment.PresentationStepListFragment;
-import com.thespeakers_studio.thespeakersstudioapp.model.Prompt;
-import com.thespeakers_studio.thespeakersstudioapp.model.PromptAnswer;
 import com.thespeakers_studio.thespeakersstudioapp.R;
-import com.thespeakers_studio.thespeakersstudioapp.view.ScrimInsetsFrameLayout;
-import com.thespeakers_studio.thespeakersstudioapp.view.StepListView;
+import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
+import com.thespeakers_studio.thespeakersstudioapp.utils.AnalyticsHelper;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
-public class PresentationMainActivity extends AppCompatActivity implements
-        PresentationListFragment.PresentationListFragmentHandler,
-        PresentationStepListFragment.OnStepSelectedListener,
-        PresentationPromptListFragment.PromptSaveListener,
-        GoogleApiClient.OnConnectionFailedListener,
-        FragmentManager.OnBackStackChangedListener,
-        PresentationOutlineFragment.OutlineInterface,
-        PresentationPracticeFragment.PracticeInterface {
+import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
+import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.makeLogTag;
 
-    private PresentationDbHelper mDbHelper;
+public class PresentationMainActivity extends BaseActivity
+        implements PresentationListViewHolder.OnPresentationCardClickedListener,
+        View.OnClickListener {
+
+    private static final String TAG = makeLogTag(PresentationMainActivity.class);
+    private static final String SCREEN_LABEL = "Presentation List";
+
     private ArrayList<PresentationData> mPresentations;
-    private String mPresentationId;
 
-    private ActionBarDrawerToggle mDrawerToggle;
-
-    private GoogleApiClient mGoogleApiClient;
-    private LocationSelectedListener mLocationListener;
-
-    private PresentationListFragment mPresentationListFragment;
-    private PresentationStepListFragment mStepListFragment;
-    private PresentationPromptListFragment mPromptListFragment;
-    private PresentationOutlineFragment mOutlineFragment;
+    //private GoogleApiClient mGoogleApiClient;
+    //private LocationSelectedListener mLocationListener;
 
     private Menu mMenu;
-    private String mCurrentFragment;
 
     static final String STATE_PRESENTATION_ID = "presentationId";
     static final String STATE_FRAGMENT = "openFragment";
+
+    private boolean mIsTwoColumn;
+    private StaggeredGridLayoutManager mTwoColumnManager;
+    private LinearLayoutManager mOneColumnManager;
+
+    private RecyclerView mRecyclerView;
+    private PresentationListAdapter mAdapter;
+
+    private boolean mSelectionActive;
+
+    private FloatingActionButton mCreateFab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,739 +71,281 @@ public class PresentationMainActivity extends AppCompatActivity implements
 
         setContentView(R.layout.activity_presentation_main);
 
+        /*
         mGoogleApiClient = new GoogleApiClient
                 .Builder(this)
                 .addApi(Places.PLACE_DETECTION_API)
                 .addApi(Places.GEO_DATA_API)
                 .enableAutoManage(this, this)
                 .build();
+                */
 
-        mDbHelper = new PresentationDbHelper(getApplicationContext());
+        mPresentations = mDbHelper.loadPresentations();
 
-        /*
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        AnalyticsHelper.sendScreenView(SCREEN_LABEL);
 
-        hideBackButton();
-        setTitle();
-        */
+        //TODO: registerHideableHeaderView(findViewById(R.id.headerbar));
 
-        if (savedInstanceState == null) {
-            mPresentationId = null;
-        } else {
-            mPresentationId = savedInstanceState.getString(STATE_PRESENTATION_ID);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        mTwoColumnManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        mOneColumnManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+
+        mIsTwoColumn = SettingsUtils.isPresentationListTwoColumns(this);
+
+        mRecyclerView = (RecyclerView) findViewById(R.id.presentation_list);
+        mRecyclerView.setHasFixedSize(true);
+        mAdapter = new PresentationListAdapter(mPresentations, this);
+
+        toggleView(mIsTwoColumn);
+
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.addItemDecoration(new PresentationListSpanItemDecoration(
+                getResources().getDimensionPixelSize(R.dimen.pres_list_card_padding)));
+
+        mCreateFab = (FloatingActionButton) findViewById(R.id.create_presentation);
+        if (mCreateFab != null) {
+            mCreateFab.setOnClickListener(this);
         }
 
-        setUpDrawer();
-
-        mPresentations = loadPresentations();
-
-        FragmentManager fm = getSupportFragmentManager();
-        fm.addOnBackStackChangedListener(this);
-
-        /*
-        mPresentationListFragment = (PresentationListFragment) fm.findFragmentByTag(PresentationListFragment.TAG);
-        mStepListFragment = (PresentationStepListFragment) fm.findFragmentByTag(PresentationStepListFragment.TAG);
-        mPromptListFragment = (PresentationPromptListFragment) fm.findFragmentByTag(PresentationPromptListFragment.TAG);
-        mOutlineFragment = (PresentationOutlineFragment) fm.findFragmentByTag(PresentationOutlineFragment.TAG);
-
-        FragmentTransaction ft = fm.beginTransaction();
-
-        if (mPresentationListFragment == null) {
-            mPresentationListFragment = new PresentationListFragment();
-            mPresentationListFragment.setPresentationData(mPresentations);
-            ft.add(R.id.fragment_container, mPresentationListFragment, PresentationListFragment.TAG);
-            ft.hide(mPresentationListFragment);
-        }
-
-        if (mStepListFragment == null) {
-            mStepListFragment = new PresentationStepListFragment();
-            ft.add(R.id.fragment_container, mStepListFragment, PresentationStepListFragment.TAG);
-            ft.hide(mStepListFragment);
-        }
-
-        if (mPromptListFragment == null) {
-            mPromptListFragment = new PresentationPromptListFragment();
-            ft.add(R.id.fragment_container, mPromptListFragment, PresentationPromptListFragment.TAG);
-            ft.hide(mPromptListFragment);
-        }
-
-        if (mOutlineFragment == null) {
-            mOutlineFragment = new PresentationOutlineFragment();
-            ft.add(R.id.fragment_container, mOutlineFragment, PresentationOutlineFragment.TAG);
-            ft.hide(mOutlineFragment);
-        }
-
-        ft.commit();
-        */
-
-        if (savedInstanceState == null) {
-            showPresentationList();
-        } else {
-            mCurrentFragment = savedInstanceState.getString(STATE_FRAGMENT);
-        }
-    }
-
-    private void setUpDrawer() {
-        DrawerLayout dl = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-        mDrawerToggle = new ActionBarDrawerToggle
-                (
-                        this,
-                        dl,
-                        R.string.drawer_open,
-                        R.string.drawer_close
-                )
-        {
-            @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
-                super.onDrawerSlide(drawerView, 0);
-            }
-        };
-
-        dl.addDrawerListener(mDrawerToggle);
-        mDrawerToggle.syncState();
-
-        final int probableMinDrawerWidth = Utils.getScreenWidthInPx(this) -
-                Utils.getThemeAttributeDimensionSize(this, android.R.attr.actionBarSize);
-
-        final int maxDrawerWidth = getResources()
-                .getDimensionPixelSize(R.dimen.navigation_drawer_max_width);
-
-        ScrimInsetsFrameLayout layout =
-                (ScrimInsetsFrameLayout) findViewById(R.id.main_activity_navigation_drawer_rootLayout);
-
-        if (layout != null) {
-            layout.getLayoutParams().width = Math.min(probableMinDrawerWidth, maxDrawerWidth);
-        }
-
-        setColorStateList(R.id.navigation_drawer_items_list_icon_presentations);
-        setColorStateList(R.id.navigation_drawer_items_list_icon_timer);
-        setColorStateList(R.id.navigation_drawer_items_list_icon_stories);
-        setColorStateList(R.id.navigation_drawer_items_list_icon_curious);
-        setColorStateList(R.id.navigation_drawer_items_list_icon_settings);
-        setColorStateList(R.id.navigation_drawer_items_list_icon_about);
-
-        findViewById(R.id.navigation_drawer_items_list_linearLayout_presentations).setSelected(true);
-
-        // TODO: set click listeners on nav drawer items here
-    }
-
-    private void setColorStateList(final int iconId) {
-        ImageView icon = (ImageView) findViewById(iconId);
-        final Drawable iconDrawable = DrawableCompat.wrap(icon.getDrawable());
-        DrawableCompat.setTintList
-                (
-                        iconDrawable.mutate(),
-                        ContextCompat.getColorStateList(this, R.color.nav_drawer_icon)
-                );
-        icon.setImageDrawable(iconDrawable);
+        showMessageIfEmpty();
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putString(STATE_PRESENTATION_ID, mPresentationId);
-        outState.putString(STATE_FRAGMENT, mCurrentFragment);
-
-        super.onSaveInstanceState(outState);
+    protected void setLayoutPadding(int actionBarSize) {
+        int pad = (int) getResources().getDimension(R.dimen.pres_list_padding);
+        int fab = (int) getResources().getDimension(R.dimen.fab_button);
+        mRecyclerView.setPadding(pad, pad, pad, pad + fab);
+        ((FrameLayout.LayoutParams) mRecyclerView.getLayoutParams()).setMargins(0, actionBarSize, 0, 0);
     }
 
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+
+        // TODO: enableActionBarAutoHide((CollectionView) findViewById());
+    }
+
+    @Override
+    protected int getSelfNavDrawerItem() {
+        return NAVDRAWER_ITEM_PRESENTATIONS;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        mMenu = menu;
+        MenuInflater inflater = getMenuInflater();
+        int menuId;
+        if (mAdapter != null && mAdapter.getSelectedCount() > 0) {
+            menuId = R.menu.menu_presentation_list_selection;
+        } else {
+            menuId = R.menu.menu_presentation_list;
+        }
+
+        inflater.inflate(menuId, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        switch(id) {
+            case R.id.menu_action_search:
+                Toast.makeText(this, "Search isn't implemented yet", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.menu_action_view:
+                toggleCardViewType();
+                break;
+            case R.id.menu_action_delete:
+                deleteSelectedPresentations();
+                break;
+            case android.R.id.home:
+                if (mSelectionActive) {
+                    onBackPressed();
+                } else {
+                    super.onOptionsItemSelected(item);
+                }
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mSelectionActive) {
+            deselectAll();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public void onPresentationSelected(PresentationData presentation) {
+        LOGD(TAG, "Presentation " + presentation.getId() + " selected");
+
+        Toolbar selectionToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar_selection);
+
+        if (selectionToolbar != null && !mSelectionActive) {
+            setSupportActionBar(selectionToolbar);
+            selectionToolbar.setAlpha(0);
+            selectionToolbar.setVisibility(View.VISIBLE);
+            selectionToolbar.animate().alpha(1).setDuration(SettingsUtils.SELECTION_TOOLBAR_FADE_DURATION);
+        }
+        mSelectionActive = true;
+
+        invalidateOptionsMenu();
+
+        ActionBar bar = getSupportActionBar();
+        if (bar == null) {
+            return;
+        }
+
+        bar.setTitle(String.valueOf(mAdapter.getSelectedCount()));
+        bar.setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    public void onPresentationDeselected(PresentationData presentation) {
+        LOGD(TAG, "Presentation " + presentation.getId() + " deselected");
+
+        ActionBar bar = getSupportActionBar();
+        if (bar == null) {
+            return;
+        }
+
+        if (mAdapter.getSelectedCount() <= 0) {
+            hideSelectionToolbar();
+        } else {
+            bar.setTitle(String.valueOf(mAdapter.getSelectedCount()));
+        }
+    }
+
+    // this method resets the toolbar to the regular one, hiding the selection version
+    private void hideSelectionToolbar() {
+        final Toolbar selectionToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar_selection);
+        Toolbar basicToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+
+        if (selectionToolbar != null && mSelectionActive) {
+            final ViewPropertyAnimator vp = selectionToolbar.animate()
+                    .alpha(0).setDuration(SettingsUtils.SELECTION_TOOLBAR_FADE_DURATION);
+
+            vp.setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    selectionToolbar.setVisibility(View.GONE);
+                    vp.setListener(null);
+                }
+            });
+        }
+        mSelectionActive = false;
+
+        if (basicToolbar != null) {
+            setSupportActionBar(basicToolbar);
+        }
+        invalidateOptionsMenu();
+    }
+
+    // this clears the selection, usually because the user hit "back"
+    private void deselectAll() {
+        hideSelectionToolbar();
+        mAdapter.deselectAll();
+    }
+
+    @Override
+    public boolean onPresentationOpened(PresentationData presentation) {
+        // start the step list activity for the selected presentation
+        LOGD(TAG, "Presentation " + presentation.getId() + " opened");
+        Intent intent = new Intent(getApplicationContext(), EditPresentationActivity.class);
+        intent.putExtra(EditPresentationActivity.INTENT_PRESENTATION_ID, presentation.getId());
+
+        //startActivity(intent);
+        createBackStack(intent);
+
+        /*
+        if (Utils.versionGreaterThan(21)) {
+            TransitionManager.beginDelayedTransition(mRecyclerView, new Explode());
+            for (int cnt = 0; cnt < mRecyclerView.getChildCount(); cnt++) {
+                View view = mRecyclerView.getChildAt(cnt);
+                boolean isVisible = view.getVisibility() == View.VISIBLE;
+                view.setVisibility(isVisible ? View.INVISIBLE : View.VISIBLE);
+            }
+        }
+        */
+
+        return true;
+    }
+
+    @Override
+    public void onPresentationPracticeSelected(PresentationData presentation) {
+        Intent intent = new Intent(getApplicationContext(), PracticeSetupActivity.class);
+        intent.putExtra(EditPresentationActivity.INTENT_PRESENTATION_ID, presentation.getId());
+        startActivityForResult(intent, PracticeSetupActivity.REQUEST_CODE);
+    }
+
+    @Override
+    public void onPresentationDeleteSelected(PresentationData presentation) {
+        deleteSelectedPresentations(presentation);
+    }
+
+    public void toggleView(boolean set) {
+        if (!set) {
+            mAdapter.setIsTwoColumn(false);
+            mRecyclerView.setLayoutManager(mOneColumnManager);
+            mIsTwoColumn = false;
+        } else {
+            mAdapter.setIsTwoColumn(true);
+            mRecyclerView.setLayoutManager(mTwoColumnManager);
+            mIsTwoColumn = true;
+        }
+    }
+    public boolean toggleView() {
+        toggleView(!mIsTwoColumn);
+        return mIsTwoColumn;
+    }
     private void toggleCardViewType() {
-        if (mPresentationListFragment.isVisible()) {
-            boolean twoCol = mPresentationListFragment.toggleView();
+        boolean twoCol = toggleView();
 
-            SharedPreferences.Editor editor = getSharedPreferences("presentation_list", 0).edit();
-            editor.putBoolean("presentation_list_view_type", twoCol);
-            editor.commit();
+        SettingsUtils.setPresentationListTwoColumns(this, twoCol);
 
+        if (mMenu != null) {
             if (twoCol) {
                 mMenu.findItem(R.id.menu_action_view).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_view_agenda_white_24dp));
             } else {
                 mMenu.findItem(R.id.menu_action_view).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_view_quilt_white_24dp));
             }
+        }
+    }
+
+    public void showMessageIfEmpty() {
+        if (mPresentations.size() == 0) {
+            findViewById(R.id.no_presentations).setVisibility(View.VISIBLE);
         } else {
-            return;
+            findViewById(R.id.no_presentations).setVisibility(View.GONE);
         }
     }
 
     @Override
-    public void onBackPressed() {
-        if (mPresentationListFragment.getSelectedCount() > 0) {
-            mPresentationListFragment.deselectAll();
-            deselect();
-        } else {
-            FragmentManager fm = getSupportFragmentManager();
-            if (fm.getBackStackEntryCount() > 0) {
-                fm.popBackStack();
-            } else {
-                super.onBackPressed();
-            }
-        }
-    }
-
-    @Override
-    public void onBackStackChanged() {
-        FragmentManager fm = getSupportFragmentManager();
-        String name;
-        if (fm.getBackStackEntryCount() == 0) {
-            name = PresentationListFragment.TAG;
-        } else {
-            name = fm.getBackStackEntryAt(fm.getBackStackEntryCount()-1).getName();
-        }
-        Utils.hideKeyboard(this, findViewById(R.id.fragment_container));
-        mCurrentFragment = name;
-        //handleCurrentFragment();
-
-        mDrawerToggle.setDrawerIndicatorEnabled(true);
-        mDrawerToggle.syncState();
-    }
-
-    private void handleCurrentFragment() {
-        switch (mCurrentFragment) {
-            case PresentationStepListFragment.TAG:
-                onStepListShown();
-                break;
-            case PresentationPromptListFragment.TAG:
-                onPromptListShown();
-                break;
-            case PresentationOutlineFragment.TAG:
-                onOutlineShown();
-                break;
-            case PresentationPracticeFragment.TAG:
-                onPracticeShown();
-                break;
-            default:
-                onPresentationListShown();
+    public void onClick (View v) {
+        switch(v.getId()) {
+            case R.id.create_presentation:
+                PresentationData newPres = mDbHelper.createNewPresentation();
+                onPresentationOpened(newPres);
                 break;
         }
     }
 
-    private void hideCurrentFragment(FragmentTransaction ft) {
-        switch (mCurrentFragment) {
-            case PresentationStepListFragment.TAG:
-                ft.hide(mStepListFragment);
-                break;
-            case PresentationPromptListFragment.TAG:
-                ft.hide(mPromptListFragment);
-                break;
-            case PresentationOutlineFragment.TAG:
-                ft.hide(mOutlineFragment);
-                break;
-            case PresentationPracticeFragment.TAG:
-            case PresentationPracticeDialog.TAG:
-                // TODO: we never navigate from these, really?
-                break;
-            default:
-                ft.hide(mPresentationListFragment);
-                break;
-        }
-    }
-
-    /*
-    private void showBackButton() {
-        ActionBar bar = getSupportActionBar();
-        if (bar != null) {
-            bar.setDisplayShowHomeEnabled(false);
-            bar.setDisplayHomeAsUpEnabled(true);
-        }
-    }
-    private void hideBackButton() {
-        ActionBar bar = getSupportActionBar();
-        if (bar != null) {
-            bar.setDisplayHomeAsUpEnabled(false);
-            bar.setDisplayShowHomeEnabled(true);
-        }
-    }
-    */
-
-    /*
-    public void showMenuGroup(int id) {
-        if (mMenu == null) {
-            return;
-        }
-        mMenu.setGroupVisible(R.id.menu_group_main, false);
-        mMenu.setGroupVisible(R.id.menu_group_presentation, false);
-        mMenu.setGroupVisible(R.id.menu_group_selection, false);
-        mMenu.setGroupVisible(R.id.menu_group_outline, false);
-        mMenu.setGroupVisible(R.id.menu_group_practice, false);
-
-        mMenu.setGroupVisible(id, true);
-    }
-    */
-
-    public void onPresentationListShown() {
-        mCurrentFragment = PresentationListFragment.TAG;
-        mPresentationListFragment.refresh();
-        mPresentationId = null;
-        //setTitle();
-        //hideBackButton();
-
-        // reset the progress indication on the step list
-        mStepListFragment.resetProgress();
-
-        //showMenuGroup(R.id.menu_group_main);
-    }
-
-    public void onStepListShown() {
-        // we are on the step list
-        mStepListFragment.animateProgressHeight();
-        mPromptListFragment.clearStep();
-        //setTitle();
-        //showBackButton();
-        //showMenuGroup(R.id.menu_group_presentation);
-    }
-
-    public void onPromptListShown() {
-        //setTitle();
-        //showBackButton();
-        //showMenuGroup(R.id.menu_group_presentation);
-    }
-
-    public void onOutlineShown() {
-        //setTitle();
-        //showBackButton();
-        //showMenuGroup(R.id.menu_group_outline);
-    }
-
-    public void onPracticeShown() {
-        //setTitle();
-        //showBackButton();
-        //showMenuGroup(R.id.menu_group_practice);
-    }
-
-    public PresentationData getSelectedPresentation() {
-        if (mPresentations == null) {
-            return null;
-        }
-        for (PresentationData pres : mPresentations) {
-            if (pres.getId().equals(mPresentationId)) {
-                return pres;
-            }
-        }
-        return null;
-    }
-
-    /*
-    public void setTitle() {
-        PresentationData pres = getSelectedPresentation();
-        ActionBar bar = getSupportActionBar();
-        if (bar == null) {
-            return;
-        }
-
-        if (mCurrentFragment != null && mCurrentFragment.equals(PresentationOutlineFragment.TAG)) {
-            bar.setTitle(R.string.outline);
-        } else if (mCurrentFragment != null
-                && mCurrentFragment.equals(PresentationPracticeFragment.TAG)) {
-            bar.setTitle(R.string.practice_presentation);
-        } else {
-            if (pres != null) {
-                bar.setTitle(pres.getTopic());
-            } else {
-                bar.setTitle(R.string.saved_presentations);
-            }
-        }
-    }
-    */
-
-    public GoogleApiClient getGoogleApi() {
-        return mGoogleApiClient;
-    }
-
-    private void showPresentationList() {
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        PresentationListFragment fragment = new PresentationListFragment();
-
-        fragment.setPresentationData(mPresentations);
-        ft.add(R.id.fragment_container, fragment, PresentationListFragment.TAG);
-
-        ft.show(mPresentationListFragment);
-        ft.addToBackStack(PresentationListFragment.TAG);
-        ft.commit();
-
-        //onPresentationListShown();
-    }
-
-    @Override
-    public void onOpenPresentation(String id) {
-        Log.d("SS", "Presentation " + id + " opened");
-        mPresentationId = id;
-        mStepListFragment.setPresentation(getSelectedPresentation());
-        mPromptListFragment.setPresentation(getSelectedPresentation());
-        showStepList();
-    }
-
-    @Override
-    public void onPracticePresentation(String id) {
-        mPresentationId = id;
-        mStepListFragment.setPresentation(getSelectedPresentation());
-        mPromptListFragment.setPresentation(getSelectedPresentation());
-        onPracticeClicked(Outline.fromPresentation(this, getSelectedPresentation()));
-    }
-
-    @Override
-    public void onDeletePresentation(String id) {
-        deleteSelectedPresentations(id);
-    }
-
-    @Override
-    public void onSelectPresentation(String presentationId) {
-        /*
-        Log.d("SS", "Presentation " + presentationId + " selected");
-        ActionBar bar = getSupportActionBar();
-        if (bar == null) {
-            return;
-        }
-        bar.setTitle(String.valueOf(mPresentationListFragment.getSelectedCount()));
-        bar.setDisplayHomeAsUpEnabled(true);
-        bar.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.colorAccent)));
-
-        //showMenuGroup(R.id.menu_group_selection);
-        */
-        // TODO: how does selection work, then?
-    }
-
-    @Override
-    public void onDeselectPresentation(String presentationId) {
-        /*
-        Log.d("SS", "Presentation " + presentationId + " deselected");
-
-        ActionBar bar = getSupportActionBar();
-        if (bar == null) {
-            return;
-        }
-        bar.setTitle(String.valueOf(mPresentationListFragment.getSelectedCount()));
-
-        if (mPresentationListFragment.getSelectedCount() <= 0) {
-            deselect();
-        }
-        */
-        // TODO: how does selection work, then?
-    }
-
-    private void deselect() {
-        /*
-        ActionBar bar = getSupportActionBar();
-        if (bar == null) {
-            return;
-        }
-        setTitle();
-        bar.setDisplayHomeAsUpEnabled(false);
-        showMenuGroup(R.id.menu_group_main);
-        bar.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.colorPrimary)));
-        */
-        // TODO: how does selection work, then?
-    }
-
-    @Override
-    public void onCreateNewPresentation() {
-        PresentationData newPres = createNewPresentation();
-        mPresentations.add(newPres);
-        mPresentationId = newPres.getId();
-        mStepListFragment.setPresentation(newPres);
-        mPromptListFragment.setPresentation(newPres);
-        showStepList();
-    }
-
-    private void showStepList() {
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
-
-        //ft.hide(mPresentationListFragment);
-        hideCurrentFragment(ft);
-        ft.show(mStepListFragment);
-
-        ft.addToBackStack(PresentationStepListFragment.TAG);
-        ft.commit();
-    }
-
-    public void onStepSelected(int step) {
-        Log.d("SS", "Step " + step + " selected");
-        if (step < 5) {
-            showStep(step);
-        } else {
-            showOutline();
-        }
-    }
-
-    private void showStep(int step) {
-        mPromptListFragment.setStep(step);
-
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
-
-        //ft.hide(mStepListFragment);
-        hideCurrentFragment(ft);
-        ft.show(mPromptListFragment);
-
-        ft.addToBackStack(PresentationPromptListFragment.TAG);
-        ft.commit();
-    }
-
-    private void showOutline() {
-        mOutlineFragment.setOutline(Outline.fromPresentation(this, getSelectedPresentation()));
-
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
-
-        //ft.hide(mStepListFragment);
-        hideCurrentFragment(ft);
-        ft.show(mOutlineFragment);
-
-        mOutlineFragment.render();
-
-        ft.addToBackStack(PresentationOutlineFragment.TAG);
-        ft.commit();
-    }
-
-    @Override
-    public void onPracticeClicked(Outline outline) {
-        PresentationPracticeFragment fragment = new PresentationPracticeFragment();
-        fragment.setOutline(outline);
-
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
-        //ft.hide(mOutlineFragment);
-        hideCurrentFragment(ft);
-        ft.add(R.id.fragment_container, fragment, PresentationPracticeFragment.TAG);
-        ft.show(fragment);
-
-        ft.addToBackStack(PresentationPracticeFragment.TAG);
-        ft.commit();
-    }
-
-    @Override
-    public void onStartPractice(Outline outline, boolean delay, boolean displayTimer, boolean showWarning, boolean track, boolean vibrate, boolean recordVideo, boolean disablePhone) {
-        PresentationPracticeDialog dialog = new PresentationPracticeDialog();
-        dialog.setup(outline, delay, displayTimer, showWarning, track, vibrate);
-        /*
-        dialog.setInterface(new PresentationPracticeDialog.PresentationPracticeDialogInterface() {
-            @Override
-            public void onDialogDismissed() {
-                //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-            }
-        });
-        */
-
-        dialog.show(getSupportFragmentManager(), PresentationPracticeDialog.TAG);
-        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-    }
-
-    @Override
-    public void onPromptSave(Prompt prompt) {
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        String id;
-        ContentValues values = new ContentValues();
-
-        String datetime = Utils.getDateTimeStamp();
-
-        ArrayList<PromptAnswer> answers = prompt.getAnswer();
-
-        for (PromptAnswer answer : answers) {
-            //
-            values.put(PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_KEY, answer.getKey());
-            values.put(PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_VALUE, answer.getValue());
-            values.put(PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_DATE_MODIFIED, datetime);
-            values.put(PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_LINK_ID, answer.getAnswerLinkId());
-
-            answer.setModifiedDate(datetime);
-
-            if (answer.getId().isEmpty()) {
-                // if this is a new answer, we will add it to the database
-                id = java.util.UUID.randomUUID().toString();
-
-                values.put(PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_ID, id);
-                values.put(PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_PRESENTATION_ID, mPresentationId);
-                values.put(PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_PROMPT_ID, prompt.getId());
-                values.put(PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_DATE_CREATED, datetime);
-
-                // TODO: created by and modified by fields
-
-                db.insert(PresentationDataContract.PresentationAnswerEntry.TABLE_NAME, null, values);
-
-                // update the local record, so we know how to handle it from now on
-                answer.setId(id);
-                answer.setCreatedDate(datetime);
-            } else {
-                // if this is an existing answer, we'll update it
-                id = answer.getId();
-
-                if (answer.getValue().isEmpty()) {
-                    db.delete(PresentationDataContract.PresentationAnswerEntry.TABLE_NAME,
-                            PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_ID + " = ?",
-                            new String[]{id});
-                } else {
-                    db.update(PresentationDataContract.PresentationAnswerEntry.TABLE_NAME,
-                            values,
-                            PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_ID + " = ?",
-                            new String[]{id});
-                }
-            }
-        }
-
-        // update the modified date property on the presentation
-        ContentValues presUpdate = new ContentValues();
-        presUpdate.put(PresentationDataContract.PresentationEntry.COLUMN_NAME_DATE_MODIFIED, datetime);
-        db.update(PresentationDataContract.PresentationEntry.TABLE_NAME,
-                presUpdate,
-                PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID + " = ?",
-                new String[]{mPresentationId});
-        getSelectedPresentation().setModifiedDate(datetime);
-
-        db.close();
-
-        /*
-        if (prompt.getId() == PresentationData.PRESENTATION_TOPIC) {
-            setTitle();
-        }
-        */
-    }
-
-    @Override
-    public void onNextStep(int step) {
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
-
-        final int nextStep = step + 1;
-        if (nextStep < 5) {
-            mStepListFragment.setOnProgressAnimationListener(new StepListView.OnProgressAnimationListener() {
-                @Override
-                public void onProgressAnimationFinished() {
-                    showStep(nextStep);
-                    mStepListFragment.clearOnProgressAnimationListener();
-                }
-            });
-        }
-
-        //ft.hide(mPromptListFragment);
-        hideCurrentFragment(ft);
-        ft.show(mStepListFragment);
-
-        ft.addToBackStack(PresentationStepListFragment.TAG);
-
-        ft.commit();
-    }
-
-    private ArrayList<PresentationData> loadPresentations() {
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        ArrayList<PresentationData> presies = new ArrayList<>();
-
-        // pick what columns to load
-        String[] presProjection = {
-                PresentationDataContract.PresentationEntry._ID,
-                PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID,
-                PresentationDataContract.PresentationEntry.COLUMN_NAME_DATE_MODIFIED
-        };
-        String[] ansProjection = {
-                PresentationDataContract.PresentationAnswerEntry._ID,
-                PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_PROMPT_ID,
-                PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_PRESENTATION_ID,
-                PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_KEY,
-                PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_VALUE,
-                PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_ID,
-                PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_LINK_ID,
-                PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_DATE_CREATED,
-                PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_DATE_MODIFIED,
-                PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_CREATED_BY,
-                PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_MODIFIED_BY
-        };
-
-        // set up the clause to use on the answer db
-        String answerSelection = PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_PRESENTATION_ID + "=?";
-
-        // set up sort clause
-        String sortOrder = PresentationDataContract.PresentationEntry.COLUMN_NAME_DATE_MODIFIED + " DESC";
-
-        // fetch the presentation
-        Cursor presCursor = db.query(PresentationDataContract.PresentationEntry.TABLE_NAME, presProjection, null, null, null, null, sortOrder);
-
-        presCursor.moveToFirst();
-        try {
-            while (!presCursor.isAfterLast()) {
-                String presentationId = presCursor.getString(
-                        presCursor.getColumnIndexOrThrow(PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID)
-                );
-                String modifiedDate = presCursor.getString(
-                        presCursor.getColumnIndexOrThrow(PresentationDataContract.PresentationEntry.COLUMN_NAME_DATE_MODIFIED)
-                );
-
-                PresentationData pres = new PresentationData(getApplicationContext(), presentationId, modifiedDate);
-
-                // set up the answer clause
-                String[] answerSelectionValues = new String[] { String.valueOf(presentationId) };
-
-                // fetch the answers
-                Cursor answerCursor = db.query(PresentationDataContract.PresentationAnswerEntry.TABLE_NAME, ansProjection, answerSelection, answerSelectionValues, null, null, PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_KEY, null);
-
-                pres.setAnswers(answerCursor);
-
-                presies.add(pres);
-
-                presCursor.moveToNext();
-            }
-        } finally {
-            presCursor.close();
-        }
-        return presies;
-    }
-
-    private PresentationData createNewPresentation() {
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
-
-        String id = UUID.randomUUID().toString();
-
-        String datetime = Utils.getDateTimeStamp();
-
-        int color = R.color.colorPrimary;
-
-        ContentValues values = new ContentValues();
-        values.put(PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID, id);
-        values.put(PresentationDataContract.PresentationEntry.COLUMN_NAME_DATE_CREATED, datetime);
-        values.put(PresentationDataContract.PresentationEntry.COLUMN_NAME_DATE_MODIFIED, datetime);
-        values.put(PresentationDataContract.PresentationEntry.COLUMN_NAME_COLOR, color); // TODO: custom colors
-
-        db.insert(PresentationDataContract.PresentationEntry.TABLE_NAME, null, values);
-        return new PresentationData(getApplicationContext(), id, datetime);
-    }
-
-    private void resetPresentation() {
-        if (mPresentationId == null) {
-            return;
-        }
-
-        new AlertDialog.Builder(this)
-                .setMessage(getString(R.string.confirm_reset_message))
-                .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        doResetPresentation();
-                    }
-                })
-                .setNegativeButton(getString(R.string.no), null)
-                .show();
-    }
-
-    private void doResetPresentation() {
-        if (mPresentationId == null) {
-            return;
-        }
-
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        db.delete(PresentationDataContract.PresentationAnswerEntry.TABLE_NAME, PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_PRESENTATION_ID + "=?", new String[]{mPresentationId});
-        db.close();
-
-        getSelectedPresentation().resetAnswers();
-
-        showStepList();
-    }
-
-    private void deleteSelectedPresentations(final String id) {
+    private void deleteSelectedPresentations(final PresentationData pres) {
         int count;
-        if (id == null) {
-            count = mPresentationListFragment.getSelectedCount();
+        if (pres == null) {
+            count = mAdapter.getSelectedCount();
             if (count == 0) {
                 return;
             }
@@ -830,7 +359,7 @@ public class PresentationMainActivity extends AppCompatActivity implements
                 .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        doDeleteSelectedPresentations(id);
+                        doDeleteSelectedPresentations(pres);
                     }
                 })
                 .setNegativeButton(getString(R.string.no), null)
@@ -839,62 +368,17 @@ public class PresentationMainActivity extends AppCompatActivity implements
     private void deleteSelectedPresentations() {
         deleteSelectedPresentations(null);
     }
-
-    private void doDeleteSelectedPresentations(String id) {
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        int[] remove = new int[id == null ? mPresentationListFragment.getSelectedCount() : 1];
-        int ri = 0;
-        int pi = 0;
-
-        for (PresentationData pres : mPresentations) {
-            if (pres.getIsSelected() || pres.getId().equals(id)) {
-                String thisid = pres.getId();
-                db.delete(PresentationDataContract.PresentationAnswerEntry.TABLE_NAME, PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_PRESENTATION_ID + "=?", new String[]{thisid});
-                db.delete(PresentationDataContract.PresentationEntry.TABLE_NAME, PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID + "=?", new String[]{thisid});
-                remove[ri] = pi;
-                ri++;
-            }
-            pi++;
-        }
-        db.close();
-
-        for(int i : remove) {
-            mPresentations.remove(i);
+    private void doDeleteSelectedPresentations(PresentationData presentation) {
+        if (presentation == null) {
+            mDbHelper.deletePresentation(mAdapter.getSelectedPresentations());
+        } else {
+            mDbHelper.deletePresentation(presentation);
         }
 
-        mPresentationListFragment.deselectAll();
-        deselect();
+        mPresentations = mDbHelper.loadPresentations();
+        mAdapter.setPresentations(mPresentations);
+
+        hideSelectionToolbar();
     }
 
-    public void setOnLocationSelectedListener (LocationSelectedListener l) {
-        mLocationListener = l;
-    }
-
-    @Override
-    protected void onActivityResult (int requestCode, int resultCode, Intent data) {
-        if (requestCode == PresentationData.LOCATION_INTENT_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                Place place = PlaceAutocomplete.getPlace(this, data);
-                if (mLocationListener != null) {
-                    mLocationListener.onLocationSelected(place);
-                }
-                Log.i("SS", "Place: " + place.getName());
-            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
-                Status status = PlaceAutocomplete.getStatus(this, data);
-                // TODO: handle this
-                Log.i("SS", status.getStatusMessage());
-            } else if (resultCode == RESULT_CANCELED) {
-                // the user canceled the thing
-            }
-        }
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        // TODO: handle google api connection errors
-    }
-
-    public interface LocationSelectedListener {
-        public void onLocationSelected(Place p);
-    }
 }

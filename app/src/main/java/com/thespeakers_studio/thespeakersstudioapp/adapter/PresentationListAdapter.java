@@ -5,12 +5,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.thespeakers_studio.thespeakersstudioapp.PresentationListViewHolder;
 import com.thespeakers_studio.thespeakersstudioapp.R;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
+import com.thespeakers_studio.thespeakersstudioapp.ui.PresentationListViewHolder;
 
 /**
  * Created by smcgi_000 on 7/1/2016.
@@ -62,7 +63,27 @@ public class PresentationListAdapter extends RecyclerView.Adapter<PresentationLi
         return mSelectionCount;
     }
     public void deselectAll() {
+        for (PresentationData pres : mPresies) {
+            pres.deselect();
+        }
         mSelectionCount = 0;
+        notifyDataSetChanged();
+    }
+
+    public ArrayList<PresentationData> getSelectedPresentations () {
+        ArrayList<PresentationData> presies = new ArrayList<>();
+        for (PresentationData pres : mPresies) {
+            if (pres.getIsSelected()) {
+                presies.add(pres);
+            }
+        }
+        return presies;
+    }
+
+    public void setPresentations(ArrayList<PresentationData> presentations) {
+        mPresies = presentations;
+        mSelectionCount = 0;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -71,33 +92,35 @@ public class PresentationListAdapter extends RecyclerView.Adapter<PresentationLi
     }
 
     @Override
-    public void onPresentationSelected(String presentationId) {
+    public void onPresentationSelected(PresentationData presentation) {
         mSelectionCount++;
-        mHandler.onPresentationSelected(presentationId);
+        presentation.select();
+        mHandler.onPresentationSelected(presentation);
     }
 
     @Override
-    public void onPresentationDeselected(String presentationId) {
+    public void onPresentationDeselected(PresentationData presentation) {
         mSelectionCount--;
-        mHandler.onPresentationDeselected(presentationId);
+        presentation.deselect();
+        mHandler.onPresentationDeselected(presentation);
     }
 
     @Override
-    public boolean onPresentationOpened(String presentationId) {
+    public boolean onPresentationOpened(PresentationData presentation) {
         if (mSelectionCount == 0) {
-            return mHandler.onPresentationOpened(presentationId);
+            return mHandler.onPresentationOpened(presentation);
         } else {
             return false;
         }
     }
 
     @Override
-    public void onPresentationPracticeSelected(String presentationId) {
-        mHandler.onPresentationPracticeSelected(presentationId);
+    public void onPresentationPracticeSelected(PresentationData presentation) {
+        mHandler.onPresentationPracticeSelected(presentation);
     }
 
     @Override
-    public void onPresentationDeleteSelected(String presentationId) {
-        mHandler.onPresentationDeleteSelected(presentationId);
+    public void onPresentationDeleteSelected(PresentationData presentation) {
+        mHandler.onPresentationDeleteSelected(presentation);
     }
 }

@@ -11,7 +11,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.thespeakers_studio.thespeakersstudioapp.model.Outline;
-import com.thespeakers_studio.thespeakersstudioapp.OutlineHelper;
+import com.thespeakers_studio.thespeakersstudioapp.utils.OutlineHelper;
 import com.thespeakers_studio.thespeakersstudioapp.model.OutlineItem;
 import com.thespeakers_studio.thespeakersstudioapp.R;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;

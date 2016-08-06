@@ -5,12 +5,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,11 +17,10 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.thespeakers_studio.thespeakersstudioapp.activity.PresentationMainActivity;
 import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
 import com.thespeakers_studio.thespeakersstudioapp.adapter.PresentationListAdapter;
-import com.thespeakers_studio.thespeakersstudioapp.PresentationListSpanItemDecoration;
-import com.thespeakers_studio.thespeakersstudioapp.PresentationListViewHolder;
+import com.thespeakers_studio.thespeakersstudioapp.adapter.PresentationListSpanItemDecoration;
+import com.thespeakers_studio.thespeakersstudioapp.ui.PresentationListViewHolder;
 import com.thespeakers_studio.thespeakersstudioapp.R;
 
 import java.util.ArrayList;
@@ -50,10 +46,22 @@ public class PresentationListFragment extends Fragment implements
     private StaggeredGridLayoutManager mTwoColumnManager;
     private LinearLayoutManager mOneColumnManager;
 
+    public static PresentationListFragment newInstance(ArrayList<PresentationData> data) {
+        PresentationListFragment fragment = new PresentationListFragment();
+        /*
+        Bundle args = new Bundle();
+        args.putString(ARG_PARAM1, param1);
+        args.putString(ARG_PARAM2, param2);
+        fragment.setArguments(args);
+        */
+        fragment.setPresentationData(data);
+        return fragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         setRetainInstance(true);
-        setHasOptionsMenu(true);
+        //setHasOptionsMenu(true);
         super.onCreate(savedInstanceState);
     }
 
@@ -74,8 +82,12 @@ public class PresentationListFragment extends Fragment implements
         mView = (RelativeLayout) inflater.inflate(R.layout.fragment_presentation_list, container, false);
 
         // ActionBar
-        Toolbar toolbar = (Toolbar) mView.findViewById(R.id.toolbar);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        //Toolbar toolbar = (Toolbar) mView.findViewById(R.id.toolbar);
+        //((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        /*
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setHomeButtonEnabled(true);
+        */
 
         mTwoColumnManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         mOneColumnManager = new LinearLayoutManager(container.getContext(),
@@ -155,6 +167,20 @@ public class PresentationListFragment extends Fragment implements
         return true;
     }
 
+    private void toggleCardViewType() {
+        boolean twoCol = toggleView();
+
+        SharedPreferences.Editor editor = getActivity().getSharedPreferences("presentation_list", 0).edit();
+        editor.putBoolean("presentation_list_view_type", twoCol);
+        editor.apply();
+
+        if (twoCol) {
+            mMenu.findItem(R.id.menu_action_view).setIcon(ContextCompat.getDrawable(getContext(), R.drawable.ic_view_agenda_white_24dp));
+        } else {
+            mMenu.findItem(R.id.menu_action_view).setIcon(ContextCompat.getDrawable(getContext(), R.drawable.ic_view_quilt_white_24dp));
+        }
+    }
+
     public void toggleView(boolean set) {
         RecyclerView list = (RecyclerView) mView.findViewById(R.id.presentation_list);
         if (!set) {
@@ -199,6 +225,9 @@ public class PresentationListFragment extends Fragment implements
         return mPresentationList;
     }
 
+
+
+    //////////////////////////////////////////////////////
     public void deselectAll() {
         mAdapter.deselectAll();
         for (PresentationData pres : mPresentationList) {
@@ -212,28 +241,28 @@ public class PresentationListFragment extends Fragment implements
     }
 
     @Override
-    public void onPresentationSelected(String presentationId) {
+    public void onPresentationSelected(PresentationData presentationId) {
         mListener.onSelectPresentation(presentationId);
     }
 
     @Override
-    public void onPresentationDeselected(String presentationId) {
+    public void onPresentationDeselected(PresentationData presentationId) {
         mListener.onDeselectPresentation(presentationId);
     }
 
     @Override
-    public boolean onPresentationOpened(String presentationId) {
+    public boolean onPresentationOpened(PresentationData presentationId) {
         mListener.onOpenPresentation(presentationId);
         return true;
     }
 
     @Override
-    public void onPresentationPracticeSelected(String presentationId) {
+    public void onPresentationPracticeSelected(PresentationData presentationId) {
         mListener.onPracticePresentation(presentationId);
     }
 
     @Override
-    public void onPresentationDeleteSelected(String presentationId) {
+    public void onPresentationDeleteSelected(PresentationData presentationId) {
         mListener.onDeletePresentation(presentationId);
     }
 
@@ -246,10 +275,10 @@ public class PresentationListFragment extends Fragment implements
 
     public interface PresentationListFragmentHandler {
         public void onCreateNewPresentation();
-        public void onOpenPresentation(String presentationId);
-        public void onSelectPresentation(String presentationId);
-        public void onDeselectPresentation(String presentationId);
-        public void onPracticePresentation(String presentationId);
-        public void onDeletePresentation(String presentationId);
+        public void onOpenPresentation(PresentationData presentationId);
+        public void onSelectPresentation(PresentationData presentationId);
+        public void onDeselectPresentation(PresentationData presentationId);
+        public void onPracticePresentation(PresentationData presentationId);
+        public void onDeletePresentation(PresentationData presentationId);
     }
 }

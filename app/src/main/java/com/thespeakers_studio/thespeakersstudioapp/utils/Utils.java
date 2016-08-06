@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Paint;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.text.format.DateUtils;
@@ -30,68 +31,12 @@ import com.thespeakers_studio.thespeakersstudioapp.model.PromptAnswer;
  */
 public class Utils {
 
-    public static final int PROMPT_PROGRESS_ANIMATION_DURATION = 300;
-    public static final int FRAMES_PER_SECOND = 60;
+    public static final int REQUEST_CODE_PROMPT_LIST = 1;
+    public static final int REQUEST_CODE_OUTLINE = 2;
+    public static final int REQUEST_CODE_LOCATION_SELECTED = 3;
 
-    public static float dpToPixel(float dp, Context context) {
-        Resources resources = context.getResources();
-        DisplayMetrics metrics = resources.getDisplayMetrics();
-        return dp * ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
-    }
-
-    public static int getShadowY(int level, Context context) {
-        int shadowY = -1;
-
-        switch(level) {
-            case 1:
-                shadowY = 1;
-                break;
-            case 2:
-                shadowY = 3;
-                break;
-            case 3:
-                shadowY = 10;
-                break;
-            case 4:
-                shadowY = 14;
-                break;
-            case 5:
-                shadowY = 19;
-                break;
-        }
-        return (int) dpToPixel(shadowY, context);
-    }
-
-    public static int getShadowBlur(int level, Context context) {
-        int shadowBlur = 1;
-
-        switch(level) {
-            case 1:
-                shadowBlur = 3;
-                break;
-            case 2:
-                shadowBlur = 6;
-                break;
-            case 3:
-                shadowBlur = 20;
-                break;
-            case 4:
-                shadowBlur = 28;
-                break;
-            case 5:
-                shadowBlur = 38;
-                break;
-        }
-        return (int) dpToPixel(shadowBlur, context);
-    }
-
-    public static Paint setShadowLayer(Paint paint, int level, Context context) {
-        int shadowY = getShadowY(level, context);
-        int shadowBlur = getShadowBlur(level, context);
-
-        paint.setShadowLayer(shadowBlur, 0, shadowY, ContextCompat.getColor(context, R.color.shadow));
-
-        return paint;
+    public static boolean versionGreaterThan(int version) {
+        return Build.VERSION.SDK_INT >= version;
     }
 
     public static void showKeyboard(Context context, View container) {
@@ -263,5 +208,35 @@ public class Utils {
                 typedArray.recycle();
             }
         }
+    }
+
+    private static final int[] RES_IDS_ACTION_BAR_SIZE = { R.attr.actionBarSize };
+
+    public static int calculateActionBarSize(Context context) {
+        if (context == null) {
+            return 0;
+        }
+
+        Resources.Theme curTheme = context.getTheme();
+        if (curTheme == null) {
+            return 0;
+        }
+
+        TypedArray att = curTheme.obtainStyledAttributes(RES_IDS_ACTION_BAR_SIZE);
+        if (att == null) {
+            return 0;
+        }
+
+        float size = att.getDimension(0, 0);
+        att.recycle();
+        return (int) size;
+    }
+
+    public static float getProgress(int value, int min, int max) {
+        if (min == max) {
+            throw new IllegalArgumentException("Max (" + max + ") cannot equal min (" + min + ")");
+        }
+
+        return (value - min) / (float) (max - min);
     }
 }
