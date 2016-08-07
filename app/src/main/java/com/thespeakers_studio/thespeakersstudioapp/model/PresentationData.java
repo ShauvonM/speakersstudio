@@ -34,8 +34,6 @@ public class PresentationData {
     // header and next are for the com.thespeakers_studio.thespeakersstudioapp.view to display cards for the step name and the next button
     public static final int NONE = -1, HEADER = 0, NEXT = 1, TEXT = 2, DATETIME = 3, LOCATION = 4, CONTACTINFO = 5, PARAGRAPH = 6, DURATION = 7, LIST = 8;
 
-    public static final int LOCATION_INTENT_REQUEST_CODE = 1;
-
     public PresentationData(Context context, String id, String modifiedDate) {
         this.mContext = context;
         this.mPresentationId = id;
@@ -67,7 +65,7 @@ public class PresentationData {
 
         mPrompts.add(new Prompt(15, 3, 1, PARAGRAPH,  "What do you want to say to the audience?", 140));
         mPrompts.add(new Prompt(16, 3, 2, PARAGRAPH,  "Why?", 250));
-        mPrompts.add(new Prompt(17, 3, 3, LIST,       "What are your topics?", 50));
+        mPrompts.add(new Prompt(17, 3, 3, LIST,       "What things do you want to talk about (we'll get to why later)?", 50));
 
         mPrompts.add(new Prompt(18, 4, 1, PARAGRAPH,  "What is your first sentence?", 140));
         mPrompts.add(new Prompt(19, 4, 2, PARAGRAPH,  "What is your last sentence?", 140));
@@ -186,7 +184,7 @@ public class PresentationData {
         // add the header
         selection.add(getPromptById(PRESENTATION_HEADER));
 
-        int orderPadding = -1;
+        int orderPadding = 0;
         boolean skipRedundant = false;
         for (Prompt p : mPrompts) {
             if (p.getStep() == step && p.getId() != PRESENTATION_HEADER) {

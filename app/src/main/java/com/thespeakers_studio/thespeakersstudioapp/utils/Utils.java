@@ -35,6 +35,8 @@ public class Utils {
     public static final int REQUEST_CODE_OUTLINE = 2;
     public static final int REQUEST_CODE_LOCATION_SELECTED = 3;
 
+    public static final String INTENT_PRESENTATION_ID = "presentation_id";
+
     public static boolean versionGreaterThan(int version) {
         return Build.VERSION.SDK_INT >= version;
     }

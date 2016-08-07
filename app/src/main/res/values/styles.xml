@@ -215,6 +215,10 @@
         <item name="android:layout_marginLeft">0dp</item>
     </style>
 
+    <style name="PresentationListCardModified.OneColumn">
+        <item name="android:layout_toRightOf">@id/presentation_progress</item>
+    </style>
+
 
     <style name="StepListView">
         <item name="android:layout_width">fill_parent</item>

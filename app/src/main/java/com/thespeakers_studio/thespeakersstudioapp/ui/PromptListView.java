@@ -174,9 +174,9 @@ public class PromptListView extends LinearLayout implements ListItemView.ListIte
             // the first item should just show progress
             view.animateLineTop();
         } else if (thisOrder > 1) {
-            if (((ListItemView) getChildAt(thisOrder - 1)).isFinishShown()) {
+            if (((ListItemView) getChildAt(thisOrder - 2)).isFinishShown()) {
                 view.animateLineTop();
-                if (thisOrder == mPromptData.size() - 1) {
+                if (thisOrder == mPromptData.size() - 2) {
                     // if it's the last one, we can animate it AND the next button!
                     // thisOrder is not 0 based, so thisOrder would point to the next view
                     ((ListItemView) getChildAt(thisOrder)).animateLineTop(SettingsUtils.PROMPT_PROGRESS_ANIMATION_DURATION);

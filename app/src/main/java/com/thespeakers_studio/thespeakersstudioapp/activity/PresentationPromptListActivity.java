@@ -15,6 +15,7 @@ import com.thespeakers_studio.thespeakersstudioapp.ui.PromptListHeaderView;
 import com.thespeakers_studio.thespeakersstudioapp.ui.SmartScrollView;
 import com.thespeakers_studio.thespeakersstudioapp.ui.PromptListView;
 import com.thespeakers_studio.thespeakersstudioapp.utils.AnalyticsHelper;
+import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 import java.util.ArrayList;
 
@@ -62,7 +63,7 @@ public class PresentationPromptListActivity extends BaseActivity implements
 
         //TODO: registerHideableHeaderView(findViewById(R.id.headerbar));
 
-        mPresentationId = getIntent().getStringExtra(EditPresentationActivity.INTENT_PRESENTATION_ID);
+        mPresentationId = getIntent().getStringExtra(Utils.INTENT_PRESENTATION_ID);
         mPresentation = mDbHelper.loadPresentationById(mPresentationId);
         mStep = getIntent().getIntExtra(INTENT_STEP, 1);
 
@@ -110,7 +111,7 @@ public class PresentationPromptListActivity extends BaseActivity implements
     public void onNextStep(int step) {
         Intent intent = new Intent();
         intent.putExtra(INTENT_STEP, step + 1);
-        intent.putExtra(EditPresentationActivity.INTENT_PRESENTATION_ID, mPresentationId);
+        intent.putExtra(Utils.INTENT_PRESENTATION_ID, mPresentationId);
         // TODO: add progress amount?
         setResult(step + 1, intent);
         finish();

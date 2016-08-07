@@ -1,5 +1,6 @@
 package com.thespeakers_studio.thespeakersstudioapp.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -53,7 +54,7 @@ public class OutlineActivity extends BaseActivity implements
 
         AnalyticsHelper.sendScreenView(SCREEN_LABEL);
 
-        setPresentationId(getIntent().getStringExtra(EditPresentationActivity.INTENT_PRESENTATION_ID));
+        setPresentationId(getIntent().getStringExtra(Utils.INTENT_PRESENTATION_ID));
 
         mContentWrapper = (LinearLayout) findViewById(R.id.content_wrapper);
         mOutlineList = (LinearLayout) findViewById(R.id.outline_list);
@@ -131,7 +132,7 @@ public class OutlineActivity extends BaseActivity implements
         switch (v.getId()) {
             case R.id.fab_practice:
                 Intent intent = new Intent(getApplicationContext(), PracticeSetupActivity.class);
-                intent.putExtra(EditPresentationActivity.INTENT_PRESENTATION_ID, mPresentation.getId());
+                intent.putExtra(Utils.INTENT_PRESENTATION_ID, mPresentation.getId());
                 //startActivityForResult(intent, PracticeSetupActivity.REQUEST_CODE);
                 createBackStack(intent);
                 break;
@@ -161,7 +162,6 @@ public class OutlineActivity extends BaseActivity implements
                 Toast.makeText(this, "The timeline com.thespeakers_studio.thespeakersstudioapp.view isn't ready yet", Toast.LENGTH_SHORT).show();
                 break;
             case android.R.id.home:
-                //returnActivityResult();
                 onBackPressed();
                 break;
             default:
@@ -172,13 +172,17 @@ public class OutlineActivity extends BaseActivity implements
 
     @Override
     public void onBackPressed() {
-        navigateUpOrBack(this, getIntent().getExtras(), null);
+        if (getCallingActivity() != null) {
+            returnActivityResult();
+        } else {
+            navigateUpOrBack(this, getIntent().getExtras(), null);
+        }
     }
 
     private void returnActivityResult() {
         Intent intent = new Intent();
-        intent.putExtra(EditPresentationActivity.INTENT_PRESENTATION_ID, mPresentation.getId());
-        setResult(0, intent);
+        intent.putExtra(Utils.INTENT_PRESENTATION_ID, mPresentation.getId());
+        setResult(Activity.RESULT_OK, intent);
         finish();
     }
 

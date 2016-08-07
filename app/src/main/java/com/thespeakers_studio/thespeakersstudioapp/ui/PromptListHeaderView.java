@@ -152,6 +152,7 @@ public class PromptListHeaderView extends LinearLayout{
     public void setFillFactor(float fillFactor) {
         mCurrentFillFactor = fillFactor;
         mFillFactor = fillFactor;
+        invalidate();
     }
 
     public void reset() {

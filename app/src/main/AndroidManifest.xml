@@ -53,16 +53,17 @@
             android:theme="@style/AppTheme.WithNavDrawer.Inverted">
         </activity>
 
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBGR6wo_gS7l5y8_ZfnZQG0wqKRlIrvM5w" />
-
-        <!-- surface -->
+        <!-- desktop -->
         <!--
         <meta-data
             android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBGR6wo_gS7l5y8_ZfnZQG0wqKRlIrvM5w" />
+            -->
+
+        <!-- surface -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCGhEcr6eWY7Nn5RhIBAF5l3RXArqnOuLo" />
-        -->
 
     </application>
 

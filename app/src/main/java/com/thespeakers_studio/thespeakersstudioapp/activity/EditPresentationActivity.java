@@ -34,6 +34,7 @@ import com.thespeakers_studio.thespeakersstudioapp.utils.AnalyticsHelper;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
 import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGE;
@@ -47,8 +48,6 @@ public class EditPresentationActivity extends BaseActivity implements
         PresentationStepListFragment.OnStepSelectedListener,
         PresentationPromptListFragment.PromptSaveListener,
         GoogleApiClient.OnConnectionFailedListener {
-
-    public static final String INTENT_PRESENTATION_ID = "presentation_id";
 
     private static final String TAG = makeLogTag(EditPresentationActivity.class);
     private static final String SCREEN_LABEL = "Presentation Step List";
@@ -80,19 +79,6 @@ public class EditPresentationActivity extends BaseActivity implements
 
         mFragmentContainer = findViewById(R.id.fragment_container);
 
-        if (savedInstanceState == null) {
-            setPresentationId(getIntent().getStringExtra(INTENT_PRESENTATION_ID));
-        } else {
-            setPresentationId(savedInstanceState.getString(STATE_PRESENTATION_ID));
-        }
-
-        Intent i = getIntent();
-
-        if (mPresentation == null) {
-            LOGE(TAG, "I couldn't figure out what presentation you wanted");
-            return;
-        }
-
         FragmentManager fm = getSupportFragmentManager();
         fm.addOnBackStackChangedListener(this);
 
@@ -104,11 +90,10 @@ public class EditPresentationActivity extends BaseActivity implements
                 (PresentationPromptListFragment)
                         fm.findFragmentByTag(PresentationPromptListFragment.TAG);
 
-        FragmentTransaction ft = fm.beginTransaction();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 
         if (mStepListFragment == null) {
             mStepListFragment = new PresentationStepListFragment();
-            mStepListFragment.setPresentation(mPresentation);
             ft.add(R.id.fragment_container, mStepListFragment,
                     PresentationStepListFragment.TAG);
             ft.hide(mStepListFragment);
@@ -116,7 +101,6 @@ public class EditPresentationActivity extends BaseActivity implements
 
         if (mPromptListFragment == null) {
             mPromptListFragment = new PresentationPromptListFragment();
-            mPromptListFragment.setPresentation(mPresentation);
             ft.add(R.id.fragment_container, mPromptListFragment,
                     PresentationPromptListFragment.TAG);
             ft.hide(mPromptListFragment);
@@ -126,15 +110,11 @@ public class EditPresentationActivity extends BaseActivity implements
 
         if (savedInstanceState != null) {
             mCurrentStep = savedInstanceState.getInt(STATE_STEP);
+            setPresentationId(savedInstanceState.getString(STATE_PRESENTATION_ID));
         } else {
             mCurrentStep = 0;
+            setPresentationId(getIntent().getStringExtra(Utils.INTENT_PRESENTATION_ID));
         }
-        onStepSelected(mCurrentStep);
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
     }
 
     private void setPresentationId(String id) {
@@ -143,7 +123,19 @@ public class EditPresentationActivity extends BaseActivity implements
 
             mPresentation = mDbHelper.loadPresentationById(id);
             setTitle(mPresentation.getTopic());
+
+            if (mPresentation != null) {
+                setup();
+            } else {
+                LOGE(TAG, "No Presentation was found");
+            }
         }
+    }
+
+    private void setup() {
+        mStepListFragment.setPresentation(mPresentation);
+        mPromptListFragment.setPresentation(mPresentation);
+        onStepSelected(mCurrentStep);
     }
 
     @Override
@@ -184,7 +176,7 @@ public class EditPresentationActivity extends BaseActivity implements
                 resetPresentation();
                 break;
             case android.R.id.home:
-                //onBackPressed();
+                onBackPressed();
                 break;
             default:
                 return super.onOptionsItemSelected(item);
@@ -194,7 +186,12 @@ public class EditPresentationActivity extends BaseActivity implements
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        FragmentManager fm = getSupportFragmentManager();
+        if (fm.getBackStackEntryCount() > 0) {
+            fm.popBackStack();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -210,7 +207,8 @@ public class EditPresentationActivity extends BaseActivity implements
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putString(STATE_PRESENTATION_ID, mPresentation.getId());
-        outState.putInt(STATE_STEP, mCurrentStep);
+        // we don't want to store that we are on step 5
+        outState.putInt(STATE_STEP, mCurrentStep < 5 ? mCurrentStep : 0);
 
         super.onSaveInstanceState(outState);
     }
@@ -218,12 +216,9 @@ public class EditPresentationActivity extends BaseActivity implements
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        setPresentationId(data.getStringExtra(INTENT_PRESENTATION_ID));
         switch(requestCode) {
-            case Utils.REQUEST_CODE_PROMPT_LIST:
-                //mNextStep = data.getIntExtra(PresentationPromptListActivity.INTENT_STEP, 0);
-                break;
             case Utils.REQUEST_CODE_OUTLINE:
+                setPresentationId(data.getStringExtra(Utils.INTENT_PRESENTATION_ID));
                 break;
             case Utils.REQUEST_CODE_LOCATION_SELECTED:
                 if (resultCode == RESULT_OK) {
@@ -282,44 +277,42 @@ public class EditPresentationActivity extends BaseActivity implements
 
     @Override
     public void onNextStep(int step) {
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
-
         final int nextStep = step + 1;
         mStepListFragment.setOnProgressAnimationListener(new StepListView.OnProgressAnimationListener() {
             @Override
             public void onProgressAnimationFinished() {
-                openStep(nextStep);
+                onStepSelected(nextStep);
                 mStepListFragment.clearOnProgressAnimationListener();
             }
         });
-
-        ft.hide(mPromptListFragment);
-        ft.show(mStepListFragment);
-
-        ft.addToBackStack(PresentationStepListFragment.TAG);
-
-        ft.commit();
+        getSupportFragmentManager().popBackStack();
     }
 
     private void showStepList() {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
         ft.show(mStepListFragment);
-        ft.commit();
+        ft.commitAllowingStateLoss();
     }
 
     private void openStep(int step) {
         if (step == 5) {
+            // set mCurrentStep to 0 in case we go back to here
+            // this will make sure it shows the step list, and it won't just keep going to the outline
+            mCurrentStep = 0;
+
+            // open the outline activity
             Intent intent = new Intent(getApplicationContext(), OutlineActivity.class);
             //int code = OutlineActivity.REQUEST_CODE;
-            intent.putExtra(EditPresentationActivity.INTENT_PRESENTATION_ID, mPresentation.getId());
-            //startActivityForResult(intent, code);
-            createBackStack(intent);
+            intent.putExtra(Utils.INTENT_PRESENTATION_ID, mPresentation.getId());
+            startActivityForResult(intent, Utils.REQUEST_CODE_OUTLINE);
+            //createBackStack(intent);
         } else {
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+
             ft.hide(mStepListFragment);
+
             mPromptListFragment.setStep(step);
             ft.show(mPromptListFragment);
 
@@ -328,7 +321,6 @@ public class EditPresentationActivity extends BaseActivity implements
 
             setupHeaderDetails(step);
         }
-        LOGD(TAG, "Open step " + step);
     }
 
     private void setupHeaderDetails(int step) {

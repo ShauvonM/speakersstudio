@@ -264,7 +264,7 @@ public class PresentationMainActivity extends BaseActivity
         // start the step list activity for the selected presentation
         LOGD(TAG, "Presentation " + presentation.getId() + " opened");
         Intent intent = new Intent(getApplicationContext(), EditPresentationActivity.class);
-        intent.putExtra(EditPresentationActivity.INTENT_PRESENTATION_ID, presentation.getId());
+        intent.putExtra(Utils.INTENT_PRESENTATION_ID, presentation.getId());
 
         //startActivity(intent);
         createBackStack(intent);
@@ -286,7 +286,7 @@ public class PresentationMainActivity extends BaseActivity
     @Override
     public void onPresentationPracticeSelected(PresentationData presentation) {
         Intent intent = new Intent(getApplicationContext(), PracticeSetupActivity.class);
-        intent.putExtra(EditPresentationActivity.INTENT_PRESENTATION_ID, presentation.getId());
+        intent.putExtra(Utils.INTENT_PRESENTATION_ID, presentation.getId());
         startActivityForResult(intent, PracticeSetupActivity.REQUEST_CODE);
     }
 

@@ -16,6 +16,7 @@ import com.thespeakers_studio.thespeakersstudioapp.model.Outline;
 import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
 import com.thespeakers_studio.thespeakersstudioapp.utils.AnalyticsHelper;
 import com.thespeakers_studio.thespeakersstudioapp.utils.OutlineHelper;
+import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.makeLogTag;
 
@@ -47,7 +48,7 @@ public class PracticeSetupActivity extends BaseActivity implements View.OnClickL
 
         AnalyticsHelper.sendScreenView(SCREEN_LABEL);
 
-        setPresentationId(getIntent().getStringExtra(EditPresentationActivity.INTENT_PRESENTATION_ID));
+        setPresentationId(getIntent().getStringExtra(Utils.INTENT_PRESENTATION_ID));
 
         mContentWrapper = findViewById(R.id.content_wrapper);
 
@@ -194,7 +195,7 @@ public class PracticeSetupActivity extends BaseActivity implements View.OnClickL
     private void returnActivityResult() {
         Intent intent = new Intent();
         if (mPresentation != null) {
-            intent.putExtra(EditPresentationActivity.INTENT_PRESENTATION_ID, mPresentation.getId());
+            intent.putExtra(Utils.INTENT_PRESENTATION_ID, mPresentation.getId());
         }
         setResult(0, intent);
         finish();

@@ -15,17 +15,20 @@
 
         <TextView
             android:id="@+id/presentation_name"
+            android:text="Presentation Name Here"
             style="@style/PresentationListCardName.OneColumn"
             />
 
         <TextView
-            android:id="@+id/presentation_modified"
-            style="@style/PresentationListCardModified"
+            android:id="@+id/presentation_progress"
+            android:text="100% Complete"
+            style="@style/PresentationListCardProgress.OneColumn"
             />
 
         <TextView
-            android:id="@+id/presentation_progress"
-            style="@style/PresentationListCardProgress.OneColumn"
+            android:id="@+id/presentation_modified"
+            android:text="Modified: August 11, 2000 at some time in the night"
+            style="@style/PresentationListCardModified.OneColumn"
             />
 
     </RelativeLayout>

@@ -23,6 +23,7 @@ import com.thespeakers_studio.thespeakersstudioapp.activity.PresentationMainActi
 import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
 import com.thespeakers_studio.thespeakersstudioapp.model.Prompt;
 import com.thespeakers_studio.thespeakersstudioapp.model.PromptAnswer;
+import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 /**
  * Created by smcgi_000 on 6/8/2016.
@@ -111,7 +112,8 @@ public class ListItemLocationPromptView extends ListItemPromptView implements
                 try {
                     Intent intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
                             .build((Activity) getContext());
-                    ((Activity) getContext()).startActivityForResult(intent, PresentationData.LOCATION_INTENT_REQUEST_CODE);
+                    ((Activity) getContext()).startActivityForResult(intent,
+                            Utils.REQUEST_CODE_LOCATION_SELECTED);
                 } catch (GooglePlayServicesRepairableException e) {
                     Log.e("SS", "Repairable exception");
                 } catch (GooglePlayServicesNotAvailableException e) {
