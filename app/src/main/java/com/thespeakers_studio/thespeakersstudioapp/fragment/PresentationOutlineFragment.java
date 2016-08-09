@@ -107,7 +107,7 @@ public class PresentationOutlineFragment extends Fragment implements View.OnClic
                 timeView.setText("");
             }
 
-            renderList(item.getSubItems(), (LinearLayout) itemLayout.findViewById(R.id.outline_sub_item_wrapper), level == 3 ? 1 : level + 1);
+            //renderList(item.getSubItems(), (LinearLayout) itemLayout.findViewById(R.id.outline_sub_item_wrapper), level == 3 ? 1 : level + 1);
 
             wrapper.addView(itemLayout);
 

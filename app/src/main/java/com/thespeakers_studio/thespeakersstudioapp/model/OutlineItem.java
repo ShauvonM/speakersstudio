@@ -8,11 +8,95 @@ import java.util.ArrayList;
  * Created by smcgi_000 on 7/18/2016.
  */
 public class OutlineItem {
+    /*
     private ArrayList<OutlineItem> mSubItems;
     private String mText;
     private long mDuration;
     private int mOrder;
+    */
+    private String mId;
+    private String mParentId;
+    private int mOrder;
+    private String mText;
+    private String mAnswerId;
+    private boolean mFromDB;
+    private long mDuration;
+    private String mPresentationId;
 
+    public static final String INTRO = "intro";
+    public static final String CONCLUSION = "conclusion";
+
+    public OutlineItem (String id, String parent, int order, String text, String answer, boolean fromDB, long duration, String presentation) {
+        mId = id;
+        mParentId = parent;
+        mOrder = order;
+        mText = text;
+        mAnswerId = answer;
+        mFromDB = fromDB;
+        mDuration = duration;
+        mPresentationId = presentation;
+    }
+
+    // for the intro / conclusion items
+    public OutlineItem (String id, int order, String text, String presentation) {
+        this(id, "", order, text, "", false, 0, presentation);
+    }
+
+    // for manually setting everything up
+    public OutlineItem () {
+    }
+
+    public void setIsFromDB() {
+        mFromDB = true;
+    }
+    public boolean getIsFromDB() {
+        return mFromDB;
+    }
+
+    public String getId() {
+        return mId;
+    }
+    public void setId(String id) {
+        mId = id;
+    }
+
+    public void setAnswerId(String answer) {
+        mAnswerId = answer;
+    }
+
+    public long getDuration() {
+        return mDuration;
+    }
+    public void setDuration(long duration) {
+        mDuration = duration;
+    }
+
+    public String getParentId () {
+        return mParentId;
+    }
+    public void setParentId(String parent) {
+        mParentId = parent;
+    }
+
+    public int getOrder () {
+        return mOrder;
+    }
+    public void setOrder(int order) {
+        mOrder = order;
+    }
+
+    public void setPresentationId(String presentation) {
+        mPresentationId = presentation;
+    }
+
+    public String getText() {
+        return mText;
+    }
+    public void setText(String text) {
+        mText = text;
+    }
+
+    /*
     public OutlineItem (String t, int o, ArrayList<OutlineItem> items) {
         mText = t;
         mOrder = o;
@@ -65,4 +149,5 @@ public class OutlineItem {
         mSubItems.add(item);
         Utils.sortOutlineList(mSubItems);
     }
+    */
 }

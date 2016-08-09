@@ -21,6 +21,13 @@ public class Outline {
     public static final int[] OUTLINE_TOPIC_ITEMS = new int[] {22, 21, 20, 23};
     public static final int[] OUTLINE_CONC_ITEMS = new int[] {13, 19};
 
+    /*
+        default durations (these are probably placeholders)
+        INTRO: 12.5%
+        TOPICS: 75% / top level item count
+        CONCLUSION: 12.5%
+    */
+
     public Outline(Context context) {
         mItems = new ArrayList<>();
         mContext = context;
@@ -31,6 +38,21 @@ public class Outline {
         return mItems;
     }
 
+    public ArrayList<OutlineItem> getItemsByParentId(String parentId) {
+        ArrayList<OutlineItem> items = new ArrayList<>();
+        for (OutlineItem item : mItems) {
+            if (parentId == null || parentId.isEmpty()) {
+                if (item.getParentId().isEmpty() || item.getParentId() == null) {
+                    items.add(item);
+                }
+            } else if (item.getParentId().equals(parentId)) {
+                items.add(item);
+            }
+        }
+        //Utils.sortOutlineList(items); TODO
+        return items;
+    }
+
     public OutlineItem getItem(int index) {
         if (index >= mItems.size()) {
             return null;
@@ -38,6 +60,7 @@ public class Outline {
         Utils.sortOutlineList(mItems);
         return mItems.get(index);
     }
+
     public int getItemCount() {
         return mItems.size();
     }
@@ -68,7 +91,107 @@ public class Outline {
                 .replace("\n", " ");
     }
 
+    private int loadSubItemsFromPrompts(int[] promptIDs, String parentId, long duration, int order) {
+        Resources r = mContext.getResources();
+
+        long subItemDuration = Math.round((duration / promptIDs.length) / 1000) * 1000;
+        long subItemLeftover = duration - (subItemDuration * promptIDs.length);
+
+        for (int i = 0; i < promptIDs.length; i++) {
+            order += i;
+
+            int type = mPresentation.getPromptById(promptIDs[i]).getType();
+            String id = parentId + "_prompt_" + promptIDs[i];
+
+            OutlineItem thisItem = new OutlineItem();
+
+            thisItem.setId(id);
+            thisItem.setPresentationId(mPresentation.getId());
+            thisItem.setOrder(order);
+
+            long thisDuration = subItemDuration;
+            if (subItemLeftover >= 1000) {
+                thisDuration += 1000;
+                subItemLeftover -= 1000;
+            }
+
+            thisItem.setDuration(thisDuration);
+            thisItem.setParentId(parentId);
+
+            if (type == PresentationData.TEXT || type == PresentationData.PARAGRAPH) {
+
+                PromptAnswer answer = mPresentation.getAnswerByKey(promptIDs[i], "text");
+
+                thisItem.setText(answer.getValue());
+                thisItem.setAnswerId(answer.getId());
+
+                addItem(thisItem);
+
+            } else if (type == PresentationData.LIST) {
+
+                // we have to add all the answers as their own sub-item, so we can treat them
+                // individually if we need to
+                thisItem.setText(r.getString(R.string.outline_item_mention));
+                thisItem.setAnswerId(id);
+                addItem(thisItem);
+
+                ArrayList<PromptAnswer> answers = mPresentation.getAnswer(promptIDs[i]);
+                for (PromptAnswer answer : answers) {
+                    order++;
+                    OutlineItem answerItem = new OutlineItem(
+                            "",
+                            id,
+                            order,
+                            answer.getValue(),
+                            answer.getId(),
+                            false,
+                            0,
+                            mPresentation.getId()
+                    );
+                    addItem(answerItem);
+                }
+
+            }
+        }
+
+        order++;
+        return order;
+    }
+
+
     // this is the biggun - this method generates the outline list
+    public static Outline fromPresentation (Context context, PresentationData pres) {
+        Outline outline = new Outline(context);
+        outline.setPresentation(pres);
+
+        Resources r = context.getResources();
+
+        int durationMinutes = pres.getDuration();
+        long durationMillis = (durationMinutes * 60) * 1000;
+
+        ArrayList<PromptAnswer> topics = pres.getAnswer(PresentationData.PRESENTATION_TOPICS);
+        int topicCount = topics.size();
+
+        long topicDuration = (long) Math.floor((durationMillis * 0.75) / topicCount);
+        long introDuration = (long) Math.floor((durationMillis - (topicDuration * topicCount)) / 2);
+
+        int masterOrder = 0;
+
+        //public OutlineItem (String id, int order, String text, String presentation) {
+        OutlineItem introItem = new OutlineItem(
+                OutlineItem.INTRO,
+                masterOrder,
+                r.getString(R.string.outline_item_intro),
+                pres.getId()
+        );
+        // we won't know the duration of the intro until we've gone through the items
+        // because there could be some wackyland stuff in there
+        masterOrder = outline.loadSubItemsFromPrompts(OUTLINE_INTRO_ITEMS, OutlineItem.INTRO, introDuration, masterOrder);
+
+        return outline;
+    }
+
+    /*
     public static Outline fromPresentation (Context context, PresentationData pres) {
         Outline outline = new Outline(context);
         outline.setPresentation(pres);
@@ -79,12 +202,6 @@ public class Outline {
 
         ArrayList<PromptAnswer> topics = pres.getAnswer(PresentationData.PRESENTATION_TOPICS);
 
-        /*
-            default durations (these are probably placeholders)
-            INTRO: 12.5%
-            TOPICS: 75% (divided among topics)
-            CONCLUSION: 12.5%
-        */
         long topicDuration = (long) Math.floor((durationMillis * 0.75) / topics.size());
         long introDuration = (long) Math.floor((durationMillis - (topicDuration * topics.size())) / 2);
 
@@ -151,47 +268,5 @@ public class Outline {
 
         return outline;
     }
-
-    private OutlineItem loadSubItemsFromPrompts(int[] promptIDs, OutlineItem parent, long duration) {
-        Resources r = mContext.getResources();
-
-        long subItemDuration = Math.round((duration / promptIDs.length) / 1000) * 1000;
-        long subItemLeftover = duration - (subItemDuration * promptIDs.length);
-
-        for (int i = 0; i < promptIDs.length; i++) {
-            int type = mPresentation.getPromptById(promptIDs[i]).getType();
-            OutlineItem thisItem = new OutlineItem();
-            thisItem.setOrder(i);
-
-            /*
-            if (i < promptIDs.length - 1) {
-                long thisduration = Math.round((duration / promptIDs.length) / 1000) * 1000;
-                thisItem.setDuration(thisduration);
-                durationTally += thisduration;
-            } else {
-                thisItem.setDuration(duration - durationTally);
-            }
-            */
-            long thisDuration = subItemDuration;
-            if (subItemLeftover >= 1000) {
-                thisDuration += 1000;
-                subItemLeftover -= 1000;
-            }
-            thisItem.setDuration(thisDuration);
-
-            if (type == PresentationData.TEXT || type == PresentationData.PARAGRAPH) {
-                thisItem.setText(
-                        mPresentation.getAnswerByKey(promptIDs[i], "text"));
-
-                parent.addSubItem(thisItem);
-            } else if (type == PresentationData.LIST) {
-                thisItem.setText(String.format(r.getString(R.string.outline_item_mention),
-                                Utils.processAnswerList(
-                                        mPresentation.getAnswer(promptIDs[i]), r)));
-
-                parent.addSubItem(thisItem);
-            }
-        }
-        return parent;
-    }
+    */
 }

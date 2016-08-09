@@ -78,11 +78,12 @@ public class OutlineActivity extends BaseActivity implements
         LinearLayout listWrapper = (LinearLayout) findViewById(R.id.outline_list);
         if (listWrapper != null) {
             listWrapper.removeAllViews();
-            renderList(mOutline.getItems(), listWrapper, 1);
+            renderList(listWrapper, null, 1);
         }
     }
 
-    private void renderList (ArrayList<OutlineItem> items, LinearLayout wrapper, int level) {
+    private void renderList (LinearLayout wrapper, String parentId, int level) {
+        ArrayList<OutlineItem> items = mOutline.getItemsByParentId(parentId);
         if (items.size() == 0) {
             return;
         }
@@ -94,7 +95,8 @@ public class OutlineActivity extends BaseActivity implements
             RelativeLayout itemLayout = (RelativeLayout) inflater.inflate(R.layout.outline_item, wrapper, false);
 
             // set the icon
-            ((TextView) itemLayout.findViewById(R.id.list_main_bullet)).setText(mHelper.getBullet(level, index + 1));
+            ((TextView) itemLayout.findViewById(R.id.list_main_bullet))
+                    .setText(mHelper.getBullet(level, index + 1));
             // set the text for this thing
             ((TextView) itemLayout.findViewById(R.id.list_topic)).setText(item.getText());
             // set the duration for this thing
@@ -107,7 +109,9 @@ public class OutlineActivity extends BaseActivity implements
                 timeView.setText("");
             }
 
-            renderList(item.getSubItems(), (LinearLayout) itemLayout.findViewById(R.id.outline_sub_item_wrapper), level == 3 ? 1 : level + 1);
+            renderList((LinearLayout) itemLayout.findViewById(R.id.outline_sub_item_wrapper),
+                    item.getId(),
+                    level == 3 ? 1 : level + 1);
 
             wrapper.addView(itemLayout);
 

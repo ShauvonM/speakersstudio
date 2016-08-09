@@ -245,7 +245,8 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
                 start();
             }
             mSubTopicIndex++;
-            if (mTopicIndex < 0 || mOutline.getItem(mTopicIndex) == null || mSubTopicIndex >= mOutline.getItem(mTopicIndex).getSubItemCount()) {
+            if (mTopicIndex < 0 || mOutline.getItem(mTopicIndex) == null ||
+                    mSubTopicIndex >= mOutline.getItemsByParentId("").size()) { // TODO: This is totally broken
                 // move to the next topic
                 mTopicIndex++;
                 mSubTopicIndex = -1;
@@ -263,7 +264,7 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
             } else {
                 // show the next sub item
                 showText(mOutputSubView, mOutline.getItem(mTopicIndex).getText());
-                OutlineItem subitem = mOutline.getItem(mTopicIndex).getSubItem(mSubTopicIndex);
+                OutlineItem subitem = mOutline.getItem(mTopicIndex); // .getSubItem(mSubTopicIndex); TODO: this is totally broken too
                 showText(mOutputMainView, subitem.getText());
 
                 if (mPaused) {

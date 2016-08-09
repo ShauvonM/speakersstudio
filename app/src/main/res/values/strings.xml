@@ -95,7 +95,7 @@
 
     <string name="outline_item_intro">Intro</string>
     <string name="outline_item_conclusion">Conclusion</string>
-    <string name="outline_item_mention">Mention %1$s</string>
+    <string name="outline_item_mention">Mention:</string>
     <string name="outline_duration">(%1$d Minutes)</string>
 
     <string name="practice_presentation">Practice Presentation</string>

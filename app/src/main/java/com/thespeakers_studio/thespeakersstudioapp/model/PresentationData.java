@@ -109,13 +109,13 @@ public class PresentationData {
         return getPromptById(promptId).getAnswer();
     }
 
-    public String getAnswerByKey(int promptId, String answerKey) {
+    public PromptAnswer getAnswerByKey (int promptId, String answerKey) {
         Prompt p = getPromptById(promptId);
-        return p.getAnswerByKey(answerKey).getValue();
+        return p.getAnswerByKey(answerKey);
     }
 
     public String getTopic() {
-        String topic = getAnswerByKey(PRESENTATION_TOPIC, "text");
+        String topic = getAnswerByKey(PRESENTATION_TOPIC, "text").getValue();
         if (topic.isEmpty()) {
             return mContext.getResources().getString(R.string.new_presentation);
         } else{
@@ -124,11 +124,11 @@ public class PresentationData {
     }
 
     public int getDuration() {
-        return Integer.parseInt(getAnswerByKey(PRESENTATION_DURATION, "duration"));
+        return Integer.parseInt(getAnswerByKey(PRESENTATION_DURATION, "duration").getValue());
     }
 
     public String getDate() {
-        return getAnswerByKey(PRESENTATION_DATE, "timestamp");
+        return getAnswerByKey(PRESENTATION_DATE, "timestamp").getValue();
     }
 
     public void setModifiedDate(String date) {
