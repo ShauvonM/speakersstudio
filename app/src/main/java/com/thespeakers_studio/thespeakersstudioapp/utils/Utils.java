@@ -31,9 +31,10 @@ import com.thespeakers_studio.thespeakersstudioapp.model.PromptAnswer;
  */
 public class Utils {
 
-    public static final int REQUEST_CODE_PROMPT_LIST = 1;
+    public static final int REQUEST_CODE_EDIT_PRESENTATION = 1;
     public static final int REQUEST_CODE_OUTLINE = 2;
     public static final int REQUEST_CODE_LOCATION_SELECTED = 3;
+    public static final int REQUEST_CODE_PRACTICE = 4;
 
     public static final String INTENT_PRESENTATION_ID = "presentation_id";
 

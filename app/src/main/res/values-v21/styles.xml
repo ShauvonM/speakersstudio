@@ -30,6 +30,10 @@
         <item name="android:elevation">0dp</item>
     </style>
 
+    <style name="FloatingActionButtonOnContent">
+        <item name="android:elevation">@dimen/fab_elevation</item>
+    </style>
+
     <!-- Text -->
     <style name="NavDrawerRowText" parent="TextAppearance.AppCompat.Body2">
         <item name="android:layout_height">wrap_content</item>

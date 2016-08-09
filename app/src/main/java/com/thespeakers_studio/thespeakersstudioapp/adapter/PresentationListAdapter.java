@@ -1,9 +1,11 @@
 package com.thespeakers_studio.thespeakersstudioapp.adapter;
 
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.thespeakers_studio.thespeakersstudioapp.R;
 
@@ -25,6 +27,9 @@ public class PresentationListAdapter extends RecyclerView.Adapter<PresentationLi
     private boolean mIsTwoColumn;
     private int mSelectionCount;
 
+    private final int VIEW_TYPE_NORMAL = 0;
+    private final int VIEW_TYPE_LAST = 1;
+
     public PresentationListAdapter(ArrayList<PresentationData> presies,
                                    PresentationListViewHolder.OnPresentationCardClickedListener h) {
         mPresies = presies;
@@ -41,12 +46,17 @@ public class PresentationListAdapter extends RecyclerView.Adapter<PresentationLi
     @Override
     public PresentationListViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView;
-        if (mIsTwoColumn) {
-            itemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.presentation_list_item_two_column, parent, false);
+        if (viewType == VIEW_TYPE_NORMAL) {
+            if (mIsTwoColumn) {
+                itemView = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.presentation_list_item_two_column, parent, false);
+            } else {
+                itemView = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.presentation_list_item_one_column, parent, false);
+            }
         } else {
             itemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.presentation_list_item_one_column, parent, false);
+                    .inflate(R.layout.ss_logo_imageview, parent, false);
         }
         PresentationListViewHolder holder = new PresentationListViewHolder(itemView);
         holder.setCardClickListener(this);
@@ -55,8 +65,15 @@ public class PresentationListAdapter extends RecyclerView.Adapter<PresentationLi
     }
 
     @Override
+    public int getItemViewType(int position) {
+        return position < mPresies.size() ? VIEW_TYPE_NORMAL : VIEW_TYPE_LAST;
+    }
+
+    @Override
     public void onBindViewHolder(PresentationListViewHolder holder, int position) {
-        holder.setPresentation(mPresies.get(position));
+        if (position < mPresies.size()) {
+            holder.setPresentation(mPresies.get(position));
+        }
     }
 
     public int getSelectedCount() {
@@ -88,7 +105,7 @@ public class PresentationListAdapter extends RecyclerView.Adapter<PresentationLi
 
     @Override
     public int getItemCount() {
-        return mPresies.size();
+        return mPresies.size() + 1;
     }
 
     @Override

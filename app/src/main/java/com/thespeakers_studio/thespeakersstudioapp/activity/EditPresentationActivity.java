@@ -1,5 +1,6 @@
 package com.thespeakers_studio.thespeakersstudioapp.activity;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -34,7 +35,6 @@ import com.thespeakers_studio.thespeakersstudioapp.utils.AnalyticsHelper;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Stack;
 
 import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
 import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGE;
@@ -189,6 +189,8 @@ public class EditPresentationActivity extends BaseActivity implements
         FragmentManager fm = getSupportFragmentManager();
         if (fm.getBackStackEntryCount() > 0) {
             fm.popBackStack();
+        } else if (getCallingActivity() != null) {
+            returnActivityResult();
         } else {
             super.onBackPressed();
         }
@@ -236,6 +238,13 @@ public class EditPresentationActivity extends BaseActivity implements
                 }
                 break;
         }
+    }
+
+    private void returnActivityResult() {
+        Intent intent = new Intent();
+        intent.putExtra(Utils.INTENT_PRESENTATION_ID, mPresentation.getId());
+        setResult(Activity.RESULT_OK, intent);
+        finish();
     }
 
     public void addLocationCallback(LocationSelectedListener listener) {

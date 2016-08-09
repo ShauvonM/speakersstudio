@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.thespeakers_studio.thespeakersstudioapp.adapter.PresentationListSpanItemDecoration;
@@ -113,9 +114,9 @@ public class PresentationMainActivity extends BaseActivity
 
     @Override
     protected void setLayoutPadding(int actionBarSize) {
-        int pad = (int) getResources().getDimension(R.dimen.pres_list_padding);
-        int fab = (int) getResources().getDimension(R.dimen.fab_button);
-        mRecyclerView.setPadding(pad, pad, pad, pad + fab);
+        //int pad = (int) getResources().getDimension(R.dimen.pres_list_padding);
+        //int fab = (int) getResources().getDimension(R.dimen.fab_button);
+        //mRecyclerView.setPadding(pad, pad, pad, pad + fab);
         ((FrameLayout.LayoutParams) mRecyclerView.getLayoutParams()).setMargins(0, actionBarSize, 0, 0);
     }
 
@@ -165,11 +166,7 @@ public class PresentationMainActivity extends BaseActivity
                 deleteSelectedPresentations();
                 break;
             case android.R.id.home:
-                if (mSelectionActive) {
                     onBackPressed();
-                } else {
-                    super.onOptionsItemSelected(item);
-                }
                 break;
             default:
                 return super.onOptionsItemSelected(item);
@@ -263,7 +260,13 @@ public class PresentationMainActivity extends BaseActivity
     public boolean onPresentationOpened(PresentationData presentation) {
         // start the step list activity for the selected presentation
         LOGD(TAG, "Presentation " + presentation.getId() + " opened");
-        Intent intent = new Intent(getApplicationContext(), EditPresentationActivity.class);
+        Intent intent;
+        if (SettingsUtils.getOpenCompleteGoto(getApplicationContext()) &&
+                presentation.getCompletionPercentage() == 1) {
+            intent = new Intent(getApplicationContext(), OutlineActivity.class);
+        } else {
+            intent = new Intent(getApplicationContext(), EditPresentationActivity.class);
+        }
         intent.putExtra(Utils.INTENT_PRESENTATION_ID, presentation.getId());
 
         //startActivity(intent);
@@ -287,7 +290,7 @@ public class PresentationMainActivity extends BaseActivity
     public void onPresentationPracticeSelected(PresentationData presentation) {
         Intent intent = new Intent(getApplicationContext(), PracticeSetupActivity.class);
         intent.putExtra(Utils.INTENT_PRESENTATION_ID, presentation.getId());
-        startActivityForResult(intent, PracticeSetupActivity.REQUEST_CODE);
+        startActivityForResult(intent, Utils.REQUEST_CODE_PRACTICE);
     }
 
     @Override

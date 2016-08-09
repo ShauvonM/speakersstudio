@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.os.Build;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -24,10 +24,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.Toast;
 
 import com.thespeakers_studio.thespeakersstudioapp.R;
 import com.thespeakers_studio.thespeakersstudioapp.data.PresentationDbHelper;
+import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsActivity;
 import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
 import com.thespeakers_studio.thespeakersstudioapp.ui.NavDrawerItemView;
 import com.thespeakers_studio.thespeakersstudioapp.ui.ScrimInsetsScrollView;
@@ -138,8 +138,15 @@ public abstract class BaseActivity extends AppCompatActivity
             return;
         }
 
-        if (navDrawer != null) {
-            // TODO: set up account view (ui.BaseActivity:381 in the I/O app)
+        View accountView = findViewById(R.id.navigation_drawer_account_section);
+        if (accountView != null) {
+            accountView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://thespeakers-studio.com"));
+                    startActivity(browserIntent);
+                }
+            });
         }
 
         mDrawerToggle = new ActionBarDrawerToggle
@@ -302,12 +309,16 @@ public abstract class BaseActivity extends AppCompatActivity
                 createBackStack(new Intent(this, PracticeSetupActivity.class));
                 break;
             case NAVDRAWER_ITEM_STORIES:
+                createBackStack(new Intent(this, StoriesMainActivity.class));
                 break;
             case NAVDRAWER_ITEM_CURIOUS:
+                createBackStack(new Intent(this, CuriousActivity.class));
                 break;
             case NAVDRAWER_ITEM_SETTINGS:
+                createBackStack(new Intent(this, SettingsActivity.class));
                 break;
             case NAVDRAWER_ITEM_ABOUT:
+                createBackStack(new Intent(this, AboutActivity.class));
                 break;
         }
     }
@@ -429,7 +440,7 @@ public abstract class BaseActivity extends AppCompatActivity
         int minHeaderDetailsHeight = getMinHeaderHeight(); //mHeaderDetails.getMinHeight();
         // the details text will shrink as the user scrolls
         // multiply scrollY by 0.4 to give it a bit of a parallax effect
-        float newHeight = Math.min(mHeaderDetailsHeightPixels - minHeaderDetailsHeight, (float) (scrollY * 0.4));
+        float newHeight = Math.min(mHeaderDetailsHeightPixels - minHeaderDetailsHeight, (float) (scrollY * 0.75));
         return mHeaderDetailsHeightPixels - (int) newHeight;
     }
 

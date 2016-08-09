@@ -1,4 +1,9 @@
 <resources>
+    <string name="the_speakers_studio">The Speaker\'s Studio</string>
+    <string name="ss_url">thespeakers-studio.com</string>
+
+    <string name="app_version">Version %1$s</string>
+
     <string name="about">About</string>
     <string name="curious">Curious for more?</string>
     <string name="app_name">The Speaker\'s Studio App</string>
@@ -39,9 +44,11 @@
 
     <string name="five_minutes">Five Minutes</string>
     <string name="ten_minutes">Ten Minutes</string>
+    <string name="fifteen_minutes">Fifteen Minutes</string>
     <string name="twenty_minutes">Twenty Minutes</string>
     <string name="thirty_minutes">Thirty Minutes</string>
     <string name="specify_duration">Specify Duration...</string>
+    <string name="specify_duration_minutes">Specify Duration (in minutes)</string>
     <string name="minutes">Minutes</string><!-- TODO: put a %1$s in here to include the time -->
 
     <string name="list_and">and</string>
@@ -56,8 +63,10 @@
 
     <string name="drawer_open">The navigation drawer is opened</string>
     <string name="drawer_close">The navigation drawer is closed</string>
+
     <string name="tools_text_account_information_username">Username</string>
     <string name="tools_text_account_information_email">user@email.com</string>
+
     <string name="tag_nav_drawer_main_entry">nav_drawer_main_entry</string>
     <string name="tag_nav_drawer_special_entry">nav_drawer_special_entry</string>
 
@@ -77,7 +86,12 @@
     <string name="modified_output">Modified: %1$s</string>
 
     <string name="no_presentations">You have no saved presentations.</string>
+    <string name="no_stories">You have no saved stories.</string>
+    <string name="no_stories_placeholder">You cannot save stories just yet. I know, tell me about it.</string>
     <string name="no_saved_practices">You have no saved practices.</string>
+    <string name="no_saved_timers">You have no saved timers.</string>
+
+    <string name="curious_copy">Schedule a fifteen minute phone call, and we can figure out how The Speaker\'s Studio can make you a better you. Select a date and time below, and then you will be able to tell us a little about yourself.</string>
 
     <string name="outline_item_intro">Intro</string>
     <string name="outline_item_conclusion">Conclusion</string>
@@ -86,7 +100,8 @@
 
     <string name="practice_presentation">Practice Presentation</string>
 
-    <string name="get_ready">Get ready...</string>
+    <string name="get_ready">Get ready&#8230;</string>
+    <string name="done">All done!</string>
     <string name="timer_output">%1$d:%2$02d</string>
     <string name="paused">Paused</string>
     <string name="five_minutes_left">Five Minutes Left</string>
@@ -101,5 +116,8 @@
     <!-- Accessibility description for navigation drawer -->
     <string name="navdrawer_description_a11y">Navigation Drawer used to switch between major
         features of the application</string>
+
+    <string name="pref_completed_presentations_entry_off">Step List</string>
+    <string name="pref_completed_presentations_entry_on">Outline</string>
 
 </resources>

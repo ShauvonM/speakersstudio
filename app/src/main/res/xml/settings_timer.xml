@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:key="pref_timer_wait"
+        android:summary="Wait five seconds before starting the timer?"
+        android:defaultValue="true"
+         />
+    <CheckBoxPreference
+        android:key="pref_timer_show"
+        android:summary="Show timer as it runs?"
+        android:defaultValue="true"
+         />
+    <CheckBoxPreference
+        android:key="pref_timer_warning"
+        android:summary="Show a warning when you have five minutes left?"
+        android:defaultValue="true"
+         />
+    <CheckBoxPreference
+        android:key="pref_timer_vibrate"
+        android:summary="Notify time up and warnings with vibration?"
+        android:defaultValue="true"
+         />
+    <!--
+    <CheckBoxPreference
+        android:key="pref_timer_disable"
+        android:summary="Disable your device as timer is running?"
+        android:defaultValue="false"
+         />
+         -->
+
+</PreferenceScreen>

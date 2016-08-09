@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.Vibrator;
+import android.provider.ContactsContract;
 import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -18,10 +19,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.thespeakers_studio.thespeakersstudioapp.R;
+import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 import com.thespeakers_studio.thespeakersstudioapp.model.Outline;
 import com.thespeakers_studio.thespeakersstudioapp.model.OutlineItem;
+
+import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
 
 /**
  * Created by smcgi_000 on 7/20/2016.
@@ -39,6 +43,10 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
     private Outline mOutline;
     private Dialog mDialog;
 
+    private int mDuration;
+
+    private boolean mIsPractice;
+
     private boolean mDelay;
     private boolean mDisplayTimer;
     private boolean mShowWarning;
@@ -52,6 +60,7 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
     private TextView mWarningView;
     private ImageButton mButtonLeft;
     private ImageButton mButtonRight;
+    private ImageButton mButtonDone;
 
     private Handler mTimeHandler = new Handler();
 
@@ -66,6 +75,7 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
 
     private boolean mStarted;
     private boolean mPaused;
+    private boolean mFinished;
 
     private final int PULSE = 500;
     private final int PULSE_GAP = 200;
@@ -83,6 +93,12 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+
+        mDelay = SettingsUtils.getTimerWait(getContext());
+        mDisplayTimer = SettingsUtils.getTimerShow(getContext());
+        mShowWarning = SettingsUtils.getTimerWarning(getContext());
+        mTrack = SettingsUtils.getTimerTrack(getContext());
+        mVibrate = SettingsUtils.getTimerVibrate(getContext());
     }
 
     @Override
@@ -99,13 +115,17 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
         mInterface = inter;
     }
 
-    public void setup (Outline outline, boolean delay, boolean displayTimer, boolean showWarning, boolean track, boolean vibrate) {
-        mOutline = outline;
-        mDelay = delay;
-        mDisplayTimer = displayTimer;
-        mShowWarning = showWarning;
-        mTrack = track;
-        mVibrate = vibrate;
+    public void setup (Outline outline) {
+        if (outline != null) {
+            mOutline = outline;
+            mIsPractice = true;
+        } else {
+            mIsPractice = false;
+        }
+    }
+    public void setup (int duration) {
+        mIsPractice = false;
+        mDuration = duration * 60 * 1000; // we'll be getting the duration in minutes
     }
 
     @Override
@@ -118,6 +138,7 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
         mOutputSubView = (TextView) mDialog.findViewById(R.id.practice_sub);
         mButtonLeft = (ImageButton) mDialog.findViewById(R.id.button_left);
         mButtonRight = (ImageButton) mDialog.findViewById(R.id.button_right);
+        mButtonDone = (ImageButton) mDialog.findViewById(R.id.button_done);
         mOutputMainView = (TextView) mDialog.findViewById(R.id.practice_main);
         mTimerView = (TextView) mDialog.findViewById(R.id.practice_timer_current);
         mWarningView = (TextView) mDialog.findViewById(R.id.practice_interval_warning);
@@ -135,8 +156,37 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
         if (mDelay) {
             startDelay();
         } else {
-            nextItem();
+            start();
         }
+        mTimeHandler.postDelayed(updateTimerThread, ANIMATION_DURATION);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mTimeHandler.removeCallbacks(updateTimerThread);
+    }
+
+    public void startDelay() {
+        mTimerTotalView.setVisibility(View.GONE);
+        mOutputSubView.setVisibility(View.GONE);
+
+        //mOutputMainView.setText(R.string.get_ready);
+        showText(mOutputMainView, R.string.get_ready);
+        mTimerView.setText("");
+
+        mCurrentExpiration = DELAY_TIME;
+
+        mStarted = false;
+    }
+
+    private void start() {
+        mStarted = true;
+        mStartTime = 0;
+        mElapsed = 0;
+        mTopicIndex = -1;
+        mOutlineDuration = mIsPractice ? mOutline.getDurationMillis() : mDuration;
+        mCurrentExpiration = 0;
     }
 
     public boolean showText(final TextView view, final String text) {
@@ -189,82 +239,91 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
         return showText(view, getResources().getString(id));
     }
 
-    public void startDelay() {
-        mTimerTotalView.setVisibility(View.GONE);
-        mOutputSubView.setVisibility(View.GONE);
-
-        //mOutputMainView.setText(R.string.get_ready);
-        showText(mOutputMainView, R.string.get_ready);
-        mTimerView.setText("");
-
-        mCurrentExpiration = DELAY_TIME;
-
-        mStarted = false;
-        mTimeHandler.postDelayed(updateTimerThread, ANIMATION_DURATION);
-    }
-
     public void nextItem() {
-        if (!mStarted) {
-            // we are starting the presentation, so we should set everything up
-            mStartTime = 0;
-            mElapsed = 0;
-            mOutlineDuration = mOutline.getDurationMillis();
-            mTopicIndex = -1;
-            mStarted = true;
-        }
+        if (mIsPractice) {
+            if (!mStarted) {
+                start();
+            }
+            mSubTopicIndex++;
+            if (mTopicIndex < 0 || mOutline.getItem(mTopicIndex) == null || mSubTopicIndex >= mOutline.getItem(mTopicIndex).getSubItemCount()) {
+                // move to the next topic
+                mTopicIndex++;
+                mSubTopicIndex = -1;
+                if (mTopicIndex >= mOutline.getItemCount()) {
+                    // we're done!
+                    finish();
+                } else {
+                    showText(mOutputMainView, mOutline.getItem(mTopicIndex).getText());
+                    // when showing a new topic, we'll highlight the topic name for a second
+                    mCurrentExpiration = mElapsed + INTERSTITIAL_DURATION;
+                    vibrate(PULSE);
+                }
 
-        mSubTopicIndex++;
-        if (mTopicIndex < 0 || mOutline.getItem(mTopicIndex) == null || mSubTopicIndex >= mOutline.getItem(mTopicIndex).getSubItemCount()) {
-            // move to the next topic
-            mTopicIndex++;
-            mSubTopicIndex = -1;
-            if (mTopicIndex >= mOutline.getItemCount()) {
-                // we're done!
-                vibrate(new long[] {PULSE, PULSE_GAP, PULSE, PULSE_GAP, PULSE});
-                return;
+                hideButton(mButtonRight);
             } else {
-                showText(mOutputMainView, mOutline.getItem(mTopicIndex).getText());
-                // when showing a new topic, we'll highlight the topic name for a second
-                mCurrentExpiration = mElapsed + INTERSTITIAL_DURATION;
-                vibrate(PULSE);
+                // show the next sub item
+                showText(mOutputSubView, mOutline.getItem(mTopicIndex).getText());
+                OutlineItem subitem = mOutline.getItem(mTopicIndex).getSubItem(mSubTopicIndex);
+                showText(mOutputMainView, subitem.getText());
+
+                if (mPaused) {
+                    // mCurrentExpiration is already set, because we will continue from where we left off
+                    mPaused = false;
+                } else {
+                    // add any remaining time from the last item, in case the user skipped ahead
+                    // round the duration of this item to the nearest 1000 to make sure it doesn't
+                    // throw off the timer
+                    long thisDuration = Utils.roundToThousand(subitem.getDuration());
+                    long remainingTime = mCurrentExpiration - mElapsed;
+                    mCurrentExpiration = mElapsed + (remainingTime + thisDuration);
+
+                    if (mSubTopicIndex == 0) {
+                        // since we wasted time showing the topic name, we need to account for that here
+                        mCurrentExpiration -= INTERSTITIAL_DURATION;
+                    }
+                }
+
+                showButton(mButtonRight);
             }
 
-            hideButton(mButtonRight);
-        } else {
-            // show the next sub item
-            showText(mOutputSubView, mOutline.getItem(mTopicIndex).getText());
-            OutlineItem subitem = mOutline.getItem(mTopicIndex).getSubItem(mSubTopicIndex);
-            showText(mOutputMainView, subitem.getText());
-
-            if (mPaused) {
-                // mCurrentExpiration is already set, because we will continue from where we left off
+            if (mTopicIndex > 0 || mSubTopicIndex > 0) {
+                //showButton(mButtonLeft);
+            }
+        } else { // this is a timer, so just show a timer
+            showText(mOutputSubView, R.string.timer);
+            showText(mOutputMainView, "");
+            if (!mStarted) {
+                mCurrentExpiration = mDuration;
+                start();
+            } else if (mPaused) {
                 mPaused = false;
             } else {
-                // add any remaining time from the last item, in case the user skipped ahead
-                // round the duration of this item to the nearest 1000 to make sure it doesn't
-                // throw off the timer
-                long thisDuration = Utils.roundToThousand(subitem.getDuration());
-                long remainingTime = mCurrentExpiration - mElapsed;
-                mCurrentExpiration = mElapsed + (remainingTime + thisDuration);
-
-                if (mSubTopicIndex == 0) {
-                    // since we wasted time showing the topic name, we need to account for that here
-                    mCurrentExpiration -= INTERSTITIAL_DURATION;
-                }
+                finish();
             }
-
-            showButton(mButtonRight);
         }
 
-        if (mTopicIndex > 0 || mSubTopicIndex > 0) {
-            //showButton(mButtonLeft);
-        }
+        //mTimeHandler.postDelayed(updateTimerThread, 0);
+    }
 
-        mTimeHandler.postDelayed(updateTimerThread, 0);
+    private void finish() {
+        mFinished = true;
+
+        vibrate(new long[]{PULSE, PULSE_GAP, PULSE, PULSE_GAP, PULSE});
+        mOutlineDuration = 0;
+        mCurrentExpiration = 0;
+        mStartTime = 0;
+
+        showText(mOutputSubView, "");
+        showText(mOutputMainView, R.string.done);
+
+        hideButton(mButtonRight);
+        showButton(mButtonDone);
     }
 
     private void animateButton(final View button, boolean in) {
         if (button.getVisibility() == View.VISIBLE && in) {
+            return;
+        } else if (button.getVisibility() == View.GONE && !in) {
             return;
         }
         button.setVisibility(View.VISIBLE);
@@ -282,9 +341,7 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
         if (!in) {
             set.setAnimationListener(new Animation.AnimationListener() {
                 @Override
-                public void onAnimationStart(Animation animation) {
-
-                }
+                public void onAnimationStart(Animation animation) {}
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
@@ -292,9 +349,7 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
                 }
 
                 @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
+                public void onAnimationRepeat(Animation animation) {}
             });
         }
 
@@ -346,7 +401,12 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
                 // skip to next, but only if the presentation is running
                 if (mStartTime > 0) {
                     vibrate(BUMP);
-                    nextItem();
+                    if (!mFinished) {
+                        nextItem();
+                    } else {
+                        // we are done, so close the thing
+                        dismiss();
+                    }
                 }
                 break;
         }
@@ -381,8 +441,12 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
             long totalRemaining = mOutlineDuration - mElapsed;
             long currentRemaining = mCurrentExpiration - mElapsed;
 
-            if (currentRemaining > 0) {
-                if (mStarted && mDisplayTimer) {
+            if (currentRemaining <= 0 && !mFinished) {
+                nextItem();
+            }
+
+            if (!mFinished) {
+                if (mStarted && mDisplayTimer && mIsPractice) {
                     setTimer(mTimerTotalView, totalRemaining);
                 }
                 if (mSubTopicIndex > -1 && mDisplayTimer) {
@@ -394,24 +458,23 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
                 } else {
                     mTimerView.setText("");
                 }
-                mTimeHandler.postDelayed(this, 0);
-
                 //Log.d("SS", "total remaining: " + totalRemaining + " - current remaining: " + currentRemaining);
-
             } else {
-                //Log.d("SS", "total remaining: " + totalRemaining + " - current remaining: " + currentRemaining + " SKIPPED");
-
-                nextItem();
+                // we are totally done, so we can begin counting up!
+                setTimer(mTimerView, mElapsed);
+                setTimer(mTimerTotalView, 0);
             }
 
-            if (mStarted && mShowWarning) {
-                if (totalRemaining <= WARNING_DURATION && totalRemaining >= WARNING_DURATION - 100) {
+            mTimeHandler.postDelayed(this, 0);
+
+            if (mStarted && mShowWarning && !mFinished) {
+                if (totalRemaining <= WARNING_TIME && totalRemaining >= WARNING_TIME - 100) {
                     // five minute warning
                     if (showText(mWarningView, R.string.five_minutes_left)) {
                         vibrate(new long[] {PULSE, PULSE_GAP, PULSE});
                     }
-                } else if (totalRemaining <= (WARNING_DURATION - WARNING_TIME)
-                        && totalRemaining >= (WARNING_DURATION - WARNING_TIME - 100)) {
+                } else if (totalRemaining <= (WARNING_TIME - WARNING_DURATION)
+                        && totalRemaining >= (WARNING_TIME - WARNING_DURATION - 100)) {
                     // hide it after five seconds
                     showText(mWarningView, "");
                 }

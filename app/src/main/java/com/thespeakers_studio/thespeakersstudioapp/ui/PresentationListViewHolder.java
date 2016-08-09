@@ -24,10 +24,12 @@ public class PresentationListViewHolder extends RecyclerView.ViewHolder implemen
 
     public PresentationListViewHolder(View v) {
         super(v);
-        mCard = (CardView) v;
+        if (v instanceof CardView) {
+            mCard = (CardView) v;
+            mCard.findViewById(R.id.presentation_submenu).setOnClickListener(this);
+        }
         mListener = null;
 
-        mCard.findViewById(R.id.presentation_submenu).setOnClickListener(this);
     }
 
     public void setCardClickListener (OnPresentationCardClickedListener l) {
@@ -57,10 +59,12 @@ public class PresentationListViewHolder extends RecyclerView.ViewHolder implemen
     }
 
     private void setBackground() {
-        if (mPresentation.getIsSelected()) {
-            mCard.setCardBackgroundColor(ContextCompat.getColor(mCard.getContext(), R.color.colorAccent));
-        } else {
-            mCard.setCardBackgroundColor(ContextCompat.getColor(mCard.getContext(), R.color.colorPrimary));
+        if (mCard != null) {
+            if (mPresentation.getIsSelected()) {
+                mCard.setCardBackgroundColor(ContextCompat.getColor(mCard.getContext(), R.color.colorAccent));
+            } else {
+                mCard.setCardBackgroundColor(ContextCompat.getColor(mCard.getContext(), R.color.colorPrimary));
+            }
         }
     }
 

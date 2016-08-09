@@ -2,22 +2,14 @@ package com.thespeakers_studio.thespeakersstudioapp.data;
 
 import android.provider.BaseColumns;
 
+import com.thespeakers_studio.thespeakersstudioapp.model.OutlineItem;
+
 /**
  * Created by smcgi_000 on 4/21/2016.
  */
-public class PresentationDataContract {
-    public static final int DATABASE_VERSION = 3;
-    public static final String DATABASE_NAME = "SpeakersStudio.db";
+public class PresentationDataContract extends BasicDataContract {
 
     public PresentationDataContract() {}
-
-    private static final String TEXT_TYPE = " TEXT";
-    private static final String INT_TYPE = " INTEGER";
-    private static final String COMMA_SEP = ", ";
-    private static final String COLUMN_NAME_DATE_CREATED = "created_date";
-    private static final String COLUMN_NAME_DATE_MODIFIED = "modified_date";
-    private static final String COLUMN_NAME_CREATED_BY = "created_by";
-    private static final String COLUMN_NAME_MODIFIED_BY = "modified_by";
 
     public static abstract class PresentationEntry implements BaseColumns {
         public static final String TABLE_NAME = "presentation";

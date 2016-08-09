@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.thespeakers_studio.thespeakersstudioapp.R;
+import com.thespeakers_studio.thespeakersstudioapp.model.OutlineItem;
 import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
 import com.thespeakers_studio.thespeakersstudioapp.model.Prompt;
 import com.thespeakers_studio.thespeakersstudioapp.model.PromptAnswer;
@@ -65,11 +66,13 @@ public class PresentationDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(PresentationDataContract.PresentationEntry.SQL_DELETE_ENTRIES);
-        db.execSQL(PresentationDataContract.PresentationEntry.SQL_CREATE_ENTRIES);
+        if (oldVersion < 3) {
+            db.execSQL(PresentationDataContract.PresentationEntry.SQL_DELETE_ENTRIES);
+            db.execSQL(PresentationDataContract.PresentationEntry.SQL_CREATE_ENTRIES);
 
-        db.execSQL(PresentationDataContract.PresentationAnswerEntry.SQL_DELETE_ENTRIES);
-        db.execSQL(PresentationDataContract.PresentationAnswerEntry.SQL_CREATE_ENTRIES);
+            db.execSQL(PresentationDataContract.PresentationAnswerEntry.SQL_DELETE_ENTRIES);
+            db.execSQL(PresentationDataContract.PresentationAnswerEntry.SQL_CREATE_ENTRIES);
+        }
     }
 
     public String[] getIdSelectionClause (String presentationId) {

@@ -2,7 +2,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".PresentationMain">
 
-    <item android:id="@+id/menu_action_search" android:title="@string/search"
+    <item android:id="@+id/menu_action_search" android:visible="false" android:title="@string/search"
         app:showAsAction="ifRoom" android:icon="@drawable/ic_search_white_24dp" />
     <item android:id="@+id/menu_action_view" android:title="@string/change_view"
         app:showAsAction="ifRoom" android:icon="@drawable/ic_view_agenda_white_24dp" />

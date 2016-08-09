@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:key="pref_completed_presentations_goto"
+        android:title="Completed Presentations"
+        android:summary="When opening a completed presentation, go directly to the Outline instead of the Step List?"
+        android:defaultValue="true"
+         />
+
+</PreferenceScreen>

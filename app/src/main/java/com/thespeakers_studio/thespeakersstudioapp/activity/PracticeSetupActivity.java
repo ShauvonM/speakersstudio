@@ -1,12 +1,27 @@
 package com.thespeakers_studio.thespeakersstudioapp.activity;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceFragment;
 import android.support.design.widget.FloatingActionButton;
+import android.app.FragmentTransaction;
+import android.support.v4.view.ViewCompat;
+import android.text.InputType;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -14,31 +29,39 @@ import com.thespeakers_studio.thespeakersstudioapp.R;
 import com.thespeakers_studio.thespeakersstudioapp.fragment.PresentationPracticeDialog;
 import com.thespeakers_studio.thespeakersstudioapp.model.Outline;
 import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
+import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.AnalyticsHelper;
 import com.thespeakers_studio.thespeakersstudioapp.utils.OutlineHelper;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
+import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
 import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.makeLogTag;
 
 /**
  * Created by smcgi_000 on 8/5/2016.
  */
-public class PracticeSetupActivity extends BaseActivity implements View.OnClickListener {
+public class PracticeSetupActivity extends BaseActivity implements
+        View.OnClickListener {
 
     private static final String TAG = makeLogTag(OutlineActivity.class);
     private static final String SCREEN_LABEL = "Presentation Outline";
-
-    public static final int REQUEST_CODE = 4;
 
     private PresentationData mPresentation;
 
     private View mContentWrapper;
 
-    private View mStartWrapper;
     private FloatingActionButton mStartButton;
+
+    private boolean isPractice;
 
     private OutlineHelper mHelper;
     private Outline mOutline;
+
+    private boolean mHeaderSetup;
+
+    private float mMaxFABElevation;
+
+    private int mDuration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,37 +71,14 @@ public class PracticeSetupActivity extends BaseActivity implements View.OnClickL
 
         AnalyticsHelper.sendScreenView(SCREEN_LABEL);
 
-        setPresentationId(getIntent().getStringExtra(Utils.INTENT_PRESENTATION_ID));
+        mMaxFABElevation = getResources().getDimensionPixelSize(R.dimen.max_fab_elevation);
 
         mContentWrapper = findViewById(R.id.content_wrapper);
+        mStartButton = (FloatingActionButton) findViewById(R.id.fab_practice);
 
-        mStartWrapper = findViewById(R.id.fab_practice_wrapper);
+        mDuration = SettingsUtils.getDefaultTimerDuration(this);
 
-        TextView presentationName = (TextView) findViewById(R.id.presentation_name);
-        TextView presentationDuration = (TextView) findViewById(R.id.presentation_duration);
-        View fab = findViewById(R.id.fab_practice);
-
-        if (presentationName != null && presentationDuration != null) {
-            if (mOutline != null) {
-                presentationName.setText(mOutline.getTitle());
-                presentationDuration.setText(mOutline.getDuration());
-            } else {
-                presentationName.setVisibility(View.GONE);
-                presentationDuration.setVisibility(View.GONE);
-            }
-        }
-
-        if (mOutline == null) {
-            setTitle(R.string.timer);
-        }
-
-        if (fab != null) {
-            fab.setOnClickListener(this);
-        }
-
-        findViewById(R.id.checkbox_record).setOnClickListener(this);
-        findViewById(R.id.checkbox_track).setOnClickListener(this);
-        findViewById(R.id.checkbox_disable_phone).setOnClickListener(this);
+        setPresentationId(getIntent().getStringExtra(Utils.INTENT_PRESENTATION_ID));
     }
 
     private void setPresentationId(String id) {
@@ -86,6 +86,110 @@ public class PracticeSetupActivity extends BaseActivity implements View.OnClickL
             mPresentation = mDbHelper.loadPresentationById(id);
             mOutline = Outline.fromPresentation(this, mPresentation);
         }
+        isPractice = mOutline != null;
+
+        setup();
+    }
+
+    private void setup() {
+        TextView presentationName = (TextView) findViewById(R.id.presentation_name);
+        TextView presentationDuration = (TextView) findViewById(R.id.presentation_duration);
+        EditText timerDurationInput = (EditText) findViewById(R.id.timer_duration_input);
+        View fab = findViewById(R.id.fab_practice);
+
+        final PracticeSettingsFragment fragment = (PracticeSettingsFragment) getFragmentManager().findFragmentById(R.id.settings_fragment);
+        fragment.setPractice(isPractice);
+
+        if (isPractice) {
+            presentationName.setText(mOutline.getTitle());
+            presentationDuration.setText(mOutline.getDuration());
+        } else {
+            //presentationName.setVisibility(View.GONE);
+            presentationDuration.setVisibility(View.GONE);
+            //durationSpinner.setVisibility(View.VISIBLE);
+
+            timerDurationInput.setVisibility(View.VISIBLE);
+            timerDurationInput.setText(String.valueOf(mDuration));
+            presentationName.setText(R.string.minutes);
+            presentationName.setOnClickListener(this);
+            /*
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                    R.array.presentation_duration_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            durationSpinner.setAdapter(adapter);
+            durationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    switch(position) {
+                        case 0:
+                            mDuration = 5;
+                            break;
+                        case 1:
+                            mDuration = 10;
+                            break;
+                        case 2:
+                            mDuration = 20;
+                            break;
+                        case 3:
+                            mDuration = 30;
+                            break;
+                        case 4:
+                            mDuration = -1;
+                            showCustomDuration();
+                            return;
+                        default:
+                            mDuration = 0;
+                            break;
+                    }
+                    hideCustomDuration();
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                    mDuration = 0;
+                    hideCustomDuration();
+                }
+            });
+            */
+
+            setTitle(R.string.timer);
+            ((TextView) findViewById(R.id.no_results)).setText(R.string.no_saved_timers);
+        }
+
+        fab.setOnClickListener(this);
+
+        /* WIP - use the scroll magic to collapse the settings section
+        DO NOT REMOVE
+
+        final View settingsView = findViewById(R.id.practice_settings);
+        final View contentView = findViewById(R.id.saved_timer_list);
+        final View settingsLabel = findViewById(R.id.settings_label);
+
+        ViewTreeObserver vto = settingsView.getViewTreeObserver();
+        if (vto.isAlive()) {
+            vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    if (!mHeaderSetup) {
+                        int height = settingsView.getHeight();
+                        int layoutHeight = contentView.getHeight();
+
+                        int h = height; // - settingsLabel.getHeight();
+                        if (layoutHeight < h) {
+                            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) contentView.getLayoutParams();
+                            layoutParams.height = h;
+                            contentView.setLayoutParams(layoutParams);
+                        }
+
+                        LOGD(TAG, "h " + h);
+
+                        findViewById(R.id.headerbar_scroll).scrollBy(0, h);
+                        mHeaderSetup = true;
+                    }
+                }
+            });
+        }
+        */
     }
 
     @Override
@@ -113,57 +217,52 @@ public class PracticeSetupActivity extends BaseActivity implements View.OnClickL
 
         int scrollY = findViewById(R.id.headerbar_scroll).getScrollY();
 
-        int wrapperHeight = mStartWrapper.getHeight();
-        int headerHeight = getSupportActionBar() != null ? getSupportActionBar().getHeight()
-                : 0;
-        int headerDetailsHeight = getNewHeaderDetailsHeight(scrollY);
-        int startPos = headerDetailsHeight + headerHeight - (wrapperHeight / 2);
-        int endPos = 0;
+        int fabHeight = getResources().getDimensionPixelSize(R.dimen.fab_button) +
+                (getResources().getDimensionPixelSize(R.dimen.fab_margin) * 2);
+        int headerHeight = getSupportActionBar() != null ? getSupportActionBar().getHeight() : 0;
+        int baseHeight = mHeaderDetailsHeightPixels + headerHeight;
 
-        float ratio = (float) headerDetailsHeight / (float) mHeaderDetailsHeightPixels;
+        float newHeight = Math.min(baseHeight, (float)scrollY); // (scrollY * 0.4));
 
-        mStartWrapper.setTranslationY(endPos + ((startPos - endPos) * ratio));
+        //float ratio = (float) headerDetailsHeight / (float) mHeaderDetailsHeightPixels;
+        //mStartWrapper.setTranslationY(endPos + ((startPos - endPos) * ratio));
+        mStartButton.setTranslationY(baseHeight - newHeight - (fabHeight / 2));
+
+        float gapFillProgress;
+        gapFillProgress = Math.min(
+                Math.max(Utils.getProgress(scrollY, 0, mHeaderHeightPixels), 0),
+                1);
+
+        ViewCompat.setElevation(mStartButton, (mMaxFABElevation / 2) + (gapFillProgress * (mMaxFABElevation / 2)));
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.presentation_name:
+                EditText timerDurationInput = (EditText) findViewById(R.id.timer_duration_input);
+                timerDurationInput.requestFocus();
+                break;
             case R.id.fab_practice:
-                boolean delay = ((CheckBox) findViewById(R.id.checkbox_delay)).isChecked();
-                boolean displayTimer = ((CheckBox) findViewById(R.id.checkbox_show_timer)).isChecked();
-                boolean showWarning = ((CheckBox) findViewById(R.id.checkbox_show_warning)).isChecked();
-                boolean track = ((CheckBox) findViewById(R.id.checkbox_track)).isChecked();
-                boolean vibrate = ((CheckBox) findViewById(R.id.checkbox_vibrate)).isChecked();
-                boolean recordVideo = ((CheckBox) findViewById(R.id.checkbox_record)).isChecked();
-                boolean disablePhone = ((CheckBox) findViewById(R.id.checkbox_disable_phone)).isChecked();
-
-                startPractice(delay, displayTimer, showWarning, track, vibrate, recordVideo, disablePhone);
+                startPractice();
             break;
-            case R.id.checkbox_record:
-                Toast.makeText(PracticeSetupActivity.this, "Recording isn't implemented yet", Toast.LENGTH_SHORT).show();
-                ((CheckBox) findViewById(R.id.checkbox_record)).setChecked(false);
-                break;
-            case R.id.checkbox_track:
-                Toast.makeText(PracticeSetupActivity.this, "Tracking isn't implemented yet", Toast.LENGTH_SHORT).show();
-                ((CheckBox) findViewById(R.id.checkbox_track)).setChecked(false);
-                break;
-            case R.id.checkbox_disable_phone:
-                Toast.makeText(PracticeSetupActivity.this, "Disabling phone isn't implemented yet", Toast.LENGTH_SHORT).show();
-                ((CheckBox) findViewById(R.id.checkbox_disable_phone)).setChecked(false);
-                break;
         }
     }
 
-    private void startPractice(boolean delay, boolean displayTimer, boolean showWarning, boolean track, boolean vibrate, boolean recordVideo, boolean disablePhone) {
-        if (mOutline != null) {
-            PresentationPracticeDialog dialog = new PresentationPracticeDialog();
-            dialog.setup(mOutline, delay, displayTimer, showWarning, track, vibrate);
-
-            dialog.show(getSupportFragmentManager(), PresentationPracticeDialog.TAG);
-            //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+    private void startPractice() {
+        PresentationPracticeDialog dialog = new PresentationPracticeDialog();
+        if (isPractice) {
+            dialog.setup(mOutline);
         } else {
-            Toast.makeText(this, "Custom timers aren't working yet. I know, I'm sorry.", Toast.LENGTH_SHORT);
+            mDuration = Integer.parseInt(((TextView) findViewById(R.id.timer_duration_input)).getText().toString());
+            if (mDuration <= 0) {
+                return;
+            }
+            SettingsUtils.setDefaultTimerDuration(this, mDuration);
+            dialog.setup(mDuration);
         }
+        dialog.show(getSupportFragmentManager(), PresentationPracticeDialog.TAG);
+        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 
     @Override
@@ -171,11 +270,7 @@ public class PracticeSetupActivity extends BaseActivity implements View.OnClickL
         int id = item.getItemId();
         switch(id) {
             case android.R.id.home:
-                if (mOutline != null) {
-                    onBackPressed();
-                } else {
-                    super.onOptionsItemSelected(item);
-                }
+                onBackPressed();
                 break;
             default:
                 return super.onOptionsItemSelected(item);
@@ -185,10 +280,10 @@ public class PracticeSetupActivity extends BaseActivity implements View.OnClickL
 
     @Override
     public void onBackPressed() {
-        if (mOutline != null) {
-            navigateUpOrBack(this, getIntent().getExtras(), EditPresentationActivity.class);
+        if (getCallingActivity() != null) {
+            returnActivityResult();
         } else {
-            super.onBackPressed();
+            navigateUpOrBack(this, getIntent().getExtras(), PresentationMainActivity.class);
         }
     }
 
@@ -197,7 +292,56 @@ public class PracticeSetupActivity extends BaseActivity implements View.OnClickL
         if (mPresentation != null) {
             intent.putExtra(Utils.INTENT_PRESENTATION_ID, mPresentation.getId());
         }
-        setResult(0, intent);
+        setResult(Activity.RESULT_OK, intent);
         finish();
     }
+
+    public static class PracticeSettingsFragment extends PreferenceFragment
+            implements SharedPreferences.OnSharedPreferenceChangeListener {
+        private boolean isPractice;
+
+        public PracticeSettingsFragment () {
+        }
+
+        public void setPractice(boolean isp) {
+            isPractice = isp;
+            if (isPractice) {
+                addPreferencesFromResource(R.xml.settings_practice);
+            }
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.settings_timer);
+
+            SettingsUtils.registerOnSharedPreferenceChangeListener(getActivity(), this);
+
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            SettingsUtils.unregisterOnSharedPreferenceChangeListener(getActivity(), this);
+        }
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            // put handlers for specific settings here, as needed
+            switch(key) {
+                case SettingsUtils.PREF_TIMER_RECORD:
+                    Toast.makeText(getActivity(), "Recording isn't implemented yet", Toast.LENGTH_SHORT).show();
+                    break;
+                case SettingsUtils.PREF_TIMER_DISABLE:
+                    Toast.makeText(getActivity(), "Disabling phone isn't implemented yet", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+        }
+    }
+
 }

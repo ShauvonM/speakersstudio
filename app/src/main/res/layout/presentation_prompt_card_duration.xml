@@ -22,7 +22,6 @@
             android:inputType="number"
             android:hint="@string/custom_duration_hint"
             android:layout_margin="@dimen/default_padding">
-
         </EditText>
     </android.support.design.widget.TextInputLayout>
 

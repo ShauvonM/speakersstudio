@@ -42,16 +42,59 @@
             android:name=".activity.OutlineActivity"
             android:label="@string/outline"
             android:theme="@style/AppTheme.Outline"
-            android:parentActivityName=".activity.EditPresentationActivity">
+            android:parentActivityName=".activity.PresentationMainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activity.EditPresentationActivity" />
+                android:value=".activity.PresentationMainActivity" />
         </activity>
+
         <activity
             android:name=".activity.PracticeSetupActivity"
             android:label="@string/practice_presentation"
-            android:theme="@style/AppTheme.WithNavDrawer.Inverted">
+            android:theme="@style/AppTheme.WithNavDrawer.Inverted"
+            android:parentActivityName=".activity.PresentationMainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.PresentationMainActivity" />
         </activity>
+
+        <activity
+            android:name=".activity.StoriesMainActivity"
+            android:label="@string/stories"
+            android:theme="@style/AppTheme.WithNavDrawer"
+            android:parentActivityName=".activity.PresentationMainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.PresentationMainActivity" />
+        </activity>
+        <activity
+            android:name=".activity.CuriousActivity"
+            android:label="@string/curious"
+            android:theme="@style/AppTheme.WithNavDrawer"
+            android:parentActivityName=".activity.PresentationMainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.PresentationMainActivity" />
+        </activity>
+        <activity
+            android:name=".settings.SettingsActivity"
+            android:label="@string/action_settings"
+            android:theme="@style/AppTheme.Settings"
+            android:parentActivityName=".activity.PresentationMainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.PresentationMainActivity" />
+        </activity>
+        <activity
+            android:name=".activity.AboutActivity"
+            android:label="@string/about"
+            android:theme="@style/AppTheme.WithNavDrawer"
+            android:parentActivityName=".activity.PresentationMainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.PresentationMainActivity" />
+        </activity>
+
 
         <!-- desktop -->
         <!--

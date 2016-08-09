@@ -19,13 +19,25 @@
         android:layout_height="match_parent">
 
         <!-- content goes here -->
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/presentation_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
             android:clipChildren="false"
+            android:padding="@dimen/pres_list_padding"
             />
+
+        <!--
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:srcCompat="@drawable/ss_logo_small_white"
+            android:layout_marginBottom="@dimen/fab_margin"
+            />
+            -->
 
         <TextView
             android:id="@+id/no_presentations"

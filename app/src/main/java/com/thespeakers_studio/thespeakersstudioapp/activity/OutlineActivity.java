@@ -36,8 +36,6 @@ public class OutlineActivity extends BaseActivity implements
     private static final String TAG = makeLogTag(OutlineActivity.class);
     private static final String SCREEN_LABEL = "Presentation Outline";
 
-    public static final int REQUEST_CODE = 3;
-
     private PresentationData mPresentation;
 
     private LinearLayout mContentWrapper;
@@ -54,10 +52,10 @@ public class OutlineActivity extends BaseActivity implements
 
         AnalyticsHelper.sendScreenView(SCREEN_LABEL);
 
-        setPresentationId(getIntent().getStringExtra(Utils.INTENT_PRESENTATION_ID));
-
         mContentWrapper = (LinearLayout) findViewById(R.id.content_wrapper);
         mOutlineList = (LinearLayout) findViewById(R.id.outline_list);
+
+        setPresentationId(getIntent().getStringExtra(Utils.INTENT_PRESENTATION_ID));
     }
 
     private void setPresentationId(String id) {
@@ -133,8 +131,7 @@ public class OutlineActivity extends BaseActivity implements
             case R.id.fab_practice:
                 Intent intent = new Intent(getApplicationContext(), PracticeSetupActivity.class);
                 intent.putExtra(Utils.INTENT_PRESENTATION_ID, mPresentation.getId());
-                //startActivityForResult(intent, PracticeSetupActivity.REQUEST_CODE);
-                createBackStack(intent);
+                startActivityForResult(intent, Utils.REQUEST_CODE_PRACTICE);
                 break;
         }
     }
@@ -159,7 +156,12 @@ public class OutlineActivity extends BaseActivity implements
                 Toast.makeText(this, "You can't edit outlines just yet", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.menu_action_outline_view:
-                Toast.makeText(this, "The timeline com.thespeakers_studio.thespeakersstudioapp.view isn't ready yet", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "The timeline view isn't ready yet", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.menu_action_goto_steplist:
+                Intent intent = new Intent(getApplicationContext(), EditPresentationActivity.class);
+                intent.putExtra(Utils.INTENT_PRESENTATION_ID, mPresentation.getId());
+                startActivityForResult(intent, Utils.REQUEST_CODE_EDIT_PRESENTATION);
                 break;
             case android.R.id.home:
                 onBackPressed();
@@ -186,4 +188,13 @@ public class OutlineActivity extends BaseActivity implements
         finish();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode) {
+            case Utils.REQUEST_CODE_PRACTICE:
+                setPresentationId(data.getStringExtra(Utils.INTENT_PRESENTATION_ID));
+                break;
+        }
+    }
 }
