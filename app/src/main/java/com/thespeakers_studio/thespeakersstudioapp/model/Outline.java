@@ -196,6 +196,63 @@ public class Outline {
         outline.addItem(introItem);
         masterOrder = outline.getItemCount();
 
+        // load up all of the topic sub items
+        ArrayList<Prompt> topicSubItems = new ArrayList<>();
+        for (int i = 0; i < Outline.OUTLINE_TOPIC_ITEMS.length; i++) {
+            topicSubItems.add(pres.getPromptById(Outline.OUTLINE_TOPIC_ITEMS[i]));
+        }
+
+        // loop through the topics and add each one with its sup-items
+        for (PromptAnswer t : topics) {
+            OutlineItem topicItem = new OutlineItem(
+                    t.getKey(),
+                    OutlineItem.NO_PARENT,
+                    masterOrder,
+                    t.getValue(),
+                    t.getId(),
+                    false,
+                    topicDuration,
+                    pres.getId());
+
+            outline.addItem(topicItem);
+            masterOrder++;
+            long durationTally = 0l;
+
+            ArrayList<PromptAnswer> subItemList = new ArrayList<>();
+            for (Prompt p : topicSubItems) {
+                subItemList.addAll(p.getAnswersByLinkId(t.getId()));
+            }
+
+            long subItemDuration = Math.round((topicDuration / subItemList.size()) / 1000) * 1000;
+            long subItemLeftover = topicDuration - (subItemDuration * subItemList.size());
+
+            for (PromptAnswer a : subItemList) {
+                OutlineItem subitem = new OutlineItem(
+                        "", // id?
+                        t.getKey(),
+                        masterOrder,
+                        a.getValue(),
+                        a.getId(),
+                        false,
+                        0,
+                        pres.getId()
+                );
+
+                long thisDuration = subItemDuration;
+                if (subItemLeftover >= 1000) {
+                    thisDuration += 1000;
+                    subItemLeftover -= 1000;
+                }
+                subitem.setDuration(thisDuration);
+
+                topicItem.addSubItem(subitem);
+                masterOrder++;
+            }
+
+            outline.addItem(topicItem);
+            order++;
+        }
+
         return outline;
     }
 
