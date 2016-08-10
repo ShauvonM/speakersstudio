@@ -391,7 +391,7 @@ public class EditPresentationActivity extends BaseActivity implements
                 mPromptListFragment.setMargin(h);
             }
         };
-        showHeaderAnimation.setDuration(SettingsUtils.PROMPT_PROGRESS_ANIMATION_DURATION);
+        showHeaderAnimation.setDuration(SettingsUtils.PROMPT_HEADER_SLIDE_DURATION);
         showHeaderAnimation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {}
