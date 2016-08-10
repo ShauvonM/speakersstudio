@@ -293,8 +293,8 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
             showText(mOutputSubView, R.string.timer);
             showText(mOutputMainView, "");
             if (!mStarted) {
-                mCurrentExpiration = mDuration;
                 start();
+                mCurrentExpiration = mDuration;
             } else if (mPaused) {
                 mPaused = false;
             } else {

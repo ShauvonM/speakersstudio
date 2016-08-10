@@ -29,6 +29,7 @@ public class SettingsUtils {
     public static final int MAIN_CONTENT_FADEIN_DURATION = 250;
 
     public static final int SELECTION_TOOLBAR_FADE_DURATION = 300;
+    public static final int PROMPT_HEADER_SLIDE_DURATION = 500;
     public static final int PROMPT_PROGRESS_ANIMATION_DURATION = 300;
     public static final int OUTLINE_BUTTON_TRANSITION_DURATION = 1000;
 
