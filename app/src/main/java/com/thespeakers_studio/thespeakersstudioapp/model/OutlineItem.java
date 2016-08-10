@@ -25,6 +25,7 @@ public class OutlineItem {
 
     public static final String INTRO = "intro";
     public static final String CONCLUSION = "conclusion";
+    public static final String NO_PARENT = "no_parent";
 
     public OutlineItem (String id, String parent, int order, String text, String answer, boolean fromDB, long duration, String presentation) {
         mId = id;
@@ -39,7 +40,7 @@ public class OutlineItem {
 
     // for the intro / conclusion items
     public OutlineItem (String id, int order, String text, String presentation) {
-        this(id, "", order, text, "", false, 0, presentation);
+        this(id, NO_PARENT, order, text, "", false, 0, presentation);
     }
 
     // for manually setting everything up

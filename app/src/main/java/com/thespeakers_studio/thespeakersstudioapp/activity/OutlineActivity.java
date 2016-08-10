@@ -78,7 +78,7 @@ public class OutlineActivity extends BaseActivity implements
         LinearLayout listWrapper = (LinearLayout) findViewById(R.id.outline_list);
         if (listWrapper != null) {
             listWrapper.removeAllViews();
-            renderList(listWrapper, null, 1);
+            renderList(listWrapper, OutlineItem.NO_PARENT, 1);
         }
     }
 

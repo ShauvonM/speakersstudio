@@ -40,12 +40,11 @@ public class Outline {
 
     public ArrayList<OutlineItem> getItemsByParentId(String parentId) {
         ArrayList<OutlineItem> items = new ArrayList<>();
+        if (parentId.isEmpty()) {
+            return items;
+        }
         for (OutlineItem item : mItems) {
-            if (parentId == null || parentId.isEmpty()) {
-                if (item.getParentId().isEmpty() || item.getParentId() == null) {
-                    items.add(item);
-                }
-            } else if (item.getParentId().equals(parentId)) {
+            if (item.getParentId().equals(parentId)) {
                 items.add(item);
             }
         }
@@ -91,8 +90,10 @@ public class Outline {
                 .replace("\n", " ");
     }
 
-    private int loadSubItemsFromPrompts(int[] promptIDs, String parentId, long duration, int order) {
+    private long loadSubItemsFromPrompts(int[] promptIDs, String parentId, long duration, int order) {
         Resources r = mContext.getResources();
+
+        long durationTally = 0;
 
         long subItemDuration = Math.round((duration / promptIDs.length) / 1000) * 1000;
         long subItemLeftover = duration - (subItemDuration * promptIDs.length);
@@ -116,6 +117,8 @@ public class Outline {
             }
 
             thisItem.setDuration(thisDuration);
+            durationTally += thisDuration;
+
             thisItem.setParentId(parentId);
 
             if (type == PresentationData.TEXT || type == PresentationData.PARAGRAPH) {
@@ -154,8 +157,7 @@ public class Outline {
             }
         }
 
-        order++;
-        return order;
+        return durationTally;
     }
 
 
@@ -184,9 +186,15 @@ public class Outline {
                 r.getString(R.string.outline_item_intro),
                 pres.getId()
         );
+        masterOrder++;
         // we won't know the duration of the intro until we've gone through the items
         // because there could be some wackyland stuff in there
-        masterOrder = outline.loadSubItemsFromPrompts(OUTLINE_INTRO_ITEMS, OutlineItem.INTRO, introDuration, masterOrder);
+        introItem.setDuration(
+                outline.loadSubItemsFromPrompts(OUTLINE_INTRO_ITEMS,
+                        OutlineItem.INTRO, introDuration, masterOrder)
+        );
+        outline.addItem(introItem);
+        masterOrder = outline.getItemCount();
 
         return outline;
     }
