@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.v4.content.ContextCompat;
 
 import com.thespeakers_studio.thespeakersstudioapp.R;
 import com.thespeakers_studio.thespeakersstudioapp.model.OutlineItem;
@@ -28,7 +29,8 @@ public class PresentationDbHelper extends SQLiteOpenHelper {
     private String[] PRESENTATION_PROJECTION = {
                 PresentationDataContract.PresentationEntry._ID,
                 PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID,
-                PresentationDataContract.PresentationEntry.COLUMN_NAME_DATE_MODIFIED
+                PresentationDataContract.PresentationEntry.COLUMN_NAME_DATE_MODIFIED,
+                PresentationDataContract.PresentationEntry.COLUMN_NAME_COLOR
         };
     private String[] ANSWER_PROJECTION = {
                 PresentationDataContract.PresentationAnswerEntry._ID,
@@ -91,11 +93,15 @@ public class PresentationDbHelper extends SQLiteOpenHelper {
         try {
             while (!presCursor.isAfterLast()) {
                 String presentationId = presCursor.getString(
-                        presCursor.getColumnIndexOrThrow(PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID)
+                        presCursor.getColumnIndexOrThrow(
+                                PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID
+                        )
                 );
                 String modifiedDate = getModifiedDateFromCursor(presCursor);
+                int color = getColorFromCursor(presCursor);
 
-                PresentationData pres = new PresentationData(mContext, presentationId, modifiedDate);
+                PresentationData pres = new PresentationData(mContext, presentationId,
+                        modifiedDate, color);
 
                 // fetch the answers
                 Cursor answerCursor = getAnswerCursor(db, presentationId);
@@ -119,6 +125,15 @@ public class PresentationDbHelper extends SQLiteOpenHelper {
         return modifiedDate;
     }
 
+    private int getColorFromCursor(Cursor presCursor) {
+        int color = presCursor.getInt(
+                    presCursor.getColumnIndexOrThrow(
+                            PresentationDataContract.PresentationEntry.COLUMN_NAME_COLOR
+                    )
+            );
+        return color;
+    }
+
     private Cursor getAnswerCursor(SQLiteDatabase db, String presentationId) {
         return db.query(
                 PresentationDataContract.PresentationAnswerEntry.TABLE_NAME,
@@ -140,7 +155,11 @@ public class PresentationDbHelper extends SQLiteOpenHelper {
         presCursor.moveToFirst();
         if (presCursor.getCount() > 0) {
             String modifiedDate = getModifiedDateFromCursor(presCursor);
-            PresentationData pres = new PresentationData(mContext, presentationId, modifiedDate);
+            int color = getColorFromCursor(presCursor);
+
+            PresentationData pres = new PresentationData(mContext, presentationId,
+                    modifiedDate, color);
+
             Cursor answerCursor = getAnswerCursor(db, presentationId);
             pres.setAnswers(answerCursor);
 
@@ -158,16 +177,17 @@ public class PresentationDbHelper extends SQLiteOpenHelper {
 
         String datetime = Utils.getDateTimeStamp();
 
-        int color = R.color.colorPrimary;
+        int color = ContextCompat.getColor(mContext, R.color.presentationColor8);
 
         ContentValues values = new ContentValues();
         values.put(PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID, id);
         values.put(PresentationDataContract.PresentationEntry.COLUMN_NAME_DATE_CREATED, datetime);
         values.put(PresentationDataContract.PresentationEntry.COLUMN_NAME_DATE_MODIFIED, datetime);
-        values.put(PresentationDataContract.PresentationEntry.COLUMN_NAME_COLOR, color); // TODO: custom colors
+        values.put(PresentationDataContract.PresentationEntry.COLUMN_NAME_COLOR, color);
 
         db.insert(PresentationDataContract.PresentationEntry.TABLE_NAME, null, values);
-        return new PresentationData(mContext, id, datetime);
+
+        return new PresentationData(mContext, id, datetime, color);
     }
 
     public void resetPresentation(PresentationData presentation) {
@@ -178,6 +198,24 @@ public class PresentationDbHelper extends SQLiteOpenHelper {
         db.close();
 
         presentation.resetAnswers();
+
+        // TODO: update modified date
+    }
+
+    public void savePresentationColor(String presentationId, int color) {
+        SQLiteDatabase db = getWritableDatabase();
+        String datetime = Utils.getDateTimeStamp();
+        ContentValues values = new ContentValues();
+
+        values.put(PresentationDataContract.PresentationEntry.COLUMN_NAME_COLOR, color);
+        values.put(PresentationDataContract.PresentationEntry.COLUMN_NAME_DATE_MODIFIED, datetime);
+
+        db.update(PresentationDataContract.PresentationEntry.TABLE_NAME,
+                values,
+                PRESENTATION_SELECTION_CLAUSE,
+                getIdSelectionClause(presentationId));
+
+        db.close();
     }
 
     public void savePrompt(String presentationId, Prompt prompt) {

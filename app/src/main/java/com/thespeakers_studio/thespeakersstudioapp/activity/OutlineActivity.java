@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,6 +22,7 @@ import com.thespeakers_studio.thespeakersstudioapp.model.OutlineItem;
 import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
 import com.thespeakers_studio.thespeakersstudioapp.utils.AnalyticsHelper;
 import com.thespeakers_studio.thespeakersstudioapp.utils.OutlineHelper;
+import com.thespeakers_studio.thespeakersstudioapp.utils.PresentationUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 import java.util.ArrayList;
@@ -44,6 +46,8 @@ public class OutlineActivity extends BaseActivity implements
     private OutlineHelper mHelper;
     private Outline mOutline;
 
+    private int[] mColors;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +58,13 @@ public class OutlineActivity extends BaseActivity implements
 
         mContentWrapper = (LinearLayout) findViewById(R.id.content_wrapper);
         mOutlineList = (LinearLayout) findViewById(R.id.outline_list);
+        mOutlineList.removeAllViews();
+
+        mColors = new int[] {
+                ContextCompat.getColor(this, R.color.outlineColor1),
+                ContextCompat.getColor(this, R.color.outlineColor2),
+                ContextCompat.getColor(this, R.color.outlineColor3)
+        };
 
         setPresentationId(getIntent().getStringExtra(Utils.INTENT_PRESENTATION_ID));
     }
@@ -78,11 +89,12 @@ public class OutlineActivity extends BaseActivity implements
         LinearLayout listWrapper = (LinearLayout) findViewById(R.id.outline_list);
         if (listWrapper != null) {
             listWrapper.removeAllViews();
-            renderList(mOutline.getItems(), listWrapper, 1);
+            renderList(listWrapper, OutlineItem.NO_PARENT, 1);
         }
     }
 
-    private void renderList (ArrayList<OutlineItem> items, LinearLayout wrapper, int level) {
+    private void renderList (LinearLayout wrapper, String parentId, int level) {
+        ArrayList<OutlineItem> items = mOutline.getItemsByParentId(parentId);
         if (items.size() == 0) {
             return;
         }
@@ -91,10 +103,17 @@ public class OutlineActivity extends BaseActivity implements
         int index = 0;
 
         for (OutlineItem item : items) {
-            RelativeLayout itemLayout = (RelativeLayout) inflater.inflate(R.layout.outline_item, wrapper, false);
+            RelativeLayout itemLayout =
+                    (RelativeLayout) inflater.inflate(R.layout.outline_item, wrapper, false);
+
+            // make sure it's empty
+            ((LinearLayout) itemLayout.findViewById(R.id.outline_sub_item_wrapper)).removeAllViews();
 
             // set the icon
-            ((TextView) itemLayout.findViewById(R.id.list_main_bullet)).setText(mHelper.getBullet(level, index + 1));
+            TextView iconView = (TextView) itemLayout.findViewById(R.id.list_main_bullet);
+            iconView.setText(mHelper.getBullet(level, index + 1));
+            iconView.setBackgroundColor(mColors[level - 1]);
+
             // set the text for this thing
             ((TextView) itemLayout.findViewById(R.id.list_topic)).setText(item.getText());
             // set the duration for this thing
@@ -107,7 +126,9 @@ public class OutlineActivity extends BaseActivity implements
                 timeView.setText("");
             }
 
-            renderList(item.getSubItems(), (LinearLayout) itemLayout.findViewById(R.id.outline_sub_item_wrapper), level == 3 ? 1 : level + 1);
+            renderList((LinearLayout) itemLayout.findViewById(R.id.outline_sub_item_wrapper),
+                    item.getId(),
+                    level == 3 ? 1 : level + 1);
 
             wrapper.addView(itemLayout);
 
@@ -161,6 +182,8 @@ public class OutlineActivity extends BaseActivity implements
             case R.id.menu_action_goto_steplist:
                 Intent intent = new Intent(getApplicationContext(), EditPresentationActivity.class);
                 intent.putExtra(Utils.INTENT_PRESENTATION_ID, mPresentation.getId());
+                intent.putExtra(Utils.INTENT_THEME_ID,
+                        PresentationUtils.getThemeForColor(this, mPresentation.getColor()));
                 startActivityForResult(intent, Utils.REQUEST_CODE_EDIT_PRESENTATION);
                 break;
             case android.R.id.home:

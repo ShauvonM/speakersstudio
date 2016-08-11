@@ -21,6 +21,13 @@ public class Outline {
     public static final int[] OUTLINE_TOPIC_ITEMS = new int[] {22, 21, 20, 23};
     public static final int[] OUTLINE_CONC_ITEMS = new int[] {13, 19};
 
+    /*
+        default durations (these are probably placeholders)
+        INTRO: 12.5%
+        TOPICS: 75% / top level item count
+        CONCLUSION: 12.5%
+    */
+
     public Outline(Context context) {
         mItems = new ArrayList<>();
         mContext = context;
@@ -31,6 +38,20 @@ public class Outline {
         return mItems;
     }
 
+    public ArrayList<OutlineItem> getItemsByParentId(String parentId) {
+        ArrayList<OutlineItem> items = new ArrayList<>();
+        if (parentId.isEmpty()) {
+            return items;
+        }
+        for (OutlineItem item : mItems) {
+            if (item.getParentId().equals(parentId)) {
+                items.add(item);
+            }
+        }
+        //Utils.sortOutlineList(items); TODO
+        return items;
+    }
+
     public OutlineItem getItem(int index) {
         if (index >= mItems.size()) {
             return null;
@@ -38,6 +59,7 @@ public class Outline {
         Utils.sortOutlineList(mItems);
         return mItems.get(index);
     }
+
     public int getItemCount() {
         return mItems.size();
     }
@@ -63,55 +85,155 @@ public class Outline {
         return (mins * 60) * 1000;
     }
 
+    public long roundToThousand(long num) {
+        return Math.round(num / 1000) * 1000;
+    }
+
     public String getDate() {
         return Utils.getDateTimeString(mPresentation.getDate(), mContext.getResources())
                 .replace("\n", " ");
     }
 
+    private long loadSubItemsFromPrompts(int[] promptIDs, String parentId, long duration,
+                                         int order, long durationLeftover) {
+        Resources r = mContext.getResources();
+
+        long durationTally = 0;
+
+        long subItemDuration = roundToThousand(duration / promptIDs.length);
+        long subItemLeftover = (duration - (subItemDuration * promptIDs.length)) + durationLeftover;
+
+        for (int i = 0; i < promptIDs.length; i++) {
+            order += i;
+
+            int type = mPresentation.getPromptById(promptIDs[i]).getType();
+            String id = parentId + "_prompt_" + promptIDs[i];
+
+            OutlineItem thisItem = new OutlineItem();
+
+            thisItem.setId(id);
+            thisItem.setPresentationId(mPresentation.getId());
+            thisItem.setOrder(order);
+
+            long thisDuration = subItemDuration;
+            if (subItemLeftover >= 1000) {
+                thisDuration += 1000;
+                subItemLeftover -= 1000;
+            }
+
+            // if this is the last item, we should just dump all the remaining time in there
+            if (durationLeftover > 0 && i == promptIDs.length - 1) {
+                thisDuration += subItemLeftover;
+            }
+
+            thisItem.setDuration(thisDuration);
+            durationTally += thisDuration;
+
+            thisItem.setParentId(parentId);
+
+            if (type == PresentationData.TEXT || type == PresentationData.PARAGRAPH) {
+
+                PromptAnswer answer = mPresentation.getAnswerByKey(promptIDs[i], "text");
+
+                thisItem.setText(answer.getValue());
+                thisItem.setAnswerId(answer.getId());
+
+                addItem(thisItem);
+
+            } else if (type == PresentationData.LIST) {
+
+                // we have to add all the answers as their own sub-item, so we can treat them
+                // individually if we need to
+                thisItem.setText(r.getString(R.string.outline_item_mention));
+                thisItem.setAnswerId(id);
+                addItem(thisItem);
+
+                ArrayList<PromptAnswer> answers = mPresentation.getAnswer(promptIDs[i]);
+                for (PromptAnswer answer : answers) {
+                    order++;
+                    OutlineItem answerItem = new OutlineItem(
+                            "",
+                            id,
+                            order,
+                            answer.getValue(),
+                            answer.getId(),
+                            false,
+                            0,
+                            mPresentation.getId()
+                    );
+                    addItem(answerItem);
+                }
+
+            }
+        }
+
+        return durationTally;
+    }
+
+
     // this is the biggun - this method generates the outline list
     public static Outline fromPresentation (Context context, PresentationData pres) {
         Outline outline = new Outline(context);
         outline.setPresentation(pres);
+
         Resources r = context.getResources();
 
-        int durationMinutes = Integer.parseInt(pres.getAnswerByKey(PresentationData.PRESENTATION_DURATION, "duration"));
+        int durationMinutes = pres.getDuration();
         long durationMillis = (durationMinutes * 60) * 1000;
 
+        // load the topics
         ArrayList<PromptAnswer> topics = pres.getAnswer(PresentationData.PRESENTATION_TOPICS);
+        int topicCount = topics.size();
 
-        /*
-            default durations (these are probably placeholders)
-            INTRO: 12.5%
-            TOPICS: 75% (divided among topics)
-            CONCLUSION: 12.5%
-        */
-        long topicDuration = (long) Math.floor((durationMillis * 0.75) / topics.size());
-        long introDuration = (long) Math.floor((durationMillis - (topicDuration * topics.size())) / 2);
+        // this is the default durations for these things, they might change depending on
+        // items saved in the OutlineItem database
+        long topicDuration = (long) Math.floor((durationMillis * 0.75) / topicCount);
+        long introDuration = (long) Math.floor((durationMillis - (topicDuration * topicCount)) / 2);
 
-        // add the intro section
-        OutlineItem introItem = new OutlineItem(r.getString(R.string.outline_item_intro), 0);
-        introItem.setDuration(introDuration);
+        // all of the items are in one big ol' list, so we will track the ordering throughout
+        int masterOrder = 0;
 
-        // add all of the items we want to throw into the intro
-        introItem = outline.loadSubItemsFromPrompts(OUTLINE_INTRO_ITEMS, introItem, introDuration);
+        // the intro item is always first, so put it first
+        OutlineItem introItem = new OutlineItem(
+                OutlineItem.INTRO,
+                masterOrder,
+                r.getString(R.string.outline_item_intro),
+                pres.getId()
+        );
         outline.addItem(introItem);
+        masterOrder++;
+        // we won't know the duration of the intro until we've gone through the items
+        // because there could be some wackyland stuff in there
+        long totalIntroItemDuration = outline.loadSubItemsFromPrompts(OUTLINE_INTRO_ITEMS,
+                        OutlineItem.INTRO, introDuration, masterOrder, 0);
 
-        // now the three topics
-        int order = 1;
+        introItem.setDuration(totalIntroItemDuration);
+        masterOrder = outline.getItemCount();
 
+        // load up all of the topic sub items
         ArrayList<Prompt> topicSubItems = new ArrayList<>();
         for (int i = 0; i < Outline.OUTLINE_TOPIC_ITEMS.length; i++) {
             topicSubItems.add(pres.getPromptById(Outline.OUTLINE_TOPIC_ITEMS[i]));
         }
 
+        long durationLeftover = introDuration - totalIntroItemDuration;
+
+        // loop through the topics and add each one with its sup-items
         for (PromptAnswer t : topics) {
             OutlineItem topicItem = new OutlineItem(
+                    t.getKey(),
+                    OutlineItem.NO_PARENT,
+                    masterOrder,
                     t.getValue(),
-                    order);
+                    t.getId(),
+                    false,
+                    0,
+                    pres.getId());
 
-            int subOrder = 0;
-            topicItem.setDuration(topicDuration);
-            long durationTally = 0l;
+            outline.addItem(topicItem);
+
+            // any time left over from the last topic will go into the fist sub-item of the next topic
+            long durationTally = durationLeftover;
 
             ArrayList<PromptAnswer> subItemList = new ArrayList<>();
             for (Prompt p : topicSubItems) {
@@ -122,76 +244,55 @@ public class Outline {
             long subItemLeftover = topicDuration - (subItemDuration * subItemList.size());
 
             for (PromptAnswer a : subItemList) {
-                OutlineItem subitem = new OutlineItem();
-                subitem.setText(a.getValue());
-                subitem.setOrder(subOrder);
+                OutlineItem subitem = new OutlineItem(
+                        "", // id?
+                        t.getKey(),
+                        masterOrder,
+                        a.getValue(),
+                        a.getId(),
+                        false,
+                        0,
+                        pres.getId()
+                );
 
                 long thisDuration = subItemDuration;
+
+                // if the subItemLeftover is more than a second, add a second to this sub-item
                 if (subItemLeftover >= 1000) {
                     thisDuration += 1000;
                     subItemLeftover -= 1000;
                 }
                 subitem.setDuration(thisDuration);
+                durationTally += thisDuration;
 
-                topicItem.addSubItem(subitem);
-                subOrder++;
+                outline.addItem(subitem);
+                masterOrder++;
             }
 
-            outline.addItem(topicItem);
-            order++;
+            topicItem.setDuration(durationTally);
+
+            durationLeftover = topicDuration - durationTally;
+
+            masterOrder++;
         }
 
-        // and the conclusion
-        OutlineItem conclusionItem = new OutlineItem(r.getString(R.string.outline_item_conclusion), order);
-        conclusionItem.setDuration(introDuration);
-
-        // add all of the items we want to throw into the conclusion
-        conclusionItem = outline.loadSubItemsFromPrompts(Outline.OUTLINE_CONC_ITEMS, conclusionItem, introDuration);
-        outline.addItem(conclusionItem);
+        // the conclusion item is always last, so put it last
+        OutlineItem concItem = new OutlineItem(
+                OutlineItem.CONCLUSION,
+                masterOrder,
+                r.getString(R.string.outline_item_conclusion),
+                pres.getId()
+        );
+        outline.addItem(concItem);
+        masterOrder++;
+        // we won't know the duration of the conclusion until we've gone through the items
+        // because there could be some wackyland stuff in there
+        concItem.setDuration(
+                outline.loadSubItemsFromPrompts(OUTLINE_CONC_ITEMS,
+                        OutlineItem.CONCLUSION, introDuration, masterOrder, durationLeftover)
+        );
 
         return outline;
     }
 
-    private OutlineItem loadSubItemsFromPrompts(int[] promptIDs, OutlineItem parent, long duration) {
-        Resources r = mContext.getResources();
-
-        long subItemDuration = Math.round((duration / promptIDs.length) / 1000) * 1000;
-        long subItemLeftover = duration - (subItemDuration * promptIDs.length);
-
-        for (int i = 0; i < promptIDs.length; i++) {
-            int type = mPresentation.getPromptById(promptIDs[i]).getType();
-            OutlineItem thisItem = new OutlineItem();
-            thisItem.setOrder(i);
-
-            /*
-            if (i < promptIDs.length - 1) {
-                long thisduration = Math.round((duration / promptIDs.length) / 1000) * 1000;
-                thisItem.setDuration(thisduration);
-                durationTally += thisduration;
-            } else {
-                thisItem.setDuration(duration - durationTally);
-            }
-            */
-            long thisDuration = subItemDuration;
-            if (subItemLeftover >= 1000) {
-                thisDuration += 1000;
-                subItemLeftover -= 1000;
-            }
-            thisItem.setDuration(thisDuration);
-
-            if (type == PresentationData.TEXT || type == PresentationData.PARAGRAPH) {
-                thisItem.setText(
-                        mPresentation.getAnswerByKey(promptIDs[i], "text"));
-
-                parent.addSubItem(thisItem);
-            } else if (type == PresentationData.LIST) {
-                thisItem.setText(String.format(r.getString(R.string.outline_item_mention),
-                                Utils.processAnswerList(
-                                        mPresentation.getAnswer(promptIDs[i]), r)));
-
-                parent.addSubItem(thisItem);
-            }
-        }
-        return parent;
-    }
 }

@@ -52,5 +52,64 @@
     <color name="outlineText">#757575</color>
 
     <color name="outlineColor1">#2196f3</color>
+    <color name="outlineColor2">#e91e63</color>
+    <color name="outlineColor3">#4caf50</color>
+
+    <color name="presentationColor1">#d32f2f</color>
+    <color name="presentationColor1_dark">#66d32f2f</color>
+    <color name="presentationColor2">#c2185b</color>
+    <color name="presentationColor2_dark">#66c2185b</color>
+    <color name="presentationColor3">#7b1fa2</color>
+    <color name="presentationColor3_dark">#667b1fa2</color>
+    <color name="presentationColor4">#512da8</color>
+    <color name="presentationColor4_dark">#66512da8</color>
+    <color name="presentationColor5">#303f9f</color>
+    <color name="presentationColor5_dark">#66303f9f</color>
+    <color name="presentationColor6">#1976d2</color>
+    <color name="presentationColor6_dark">#661976d2</color>
+    <color name="presentationColor7">#0288d1</color>
+    <color name="presentationColor7_dark">#660288d1</color>
+    <color name="presentationColor8">@color/colorAccent</color>
+    <color name="presentationColor8_dark">@color/colorAccentDark</color>
+    <color name="presentationColor9">#00796b</color>
+    <color name="presentationColor9_dark">#6600796b</color>
+    <color name="presentationColor10">#388e3c</color>
+    <color name="presentationColor10_dark">#66388e3c</color>
+    <color name="presentationColor11">#689f38</color>
+    <color name="presentationColor11_dark">#66689f38</color>
+    <color name="presentationColor12">#afb42b</color>
+    <color name="presentationColor12_dark">#66afb42b</color>
+    <color name="presentationColor13">#fbc02d</color>
+    <color name="presentationColor13_dark">#66fbc02d</color>
+    <color name="presentationColor14">@color/colorPrimary</color>
+    <color name="presentationColor14_dark">@color/colorPrimaryDark</color>
+    <color name="presentationColor15">#f57c00</color>
+    <color name="presentationColor15_dark">#66f57c00</color>
+    <color name="presentationColor16">#e64a19</color>
+    <color name="presentationColor16_dark">#66e64a19</color>
+    <color name="presentationColor17">#5d4037</color>
+    <color name="presentationColor17_dark">#665d4037</color>
+
+    <color name="presentation_selected_bg">#455a64</color>
+
+    <array name="presentation_options">
+        <item>@color/presentationColor1</item>
+        <item>@color/presentationColor2</item>
+        <item>@color/presentationColor3</item>
+        <item>@color/presentationColor4</item>
+        <item>@color/presentationColor5</item>
+        <item>@color/presentationColor6</item>
+        <item>@color/presentationColor7</item>
+        <item>@color/presentationColor8</item>
+        <item>@color/presentationColor9</item>
+        <item>@color/presentationColor10</item>
+        <item>@color/presentationColor11</item>
+        <item>@color/presentationColor12</item>
+        <item>@color/presentationColor13</item>
+        <item>@color/presentationColor14</item>
+        <item>@color/presentationColor15</item>
+        <item>@color/presentationColor16</item>
+        <item>@color/presentationColor17</item>
+    </array>
 
 </resources>

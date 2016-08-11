@@ -7,17 +7,17 @@
         android:id="@+id/practice_timer_total"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text=""
+        android:text="10:00"
         android:textSize="20dp"
-        android:layout_margin="20dp"
+        android:layout_margin="@dimen/spacing_16"
         android:layout_alignParentRight="true"/>
 
     <TextView
         android:id="@+id/practice_sub"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text=""
-        android:layout_margin="20dp"
+        android:text="@string/lorem_ipsum_sentence"
+        android:layout_margin="@dimen/spacing_16"
         android:textSize="20dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
@@ -29,45 +29,103 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/practice_interval_warning"
-        android:text=""
+        android:text="@string/five_minutes_left"
         android:layout_centerHorizontal="true"
         android:textSize="20dp"
         android:textStyle="bold"
         android:textColor="@android:color/holo_red_light"
-        android:layout_below="@id/practice_timer_total"
-        android:visibility="gone"
+        android:layout_below="@id/practice_sub"
         />
-
-    <TextView
-        android:id="@+id/practice_main"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text=""
-        android:textSize="35dp"
-        android:layout_margin="20dp"
-        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/practice_timer_current"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text=""
+        android:text="10:00"
         android:layout_centerInParent="true"
         android:layout_alignParentBottom="true"
         android:textSize="75dp"
         android:textStyle="bold"
-        android:layout_margin="20dp"/>
+        android:layout_margin="@dimen/spacing_16"/>
+
+    <TextView
+        android:id="@+id/practice_main"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/lorem_ipsum_sentence"
+        android:textSize="35dp"
+        android:layout_margin="@dimen/spacing_16"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:layout_centerInParent="true"
+        android:gravity="center" />
+
+    <LinearLayout
+        android:id="@+id/practice_main_bullet_list_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="@dimen/spacing_16"
+        android:gravity="center"
+        android:layout_centerInParent="true">
+
+        <TextView
+            android:id="@+id/practice_main_bullet_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/lorem_ipsum_words"
+            android:textSize="25dp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/practice_main_bullet_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lorem_ipsum_bullet"
+                android:textSize="@dimen/practice_bullet_list_font_size"
+                android:layout_margin="@dimen/spacing_8" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lorem_ipsum_bullet"
+                android:textSize="@dimen/practice_bullet_list_font_size"
+                android:layout_margin="@dimen/spacing_8" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lorem_ipsum_bullet"
+                android:textSize="@dimen/practice_bullet_list_font_size"
+                android:layout_margin="@dimen/spacing_8" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lorem_ipsum_bullet"
+                android:textSize="@dimen/practice_bullet_list_font_size"
+                android:layout_margin="@dimen/spacing_8" />
+
+        </LinearLayout>
+        <!--
+            -->
+
+    </LinearLayout>
+
 
     <ImageButton
         android:id="@+id/button_left"
-        android:visibility="invisible"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_margin="20dp"
+        android:layout_margin="@dimen/spacing_16"
         android:src="@drawable/ic_arrow_back_white_50dp"
         android:background="@android:color/transparent"
         />
@@ -79,8 +137,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_margin="15dp"
-        android:visibility="gone"
+        android:layout_margin="@dimen/spacing_16"
         android:src="@drawable/ic_arrow_forward_white_50dp"
         android:background="@android:color/transparent"
         />
@@ -92,10 +149,10 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_margin="15dp"
-        android:visibility="gone"
+        android:layout_margin="@dimen/spacing_16"
         android:src="@drawable/ic_done_white_50dp"
         android:background="@android:color/transparent"
+        android:visibility="gone"
         />
 
     <Button

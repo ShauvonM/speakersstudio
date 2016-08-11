@@ -19,6 +19,7 @@ public class PresentationData {
     private ArrayList<Prompt> mPrompts;
     private String mPresentationId;
     private String mModifiedDate;
+    private int mColor;
     private boolean mIsSelected;
 
     // TODO: Is this the best way to remember all these ids?
@@ -34,9 +35,10 @@ public class PresentationData {
     // header and next are for the com.thespeakers_studio.thespeakersstudioapp.view to display cards for the step name and the next button
     public static final int NONE = -1, HEADER = 0, NEXT = 1, TEXT = 2, DATETIME = 3, LOCATION = 4, CONTACTINFO = 5, PARAGRAPH = 6, DURATION = 7, LIST = 8;
 
-    public PresentationData(Context context, String id, String modifiedDate) {
+    public PresentationData(Context context, String id, String modifiedDate, int color) {
         this.mContext = context;
         this.mPresentationId = id;
+        this.mColor = color;
         mModifiedDate = modifiedDate;
         mPrompts = new ArrayList<Prompt>();
 
@@ -91,6 +93,13 @@ public class PresentationData {
         return mPresentationId;
     }
 
+    public void setColor(int color) {
+        mColor = color;
+    }
+    public int getColor() {
+        return mColor;
+    }
+
     private int getPromptIndexById(int id) {
         for (int i = 0; i < mPrompts.size(); i++) {
             if (mPrompts.get(i).getId() == id) {
@@ -109,13 +118,13 @@ public class PresentationData {
         return getPromptById(promptId).getAnswer();
     }
 
-    public String getAnswerByKey(int promptId, String answerKey) {
+    public PromptAnswer getAnswerByKey (int promptId, String answerKey) {
         Prompt p = getPromptById(promptId);
-        return p.getAnswerByKey(answerKey).getValue();
+        return p.getAnswerByKey(answerKey);
     }
 
     public String getTopic() {
-        String topic = getAnswerByKey(PRESENTATION_TOPIC, "text");
+        String topic = getAnswerByKey(PRESENTATION_TOPIC, "text").getValue();
         if (topic.isEmpty()) {
             return mContext.getResources().getString(R.string.new_presentation);
         } else{
@@ -124,11 +133,11 @@ public class PresentationData {
     }
 
     public int getDuration() {
-        return Integer.parseInt(getAnswerByKey(PRESENTATION_DURATION, "duration"));
+        return Integer.parseInt(getAnswerByKey(PRESENTATION_DURATION, "duration").getValue());
     }
 
     public String getDate() {
-        return getAnswerByKey(PRESENTATION_DATE, "timestamp");
+        return getAnswerByKey(PRESENTATION_DATE, "timestamp").getValue();
     }
 
     public void setModifiedDate(String date) {

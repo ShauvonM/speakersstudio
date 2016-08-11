@@ -12,6 +12,7 @@ public class OutlineDataContract extends BasicDataContract {
     public static abstract class OutlineItemEntry implements BaseColumns {
         public static final String TABLE_NAME = "outline_item";
         public static final String COLUMN_NAME_OUTLINE_ITEM_ID = "outline_item_id";
+        public static final String COLUMN_NAME_PARENT_ID = "parent_id";
 
         public static final String COLUMN_NAME_PRESENTATION_ID =
                 PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID;
@@ -26,6 +27,8 @@ public class OutlineDataContract extends BasicDataContract {
                 "CREATE TABLE" + OutlineItemEntry.TABLE_NAME + " (" +
                         OutlineItemEntry._ID + " INTEGER PRIMARY KEY, " +
                         OutlineItemEntry.COLUMN_NAME_OUTLINE_ITEM_ID + TEXT_TYPE + COMMA_SEP +
+
+                        OutlineItemEntry.COLUMN_NAME_PARENT_ID + TEXT_TYPE + COMMA_SEP +
                         OutlineItemEntry.COLUMN_NAME_PRESENTATION_ID + TEXT_TYPE + COMMA_SEP +
                         OutlineItemEntry.COLUMN_NAME_ANSWER_ID + TEXT_TYPE + COMMA_SEP +
 

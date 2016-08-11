@@ -107,6 +107,11 @@ public abstract class BaseActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        int themeId = getIntent().getIntExtra(Utils.INTENT_THEME_ID, 0);
+        if (themeId > 0) {
+            setTheme(themeId);
+        }
+
         super.onCreate(savedInstanceState);
 
         mHandler = new Handler();

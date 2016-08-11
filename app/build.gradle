@@ -37,4 +37,6 @@ dependencies {
     compile "com.android.support:design:${android_support_lib_version}"
     compile "com.android.support:support-v13:${android_support_lib_version}"
     compile "com.android.support:percent:${android_support_lib_version}"
+
+    compile "com.thebluealliance:spectrum:0.5.0"
 }

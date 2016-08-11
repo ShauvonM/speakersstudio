@@ -55,6 +55,7 @@ public class PromptListView extends LinearLayout implements ListItemView.ListIte
 
     public void clearData() {
         mPromptData = null;
+        mOpenView = null;
         removeAllViews();
     }
 

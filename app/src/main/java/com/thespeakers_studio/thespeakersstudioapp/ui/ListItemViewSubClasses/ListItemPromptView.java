@@ -138,7 +138,7 @@ public class ListItemPromptView extends ListItemView {
                 // it's currently not empty, so do nothing basically
                 transition.startTransition(0);
             }
-            mCardView.setCardBackgroundColor(ContextCompat.getColor(getContext(), R.color.completedPromptBG));
+            mCardView.setCardBackgroundColor(Utils.fetchPrimaryColor(getContext()));
             mCardBGEmpty = false;
         }
     }

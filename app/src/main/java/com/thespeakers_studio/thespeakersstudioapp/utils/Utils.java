@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -37,6 +38,7 @@ public class Utils {
     public static final int REQUEST_CODE_PRACTICE = 4;
 
     public static final String INTENT_PRESENTATION_ID = "presentation_id";
+    public static final String INTENT_THEME_ID = "theme_id";
 
     public static boolean versionGreaterThan(int version) {
         return Build.VERSION.SDK_INT >= version;
@@ -88,7 +90,7 @@ public class Utils {
                 flags |= DateUtils.FORMAT_SHOW_YEAR;
 
                 finalDateTime = DateUtils.formatDateTime(context,
-                        when + TimeZone.getDefault().getOffset(when), flags);
+                        when, flags);
             }
         }
         return finalDateTime;
@@ -241,5 +243,14 @@ public class Utils {
         }
 
         return (value - min) / (float) (max - min);
+    }
+
+    public static int fetchPrimaryColor(Context context) {
+        TypedValue typedValue = new TypedValue();
+        TypedArray a = context.obtainStyledAttributes(typedValue.data,
+                new int[] {R.attr.colorPrimary});
+        int primaryColor = a.getColor(0, 0);
+        a.recycle();
+        return primaryColor;
     }
 }

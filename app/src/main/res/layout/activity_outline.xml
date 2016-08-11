@@ -25,7 +25,8 @@
                 android:id="@+id/content_wrapper"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:layout_marginTop="?actionBarSize">
 
                 <TextView
                     android:id="@+id/outline_title"
@@ -58,6 +59,9 @@
                     android:paddingRight="@dimen/outline_list_padding"
                     android:paddingBottom="@dimen/outline_list_padding_bottom"
                     android:orientation="vertical">
+
+                    <include layout="@layout/outline_item" />
+
                 </LinearLayout>
 
             </LinearLayout>

@@ -94,6 +94,7 @@ public class PresentationPromptListFragment extends Fragment implements PromptLi
 
     public void setStep (int step) {
         resetStep();
+        resetPrompts();
         mStep = step;
         mPromptData = mPresentation.getPromptsForStep(step);
         Log.d("SS", "Step count: " + mPromptData.size());
@@ -111,10 +112,7 @@ public class PresentationPromptListFragment extends Fragment implements PromptLi
         return mStep;
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-
+    public void resetPrompts() {
         if (mPromptData != null) {
             // make sure all of the prompts are set to "closed"
             for (Prompt p : mPromptData) {
@@ -123,6 +121,12 @@ public class PresentationPromptListFragment extends Fragment implements PromptLi
                 }
             }
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        resetPrompts();
     }
 
     @Override

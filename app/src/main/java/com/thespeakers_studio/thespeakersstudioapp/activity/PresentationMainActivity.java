@@ -31,6 +31,7 @@ import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
 import com.thespeakers_studio.thespeakersstudioapp.R;
 import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.AnalyticsHelper;
+import com.thespeakers_studio.thespeakersstudioapp.utils.PresentationUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 import java.util.ArrayList;
@@ -52,8 +53,7 @@ public class PresentationMainActivity extends BaseActivity
 
     private Menu mMenu;
 
-    static final String STATE_PRESENTATION_ID = "presentationId";
-    static final String STATE_FRAGMENT = "openFragment";
+    static final String STATE_SELECTED_PRESENTATIONS = "selected_presentations";
 
     private boolean mIsTwoColumn;
     private StaggeredGridLayoutManager mTwoColumnManager;
@@ -110,6 +110,30 @@ public class PresentationMainActivity extends BaseActivity
         }
 
         showMessageIfEmpty();
+
+        if (savedInstanceState != null) {
+            String[] selection = savedInstanceState.getStringArray(STATE_SELECTED_PRESENTATIONS);
+            if (selection != null && selection.length > 0) {
+                mAdapter.setSelection(selection);
+            }
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        // save the selected things
+        ArrayList<PresentationData> selection = mAdapter.getSelectedPresentations();
+        if (selection.size() > 0) {
+            String[] ids = new String[selection.size()];
+            int cnt = 0;
+            for (PresentationData pres : selection) {
+                ids[cnt] = pres.getId();
+                cnt++;
+            }
+            outState.putStringArray(STATE_SELECTED_PRESENTATIONS, ids);
+        }
+
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -165,8 +189,11 @@ public class PresentationMainActivity extends BaseActivity
             case R.id.menu_action_delete:
                 deleteSelectedPresentations();
                 break;
+            case R.id.menu_action_delete_all:
+                deleteAllPresentations();
+                break;
             case android.R.id.home:
-                    onBackPressed();
+                onBackPressed();
                 break;
             default:
                 return super.onOptionsItemSelected(item);
@@ -182,6 +209,8 @@ public class PresentationMainActivity extends BaseActivity
             super.onBackPressed();
         }
     }
+
+
 
     @Override
     public void onPresentationSelected(PresentationData presentation) {
@@ -266,6 +295,8 @@ public class PresentationMainActivity extends BaseActivity
             intent = new Intent(getApplicationContext(), OutlineActivity.class);
         } else {
             intent = new Intent(getApplicationContext(), EditPresentationActivity.class);
+            intent.putExtra(Utils.INTENT_THEME_ID,
+                    PresentationUtils.getThemeForColor(this, presentation.getColor()));
         }
         intent.putExtra(Utils.INTENT_PRESENTATION_ID, presentation.getId());
 
@@ -296,6 +327,16 @@ public class PresentationMainActivity extends BaseActivity
     @Override
     public void onPresentationDeleteSelected(PresentationData presentation) {
         deleteSelectedPresentations(presentation);
+    }
+
+    @Override
+    public void onPresentationColorChange(PresentationData presentation, int color) {
+        mDbHelper.savePresentationColor(presentation.getId(), color);
+    }
+
+    @Override
+    public void onPresentationReset(PresentationData presentation) {
+        mDbHelper.resetPresentation(presentation);
     }
 
     public void toggleView(boolean set) {
@@ -345,10 +386,10 @@ public class PresentationMainActivity extends BaseActivity
         }
     }
 
-    private void deleteSelectedPresentations(final PresentationData pres) {
+    private void deleteSelectedPresentations(final PresentationData pres, final boolean all) {
         int count;
         if (pres == null) {
-            count = mAdapter.getSelectedCount();
+            count = all ? mPresentations.size() : mAdapter.getSelectedCount();
             if (count == 0) {
                 return;
             }
@@ -356,23 +397,38 @@ public class PresentationMainActivity extends BaseActivity
             count = 1;
         }
 
+        String message;
+        if (all) {
+            message = getResources().getString(R.string.confirm_delete_all_message);
+        } else {
+            message = getResources().getQuantityString(R.plurals.confirm_delete_message,
+                    count, count);
+        }
+
         new AlertDialog.Builder(this)
-                .setMessage(getResources().getQuantityString(R.plurals.confirm_delete_message,
-                        count, count))
+                .setMessage(message)
                 .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        doDeleteSelectedPresentations(pres);
+                        doDeleteSelectedPresentations(pres, all);
                     }
                 })
                 .setNegativeButton(getString(R.string.no), null)
                 .show();
     }
-    private void deleteSelectedPresentations() {
-        deleteSelectedPresentations(null);
+    private void deleteSelectedPresentations(PresentationData pres) {
+        deleteSelectedPresentations(pres, false);
     }
-    private void doDeleteSelectedPresentations(PresentationData presentation) {
-        if (presentation == null) {
+    private void deleteSelectedPresentations() {
+        deleteSelectedPresentations(null, false);
+    }
+    private void deleteAllPresentations() {
+        deleteSelectedPresentations(null, true);
+    }
+    private void doDeleteSelectedPresentations(PresentationData presentation, boolean all) {
+        if (all) {
+            mDbHelper.deletePresentation(mPresentations);
+        } else if (presentation == null) {
             mDbHelper.deletePresentation(mAdapter.getSelectedPresentations());
         } else {
             mDbHelper.deletePresentation(presentation);

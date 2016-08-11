@@ -2,10 +2,12 @@ package com.thespeakers_studio.thespeakersstudioapp.ui;
 
 import android.animation.LayoutTransition;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.support.v4.content.ContextCompat;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -15,6 +17,7 @@ import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.PaintUtils;
 import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
 import com.thespeakers_studio.thespeakersstudioapp.model.Prompt;
+import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 /**
  * Created by smcgi_000 on 6/8/2016.
@@ -68,7 +71,7 @@ public abstract class ListItemView extends RelativeLayout implements View.OnClic
             mLinePaint.setStyle(Paint.Style.STROKE);
 
             mFinishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            mFinishPaint.setColor(ContextCompat.getColor(context, R.color.completedPromptBG));
+            mFinishPaint.setColor(Utils.fetchPrimaryColor(context));
             mFinishPaint.setStrokeWidth(getResources().getDimensionPixelSize(R.dimen.prompt_list_line_width));
             mFinishPaint.setStyle(Paint.Style.STROKE);
 

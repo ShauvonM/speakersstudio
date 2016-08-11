@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    >
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:id="@+id/list_main_bullet"
         android:text="1."
-        style="@style/PresentationOutline.Text" />
+        style="@style/PresentationOutline.Text.Bullet" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -31,7 +30,8 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/outline_list_bullet_spacing"
         style="@style/PresentationOutline.Text"
-        android:text="This is a really long string of text to show just how long this string of text can go." />
+        android:text="@string/lorem_ipsum_sentence"
+        />
 
     <LinearLayout
         android:id="@+id/outline_sub_item_wrapper"

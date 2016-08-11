@@ -11,7 +11,7 @@
 
             <TextView
                 android:id="@+id/card_text"
-                android:text="What is the Topic?"
+                android:text="@string/lorem_ipsum_sentence"
                 style="@style/PromptText" />
 
 

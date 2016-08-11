@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.ColorInt;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
@@ -23,6 +24,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.thebluealliance.spectrum.SpectrumDialog;
 import com.thespeakers_studio.thespeakersstudioapp.R;
 import com.thespeakers_studio.thespeakersstudioapp.fragment.PresentationPromptListFragment;
 import com.thespeakers_studio.thespeakersstudioapp.fragment.PresentationStepListFragment;
@@ -32,6 +34,7 @@ import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
 import com.thespeakers_studio.thespeakersstudioapp.ui.PromptListHeaderView;
 import com.thespeakers_studio.thespeakersstudioapp.ui.StepListView;
 import com.thespeakers_studio.thespeakersstudioapp.utils.AnalyticsHelper;
+import com.thespeakers_studio.thespeakersstudioapp.utils.PresentationUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 import java.util.ArrayList;
@@ -164,6 +167,12 @@ public class EditPresentationActivity extends BaseActivity implements
         int menuId = R.menu.menu_in_presentation;
         inflater.inflate(menuId, menu);
 
+        if (mPresentation == null || mPresentation.getCompletionPercentage() < 1) {
+            menu.findItem(R.id.menu_action_practice).setVisible(false);
+        } else {
+            menu.findItem(R.id.menu_action_practice).setVisible(true);
+        }
+
         onBackStackChanged();
         return super.onCreateOptionsMenu(menu);
     }
@@ -172,8 +181,40 @@ public class EditPresentationActivity extends BaseActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch(id) {
+            case R.id.menu_action_color:
+                PresentationUtils.showColorDialog(this, mPresentation,
+                    new SpectrumDialog.OnColorSelectedListener() {
+                        @Override
+                        public void onColorSelected(boolean positiveResult, @ColorInt int color) {
+                            mDbHelper.savePresentationColor(mPresentation.getId(), color);
+                            getIntent().putExtra(Utils.INTENT_THEME_ID,
+                                    PresentationUtils.getThemeForColor(getApplicationContext(), color));
+                            recreate();
+                        }
+                    }
+                );
+
+                break;
             case R.id.menu_action_reset:
-                resetPresentation();
+                PresentationUtils.resetPresentation(this, mPresentation,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (mPresentation == null) {
+                                    return;
+                                }
+                                mDbHelper.resetPresentation(mPresentation);
+                            }
+                        }
+                );
+                break;
+            case R.id.menu_action_practice:
+                Intent intent = new Intent(getApplicationContext(), PracticeSetupActivity.class);
+                intent.putExtra(Utils.INTENT_PRESENTATION_ID, mPresentation.getId());
+                startActivityForResult(intent, Utils.REQUEST_CODE_PRACTICE);
+                break;
+            case R.id.menu_action_delete:
+                delete();
                 break;
             case android.R.id.home:
                 onBackPressed();
@@ -182,6 +223,26 @@ public class EditPresentationActivity extends BaseActivity implements
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+
+    private void delete() {
+        String message = getResources().getQuantityString(R.plurals.confirm_delete_message,
+                    1);
+
+        new AlertDialog.Builder(this)
+                .setMessage(message)
+                .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        doDelete();
+                    }
+                })
+                .setNegativeButton(getString(R.string.no), null)
+                .show();
+    }
+    private void doDelete() {
+        mDbHelper.deletePresentation(mPresentation);
+        navigateUpOrBack(this, null, PresentationMainActivity.class);
     }
 
     @Override
@@ -323,6 +384,7 @@ public class EditPresentationActivity extends BaseActivity implements
             ft.hide(mStepListFragment);
 
             mPromptListFragment.setStep(step);
+
             ft.show(mPromptListFragment);
 
             ft.addToBackStack(PresentationPromptListFragment.TAG);
@@ -444,29 +506,5 @@ public class EditPresentationActivity extends BaseActivity implements
         });
 
         mHeaderDetails.startAnimation(hideHeaderAnimation);
-    }
-
-    private void resetPresentation() {
-        if (mPresentation == null) {
-            return;
-        }
-
-        new AlertDialog.Builder(this)
-                .setMessage(getString(R.string.confirm_reset_message))
-                .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        doResetPresentation();
-                    }
-                })
-                .setNegativeButton(getString(R.string.no), null)
-                .show();
-    }
-
-    private void doResetPresentation() {
-        if (mPresentation == null) {
-            return;
-        }
-        mDbHelper.resetPresentation(mPresentation);
     }
 }

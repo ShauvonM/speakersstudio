@@ -2,7 +2,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".PresentationMain">
 
+    <item android:id="@+id/menu_action_color" android:title="@string/action_change_color"
+            app:showAsAction="ifRoom" android:icon="@drawable/ic_palette_white_24dp" />
+
     <item android:id="@+id/menu_action_reset" android:title="@string/action_reset_presentation"
             app:showAsAction="ifRoom" android:icon="@drawable/ic_assignment_late_white_24dp" />
+
+    <item android:id="@+id/menu_action_practice" android:title="@string/practice_presentation"
+        app:showAsAction="ifRoom" android:icon="@drawable/ic_record_voice_over_white_24dp" />
+
+    <item android:id="@+id/menu_action_delete" android:title="@string/delete"
+        app:showAsAction="ifRoom" android:icon="@drawable/ic_delete_white_24dp" />
 
 </menu>

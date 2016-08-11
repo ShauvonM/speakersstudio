@@ -9,6 +9,7 @@
     <string name="app_name">The Speaker\'s Studio App</string>
     <string name="saved_presentations">Saved Presentations</string>
     <string name="action_reset_presentation">Reset Presentation</string>
+    <string name="action_change_color">Change Presentation Color</string>
     <string name="action_settings">Settings</string>
     <string name="presentation">Presentation</string>
     <string name="presentations">Presentations</string>
@@ -19,7 +20,7 @@
     <string name="content">Content</string>
     <string name="outline">Outline</string>
     <string name="timer">Timer</string>
-    <string name="delete">Delete</string>
+    <string name="delete">Delete Presentation</string>
     <string name="copy">Copy</string>
     <string name="change_color">Change Color</string>
     <string name="history">History</string>
@@ -72,6 +73,7 @@
 
     <string name="search">Search</string>
     <string name="change_view">Change View</string>
+    <string name="delete_all">Delete All Presentations</string>
     <string name="delete_selected">Delete Selected</string>
 
     <string name="confirm_reset_message">Are you sure you want to clear everything saved for this presentation? There is no turning back.</string>
@@ -81,6 +83,13 @@
     </plurals>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+
+    <string name="confirm_delete_all_message">This action will delete all of the things.
+        You will lose everything you have worked so hard to build. Are you sure?
+
+        \n(Protip: you can select multiple presentations by pressing and holding on them,
+        then you can delete several of them at once without losing everything)
+    </string>
 
     <string name="progress_output">%1$s%% Complete</string>
     <string name="modified_output">Modified: %1$s</string>
@@ -95,7 +104,7 @@
 
     <string name="outline_item_intro">Intro</string>
     <string name="outline_item_conclusion">Conclusion</string>
-    <string name="outline_item_mention">Mention %1$s</string>
+    <string name="outline_item_mention">Mention:</string>
     <string name="outline_duration">(%1$d Minutes)</string>
 
     <string name="practice_presentation">Practice Presentation</string>
@@ -119,5 +128,9 @@
 
     <string name="pref_completed_presentations_entry_off">Step List</string>
     <string name="pref_completed_presentations_entry_on">Outline</string>
+
+    <string name="lorem_ipsum_words">Lorem ipsum dolor sit</string>
+    <string name="lorem_ipsum_sentence">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</string>
+    <string name="lorem_ipsum_bullet">1. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</string>
 
 </resources>

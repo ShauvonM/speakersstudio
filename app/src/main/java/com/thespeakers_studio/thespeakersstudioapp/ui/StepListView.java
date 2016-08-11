@@ -1,9 +1,12 @@
 package com.thespeakers_studio.thespeakersstudioapp.ui;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
@@ -65,7 +68,13 @@ public class StepListView extends LinearLayout {
         mShadowY = PaintUtils.getShadowY(2, context);
 
         mBGPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBGPaint.setColor(ContextCompat.getColor(context, R.color.stepListBG)); // TODO: custom colors
+
+        ColorDrawable bg = (ColorDrawable) getBackground();
+        int colorValue = bg.getColor();
+
+        setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent));
+
+        mBGPaint.setColor(colorValue); // TODO: custom colors
         mBGPaint.setStyle(Paint.Style.FILL);
         PaintUtils.setShadowLayer(mBGPaint, 2, context); // TODO: base shadow layers off elevation values?
 

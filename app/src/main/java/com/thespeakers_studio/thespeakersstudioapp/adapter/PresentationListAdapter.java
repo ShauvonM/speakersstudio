@@ -11,6 +11,7 @@ import com.thespeakers_studio.thespeakersstudioapp.R;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
 import com.thespeakers_studio.thespeakersstudioapp.ui.PresentationListViewHolder;
@@ -103,6 +104,14 @@ public class PresentationListAdapter extends RecyclerView.Adapter<PresentationLi
         notifyDataSetChanged();
     }
 
+    public void setSelection(String[] ids) {
+        for (PresentationData pres : mPresies) {
+            if (Arrays.asList(ids).contains(pres.getId())) {
+                onPresentationSelected(pres);
+            }
+        }
+    }
+
     @Override
     public int getItemCount() {
         return mPresies.size() + 1;
@@ -139,5 +148,15 @@ public class PresentationListAdapter extends RecyclerView.Adapter<PresentationLi
     @Override
     public void onPresentationDeleteSelected(PresentationData presentation) {
         mHandler.onPresentationDeleteSelected(presentation);
+    }
+
+    @Override
+    public void onPresentationColorChange(PresentationData presentation, int color) {
+        mHandler.onPresentationColorChange(presentation, color);
+    }
+
+    @Override
+    public void onPresentationReset(PresentationData presentation) {
+        mHandler.onPresentationReset(presentation);
     }
 }
