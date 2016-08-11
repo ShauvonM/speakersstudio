@@ -253,6 +253,12 @@ public class PracticeSetupActivity extends BaseActivity implements
         PresentationPracticeDialog dialog = new PresentationPracticeDialog();
         if (isPractice) {
             dialog.setup(mOutline);
+            dialog.setInterface(new PresentationPracticeDialog.PresentationPracticeDialogInterface() {
+                @Override
+                public void onDialogDismissed(Outline outline) {
+                    LOGD(TAG, "Outline " + outline.toString());
+                }
+            });
         } else {
             mDuration = Integer.parseInt(((TextView) findViewById(R.id.timer_duration_input)).getText().toString());
             if (mDuration <= 0) {
@@ -300,8 +306,7 @@ public class PracticeSetupActivity extends BaseActivity implements
             implements SharedPreferences.OnSharedPreferenceChangeListener {
         private boolean isPractice;
 
-        public PracticeSettingsFragment () {
-        }
+        public PracticeSettingsFragment () {}
 
         public void setPractice(boolean isp) {
             isPractice = isp;

@@ -3,6 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools" tools:context=".PresentationMain">
 
     <item android:id="@+id/menu_action_delete" android:title="@string/delete_selected"
-            app:showAsAction="ifRoom" android:icon="@drawable/ic_clear_white_24dp" />
+            app:showAsAction="ifRoom" android:icon="@drawable/ic_delete_white_24dp" />
 
 </menu>
