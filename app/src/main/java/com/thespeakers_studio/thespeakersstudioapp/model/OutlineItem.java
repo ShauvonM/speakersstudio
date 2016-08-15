@@ -111,4 +111,15 @@ public class OutlineItem {
     public void setTimedDuration(Long duration) {
         mTimedDuration = duration;
     }
+
+    public static OutlineItem createDurationItem (OutlineItem item) {
+        OutlineItem durationItem = new OutlineItem();
+        durationItem.setPresentationId(item.getPresentationId());
+        durationItem.setAnswerId(item.getAnswerId());
+        durationItem.setParentId(item.getParentId());
+        durationItem.setDuration(item.getTimedDuration());
+        durationItem.setIsFromDB();
+
+        return durationItem;
+    }
 }

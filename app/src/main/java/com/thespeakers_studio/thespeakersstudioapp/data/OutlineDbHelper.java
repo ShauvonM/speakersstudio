@@ -17,6 +17,18 @@ public class OutlineDbHelper extends SQLiteOpenHelper {
 
     private Context mContext;
 
+    private String[] mOutlineItemProjection = new String[] {
+            OutlineDataContract.OutlineItemEntry.COLUMN_NAME_OUTLINE_ITEM_ID,
+            OutlineDataContract.OutlineItemEntry.COLUMN_NAME_PARENT_ID,
+            OutlineDataContract.OutlineItemEntry.COLUMN_NAME_PRESENTATION_ID,
+            OutlineDataContract.OutlineItemEntry.COLUMN_NAME_ANSWER_ID,
+            OutlineDataContract.OutlineItemEntry.COLUMN_NAME_ORDER,
+            OutlineDataContract.OutlineItemEntry.COLUMN_NAME_DURATION,
+            OutlineDataContract.OutlineItemEntry.COLUMN_NAME_TEXT,
+            OutlineDataContract.COLUMN_NAME_DATE_MODIFIED,
+            OutlineDataContract.COLUMN_NAME_MODIFIED_BY
+    };
+
     public OutlineDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         mContext = context;
@@ -38,5 +50,19 @@ public class OutlineDbHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
 
         String datetime = Utils.getDateTimeStamp();
+        String id = java.util.UUID.randomUUID().toString();
+
+        values.put(OutlineDataContract.OutlineItemEntry.COLUMN_NAME_OUTLINE_ITEM_ID, id);
+        values.put(OutlineDataContract.OutlineItemEntry.COLUMN_NAME_PARENT_ID, item.getParentId());
+        values.put(OutlineDataContract.OutlineItemEntry.COLUMN_NAME_PRESENTATION_ID, item.getPresentationId());
+        values.put(OutlineDataContract.OutlineItemEntry.COLUMN_NAME_ANSWER_ID, item.getAnswerId());
+        values.put(OutlineDataContract.OutlineItemEntry.COLUMN_NAME_ORDER, item.getOrder());
+        values.put(OutlineDataContract.OutlineItemEntry.COLUMN_NAME_DURATION, item.getDuration());
+        values.put(OutlineDataContract.OutlineItemEntry.COLUMN_NAME_TEXT, item.getText());
+        values.put(OutlineDataContract.COLUMN_NAME_DATE_MODIFIED, datetime);
+
+        db.insert(OutlineDataContract.OutlineItemEntry.TABLE_NAME, null, values);
+
+        db.close();
     }
 }

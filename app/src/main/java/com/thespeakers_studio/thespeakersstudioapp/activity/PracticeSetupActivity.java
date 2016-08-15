@@ -26,8 +26,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.thespeakers_studio.thespeakersstudioapp.R;
+import com.thespeakers_studio.thespeakersstudioapp.data.OutlineDbHelper;
 import com.thespeakers_studio.thespeakersstudioapp.fragment.PresentationPracticeDialog;
 import com.thespeakers_studio.thespeakersstudioapp.model.Outline;
+import com.thespeakers_studio.thespeakersstudioapp.model.OutlineItem;
 import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
 import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.AnalyticsHelper;
@@ -101,6 +103,7 @@ public class PracticeSetupActivity extends BaseActivity implements
         fragment.setPractice(isPractice);
 
         if (isPractice) {
+            timerDurationInput.setVisibility(View.GONE);
             presentationName.setText(mOutline.getTitle());
             presentationDuration.setText(mOutline.getDuration());
         } else {
@@ -216,8 +219,19 @@ public class PracticeSetupActivity extends BaseActivity implements
             dialog.setup(mOutline);
             dialog.setInterface(new PresentationPracticeDialog.PresentationPracticeDialogInterface() {
                 @Override
-                public void onDialogDismissed(Outline outline) {
-                    LOGD(TAG, "Outline " + outline.toString());
+                public void onDialogDismissed(Outline outline, boolean finished) {
+                    OutlineDbHelper dbHelper = new OutlineDbHelper(getApplicationContext());
+                    if (SettingsUtils.getTimerTrack(getApplicationContext()) && finished) {
+                        // we will save any recorded timings to the database here
+                        for (OutlineItem item : outline.getItems()) {
+                            if (item.getTimedDuration() > 0) {
+                                OutlineItem durationItem = OutlineItem.createDurationItem(item);
+                                dbHelper.saveOutlineItem(durationItem);
+                            }
+                        }
+
+                        // TODO: save user's thoughts on this practice
+                    }
                 }
             });
         } else {

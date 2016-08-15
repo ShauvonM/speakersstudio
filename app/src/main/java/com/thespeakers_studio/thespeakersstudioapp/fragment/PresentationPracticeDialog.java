@@ -38,7 +38,7 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
 
 
     public interface PresentationPracticeDialogInterface {
-        public void onDialogDismissed(Outline outline);
+        public void onDialogDismissed(Outline outline, boolean finished);
     }
 
     public static final String TAG = "timer";
@@ -115,7 +115,7 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
         if (mInterface != null) {
-            mInterface.onDialogDismissed(mOutline);
+            mInterface.onDialogDismissed(mOutline, mFinished);
         }
 
         mTimeHandler.removeCallbacks(updateTimerThread);
@@ -258,6 +258,11 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
                 if (view instanceof TextView) {
                     ((TextView) view).setText(text);
                 }
+
+                if (callback != null) {
+                    callback.onReadyToShow(view);
+                }
+
                 if (show) {
                     Animation infade = new AlphaAnimation(0f, 1f);
                     infade.setDuration(ANIMATION_DURATION);
@@ -274,10 +279,6 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
                         ((LinearLayout) view).removeAllViews();
                     }
                 }
-
-                if (callback != null) {
-                    callback.onReadyToShow(view);
-                }
             }
 
             @Override
@@ -289,11 +290,11 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
 
         return true;
     }
-    public boolean showText(TextView view, int id) {
-        return showView(view, true, getResources().getString(id), null);
-    }
     public boolean showText(TextView view, String text) {
-        return showView(view, true, text, null);
+        return showView(view, !text.isEmpty(), text, null);
+    }
+    public boolean showText(TextView view, int id) {
+        return showText(view, getResources().getString(id));
     }
     public void showView(View view) {
         showView(view, true, "", null);
@@ -374,7 +375,7 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
                                     mlp.setMargins(m, m, m, m);
                                     tv.setLayoutParams(mlp);
                                     tv.setTextSize(getContext().getResources()
-                                            .getDimensionPixelSize(R.dimen.practice_bullet_list_font_size));
+                                            .getDimension(R.dimen.practice_bullet_list_font_size));
                                     mBulletList.addView(tv);
 
                                     tv.setText(mOutlineHelper.getBullet(3, cnt)

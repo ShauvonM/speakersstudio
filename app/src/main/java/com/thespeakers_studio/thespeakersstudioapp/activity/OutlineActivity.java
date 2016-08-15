@@ -2,6 +2,7 @@ package com.thespeakers_studio.thespeakersstudioapp.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.thespeakers_studio.thespeakersstudioapp.R;
+import com.thespeakers_studio.thespeakersstudioapp.data.OutlineDbHelper;
 import com.thespeakers_studio.thespeakersstudioapp.model.Outline;
 import com.thespeakers_studio.thespeakersstudioapp.model.OutlineItem;
 import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
@@ -43,6 +45,8 @@ public class OutlineActivity extends BaseActivity implements
     private LinearLayout mContentWrapper;
     private LinearLayout mOutlineList;
 
+    private OutlineDbHelper mOutlineDbHelper;
+
     private OutlineHelper mHelper;
     private Outline mOutline;
 
@@ -51,6 +55,10 @@ public class OutlineActivity extends BaseActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mOutlineDbHelper = new OutlineDbHelper(this);
+        SQLiteDatabase db = mOutlineDbHelper.getReadableDatabase();
+        db.close();
 
         setContentView(R.layout.activity_outline);
 
