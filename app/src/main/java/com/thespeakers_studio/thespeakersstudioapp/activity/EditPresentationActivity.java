@@ -395,28 +395,8 @@ public class EditPresentationActivity extends BaseActivity implements
     }
 
     private void setupHeaderDetails(int step) {
-        String headerText;
-        String label;
-        switch(step) {
-            case 1:
-                headerText = getString(R.string.details);
-                label = getString(R.string.step_1);
-                break;
-            case 2:
-                headerText = getString(R.string.landscape);
-                label = getString(R.string.step_2);
-                break;
-            case 3:
-                headerText = getString(R.string.specifics);
-                label = getString(R.string.step_3);
-                break;
-            case 4:
-                headerText = getString(R.string.content);
-                label = getString(R.string.step_4);
-                break;
-            default:
-                return;
-        }
+        String headerText = PresentationUtils.getStepNameFromId(this, step);
+        String label = PresentationUtils.getStepLabelFromId(this, step);
 
         ((TextView) findViewById(R.id.step_label)).setText(label);
         ((TextView) findViewById(R.id.step_name)).setText(headerText);

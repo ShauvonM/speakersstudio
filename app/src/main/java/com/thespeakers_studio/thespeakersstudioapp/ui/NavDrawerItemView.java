@@ -29,8 +29,8 @@ public class NavDrawerItemView extends ForegroundLinearLayout {
 
     public NavDrawerItemView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setOrientation(HORIZONTAL);
-        LayoutInflater.from(context).inflate(R.layout.nav_drawer_item_contents, this, true);
+        //setOrientation(HORIZONTAL);
+        //LayoutInflater.from(context).inflate(R.layout.nav_drawer_item_contents, this, true);
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.NavDrawerItemView);
         if (a.hasValue(R.styleable.NavDrawerItemView_iconTints)) {
             mIconTints = a.getColorStateList(R.styleable.NavDrawerItemView_iconTints);

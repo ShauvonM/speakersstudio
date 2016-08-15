@@ -40,6 +40,50 @@ public class PresentationUtils {
                 .show();
     }
 
+    public static String getStepNameFromId (Context context, int id) {
+        String headerText;
+        switch(id) {
+            case 1:
+                headerText = context.getString(R.string.details);
+                break;
+            case 2:
+                headerText = context.getString(R.string.landscape);
+                break;
+            case 3:
+                headerText = context.getString(R.string.specifics);
+                break;
+            case 4:
+                headerText = context.getString(R.string.content);
+                break;
+            default:
+                headerText = "";
+                break;
+        }
+        return headerText;
+    }
+
+    public static String getStepLabelFromId (Context context, int id) {
+        String label;
+        switch(id) {
+            case 1:
+                label = context.getString(R.string.step_1);
+                break;
+            case 2:
+                label = context.getString(R.string.step_2);
+                break;
+            case 3:
+                label = context.getString(R.string.step_3);
+                break;
+            case 4:
+                label = context.getString(R.string.step_4);
+                break;
+            default:
+                label = "";
+                break;
+        }
+        return label;
+    }
+
     public static int getThemeForColor(Context context, int color) {
         if (color == ContextCompat.getColor(context, R.color.presentationColor1)) {
             return R.style.AppTheme_Inverted_presentation1;

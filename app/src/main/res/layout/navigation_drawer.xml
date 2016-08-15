@@ -6,7 +6,7 @@
     android:id="@+id/main_activity_navigation_drawer_rootLayout"
     style="@style/ScrimInsetsLayout"
     android:layout_height="match_parent"
-    android:layout_width="match_parent"
+    android:layout_width="@dimen/navigation_drawer_width"
     android:layout_gravity="start"
     android:fitsSystemWindows="true"
     tools:layout_marginEnd="?actionBarSize"
@@ -14,217 +14,71 @@
     android:background="@color/navigation_drawer_background"
     app:appInsetForeground="#4000">
 
-    <ScrollView
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <LinearLayout
+        <!-- HEADER -->
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="@dimen/nav_drawer_account_section_height"
+            android:id="@+id/navigation_drawer_header">
 
-            <!-- HEADER -->
-            <android.support.percent.PercentRelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/navigation_drawer_header">
-
-                <FrameLayout
-                    android:clickable="true"
-                    android:foreground="@drawable/nav_drawer_header_foreground"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    app:layout_aspectRatio="160%"
-                    app:layout_widthPercent="100%">
-
-                    <ImageView
-                        android:id="@+id/navigation_drawer_user_account_picture_cover"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/image_nav_drawer_account_background"
-                        tools:ignore="ContentDescription" />
-
-                </FrameLayout>
-
-                <LinearLayout
-                    android:id="@+id/navigation_drawer_account_section"
-                    android:gravity="bottom"
-                    android:orientation="vertical"
-                    android:paddingTop="20dp"
-                    android:paddingEnd="@dimen/vertical_keyline_first"
-                    android:paddingLeft="@dimen/vertical_keyline_first"
-                    android:paddingRight="@dimen/vertical_keyline_first"
-                    android:paddingStart="@dimen/vertical_keyline_first"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    app:layout_aspectRatio="160%"
-                    app:layout_widthPercent="100%">
-
-                    <!--
-                    <ImageView
-                        android:id="@+id/navigation_drawer_user_account_picture_profile"
-                        android:layout_width="@dimen/nav_drawer_profile_image_size"
-                        android:layout_height="@dimen/nav_drawer_profile_image_size"
-                        app:srcCompat="@drawable/ic_account_circle_white_64dp"
-                        tools:ignore="ContentDescription" />
-                        -->
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:srcCompat="@drawable/ss_icon_logo_only" />
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="@dimen/spacing_56"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/navigation_drawer_account_information_display_name"
-                            style="@style/Body2.White.Primary"
-                            android:text="@string/the_speakers_studio" />
-
-                        <TextView
-                            android:id="@+id/navigation_drawer_account_information_email"
-                            style="@style/Body1.White.Primary"
-                            android:text="@string/ss_url" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </android.support.percent.PercentRelativeLayout>
-            <!-- end of HEADER -->
-
-            <!-- BODY -->
-            <LinearLayout
-                android:id="@+id/navigation_drawer_item_list"
+            <ImageView
+                android:id="@+id/navigation_drawer_user_account_picture_cover"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/image_nav_drawer_account_background"
+                tools:ignore="ContentDescription" />
+
+            <RelativeLayout
+                android:id="@+id/navigation_drawer_account_section"
+                android:gravity="bottom"
                 android:orientation="vertical"
-                android:paddingBottom="@dimen/spacing_8"
-                android:paddingTop="@dimen/spacing_8">
+                android:paddingLeft="@dimen/spacing_16"
+                android:paddingRight="@dimen/spacing_16"
+                android:paddingBottom="@dimen/spacing_16"
+                android:paddingTop="@dimen/nav_drawer_padding_top"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-                <!--
-                <FrameLayout
-                    android:id="@+id/navigation_drawer_items_list_linearLayout_presentations"
-                    style="@style/NavDrawerRowLayout.Main"
-                    tools:background="@color/nav_drawer_row_selected">
+                <TextView
+                    android:id="@+id/navigation_drawer_account_information_email"
+                    style="@style/Body1.White.Primary"
+                    android:layout_alignParentBottom="true"
+                    android:text="@string/ss_url" />
 
-                    <ImageView
-                        android:id="@+id/navigation_drawer_items_list_icon_presentations"
-                        style="@style/NavDrawerRowItemIcon"
-                        app:srcCompat="@drawable/ic_record_voice_over_white_24dp"
-                        tools:ignore="ContentDescription"
-                        tools:tint="@color/nav_drawer_item_icon_selected" />
+                <TextView
+                    android:id="@+id/navigation_drawer_account_information_display_name"
+                    style="@style/Body2.White.Primary"
+                    android:layout_above="@id/navigation_drawer_account_information_email"
+                    android:text="@string/the_speakers_studio" />
 
-                    <TextView
-                        android:id="@+id/navigation_drawer_items_textView_presentations"
-                        style="@style/NavDrawerRowText"
-                        android:text="@string/presentations"
-                        android:textColor="@color/nav_drawer_item_text_selected" />
+                <ImageView
+                    android:layout_width="130dp"
+                    android:layout_height="wrap_content"
+                    android:scaleType="fitEnd"
+                    android:layout_alignParentTop="true"
+                    android:layout_above="@id/navigation_drawer_account_information_display_name"
+                    app:srcCompat="@drawable/ss_icon_logo_only" />
 
-                </FrameLayout>
+            </RelativeLayout>
 
-                <FrameLayout
-                    android:id="@+id/navigation_drawer_items_list_linearLayout_timer"
-                    style="@style/NavDrawerRowLayout.Main">
+        </FrameLayout>
+        <!-- end of HEADER -->
 
-                    <ImageView
-                        android:id="@+id/navigation_drawer_items_list_icon_timer"
-                        style="@style/NavDrawerRowItemIcon"
-                        app:srcCompat="@drawable/ic_alarm_white_24dp"
-                        tools:ignore="ContentDescription"
-                        tools:tint="@color/nav_drawer_item_icon_default" />
+        <!-- BODY -->
+        <LinearLayout
+            android:id="@+id/navigation_drawer_item_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/spacing_8"
+            android:paddingTop="@dimen/spacing_8" />
+        <!-- end of BODY -->
 
-                    <TextView
-                        android:id="@+id/navigation_drawer_items_textView_timer"
-                        style="@style/NavDrawerRowText"
-                        android:text="@string/timer" />
+    </LinearLayout>
 
-                </FrameLayout>
-
-                <FrameLayout
-                    android:id="@+id/navigation_drawer_items_list_linearLayout_stories"
-                    style="@style/NavDrawerRowLayout.Main">
-
-                    <ImageView
-                        android:id="@+id/navigation_drawer_items_list_icon_stories"
-                        style="@style/NavDrawerRowItemIcon"
-                        app:srcCompat="@drawable/ic_chrome_reader_mode_white_24dp"
-                        tools:ignore="ContentDescription"
-                        tools:tint="@color/nav_drawer_item_icon_default" />
-
-                    <TextView
-                        android:id="@+id/navigation_drawer_items_textView_stories"
-                        style="@style/NavDrawerRowText"
-                        android:text="@string/stories" />
-
-                </FrameLayout>
-
-                <include layout="@layout/nav_drawer_separator" />
-
-                <FrameLayout
-                    android:id="@+id/navigation_drawer_items_list_linearLayout_curious"
-                    style="@style/NavDrawerRowLayout.Secondary">
-
-                    <ImageView
-                        android:id="@+id/navigation_drawer_items_list_icon_curious"
-                        style="@style/NavDrawerRowItemIcon"
-                        app:srcCompat="@drawable/ic_help_white_24dp"
-                        tools:ignore="ContentDescription"
-                        tools:tint="@color/nav_drawer_item_icon_default" />
-
-                    <TextView
-                        android:id="@+id/navigation_drawer_items_textView_curious"
-                        style="@style/NavDrawerRowText"
-                        android:text="@string/curious" />
-
-                </FrameLayout>
-
-                <FrameLayout
-                    android:id="@+id/navigation_drawer_items_list_linearLayout_settings"
-                    style="@style/NavDrawerRowLayout.Secondary">
-
-                    <ImageView
-                        android:id="@+id/navigation_drawer_items_list_icon_settings"
-                        style="@style/NavDrawerRowItemIcon"
-                        app:srcCompat="@drawable/ic_settings_white_24dp"
-                        tools:ignore="ContentDescription"
-                        tools:tint="@color/nav_drawer_item_icon_default" />
-
-                    <TextView
-                        android:id="@+id/navigation_drawer_items_textView_settings"
-                        style="@style/NavDrawerRowText"
-                        android:text="@string/action_settings" />
-
-                </FrameLayout>
-
-                <FrameLayout
-                    android:id="@+id/navigation_drawer_items_list_linearLayout_about"
-                    style="@style/NavDrawerRowLayout.Secondary">
-
-                    <ImageView
-                        android:id="@+id/navigation_drawer_items_list_icon_about"
-                        style="@style/NavDrawerRowItemIcon"
-                        app:srcCompat="@drawable/ic_info_white_24dp"
-                        tools:ignore="ContentDescription"
-                        tools:tint="@color/nav_drawer_item_icon_default" />
-
-                    <TextView
-                        android:id="@+id/navigation_drawer_items_textView_about"
-                        style="@style/NavDrawerRowText"
-                        android:text="@string/about" />
-
-                </FrameLayout>
-                -->
-
-            </LinearLayout>
-            <!-- end of BODY -->
-
-        </LinearLayout>
-
-    </ScrollView>
-
- 
 </com.thespeakers_studio.thespeakersstudioapp.ui.ScrimInsetsScrollView>

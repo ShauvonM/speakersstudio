@@ -5,6 +5,7 @@ import android.database.Cursor;
 
 import com.thespeakers_studio.thespeakersstudioapp.data.PresentationDataContract;
 import com.thespeakers_studio.thespeakersstudioapp.R;
+import com.thespeakers_studio.thespeakersstudioapp.utils.PresentationUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class PresentationData {
         // this might not be the best way to do this, but it makes sense to me
         mPrompts.add(new Prompt(0, 0, 0, HEADER, ""));
         mPrompts.add(new Prompt(24, 5, 0, NEXT, ""));
-        mPrompts.add(new Prompt(25, 5, 0, NONE, "Please complete step %s\nto continue."));
+        mPrompts.add(new Prompt(25, 5, 0, NONE, "Please complete %s\nto continue."));
 
         // Prompt(int id, int step, int order, String type, String text, int charLimit)
         mPrompts.add(new Prompt(1, 1, 1, TEXT,        "Presentation Topic", 50));
@@ -226,7 +227,12 @@ public class PresentationData {
                     //  "complete step x" messages in a row
                     if (ref.getAnswer().size() == 0 && !skipRedundant) {
                         Prompt np = getPromptById(PRESENTATION_LIST_ERROR).clone();
-                        np.setProcessedText(np.getText().replace("%s", String.valueOf(ref.getStep())));
+                        int stepId = ref.getStep();
+                        String stepName = PresentationUtils.getStepNameFromId(mContext, stepId);
+                        String stepLabel = PresentationUtils.getStepLabelFromId(mContext, stepId);
+
+                        np.setProcessedText(np.getText().replace("%s",
+                                stepLabel + ", \"" + stepName + "\""));
                         np.setOrder(p.getOrder());
                         selection.add(np.getOrder(), np);
                         skipRedundant = true;

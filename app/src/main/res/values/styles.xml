@@ -137,16 +137,19 @@
     </style>
 
     <style name="NavDrawerRowItemIcon">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:layout_marginLeft">@dimen/vertical_keyline_first</item>
+        <item name="android:layout_height">@dimen/icon_size_24</item>
+        <item name="android:layout_width">@dimen/icon_size_24</item>
+        <item name="android:layout_marginRight">@dimen/nav_drawer_item_icon_margin_end</item>
+        <!-- api 17+ <item name="android:layout_marginEnd">@dimen/nav_drawer_item_icon_margin_end</item> -->
+        <item name="android:layout_gravity">start|center_vertical</item>
     </style>
 
-    <style name="NavDrawerRowText" parent="Body2.Black.Primary">
-        <item name="android:textColor">@color/textColorInverse</item>
+    <style name="NavDrawerRowText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">?android:textColorPrimaryInverse</item>
         <item name="android:layout_gravity">start|center_vertical</item>
-        <item name="android:layout_marginLeft">@dimen/vertical_keyline_second</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
 

@@ -112,45 +112,6 @@ public class PracticeSetupActivity extends BaseActivity implements
             timerDurationInput.setText(String.valueOf(mDuration));
             presentationName.setText(R.string.minutes);
             presentationName.setOnClickListener(this);
-            /*
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                    R.array.presentation_duration_array, android.R.layout.simple_spinner_item);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            durationSpinner.setAdapter(adapter);
-            durationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    switch(position) {
-                        case 0:
-                            mDuration = 5;
-                            break;
-                        case 1:
-                            mDuration = 10;
-                            break;
-                        case 2:
-                            mDuration = 20;
-                            break;
-                        case 3:
-                            mDuration = 30;
-                            break;
-                        case 4:
-                            mDuration = -1;
-                            showCustomDuration();
-                            return;
-                        default:
-                            mDuration = 0;
-                            break;
-                    }
-                    hideCustomDuration();
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-                    mDuration = 0;
-                    hideCustomDuration();
-                }
-            });
-            */
 
             setTitle(R.string.timer);
             ((TextView) findViewById(R.id.no_results)).setText(R.string.no_saved_timers);
@@ -240,8 +201,8 @@ public class PracticeSetupActivity extends BaseActivity implements
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.presentation_name:
-                EditText timerDurationInput = (EditText) findViewById(R.id.timer_duration_input);
-                timerDurationInput.requestFocus();
+                //EditText timerDurationInput = (EditText) findViewById(R.id.timer_duration_input);
+                //timerDurationInput.requestFocus();
                 break;
             case R.id.fab_practice:
                 startPractice();

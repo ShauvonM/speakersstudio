@@ -199,7 +199,7 @@ public class PresentationDbHelper extends SQLiteOpenHelper {
 
         presentation.resetAnswers();
 
-        // TODO: update modified date
+        updatePresentationModifiedDate(presentation.getId());
     }
 
     public void savePresentationColor(String presentationId, int color) {
@@ -268,6 +268,15 @@ public class PresentationDbHelper extends SQLiteOpenHelper {
                 }
             }
         }
+
+        db.close();
+
+        updatePresentationModifiedDate(presentationId);
+    }
+
+    public void updatePresentationModifiedDate(String presentationId) {
+        SQLiteDatabase db = getWritableDatabase();
+        String datetime = Utils.getDateTimeStamp();
 
         // update the modified date property on the presentation
         ContentValues presUpdate = new ContentValues();

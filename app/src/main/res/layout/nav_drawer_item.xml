@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.thespeakers_studio.thespeakersstudioapp.ui.NavDrawerItemView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.thespeakers_studio.thespeakersstudioapp.ui.NavDrawerItemView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -7,6 +8,19 @@
     android:gravity="start|center_vertical"
     android:paddingLeft="@dimen/padding_normal"
     android:paddingRight="@dimen/padding_normal"
+    android:orientation="horizontal"
     android:background="@drawable/nav_drawer_item_background"
     android:foreground="?android:selectableItemBackground"
-    app:iconTints="@color/nav_drawer_icon" />
+    app:iconTints="@color/nav_drawer_icon">
+
+    <ImageView
+        android:id="@+id/nav_drawer_item_icon"
+        style="@style/NavDrawerRowItemIcon"
+        app:srcCompat="@drawable/ic_record_voice_over_white_24dp" />
+
+    <TextView
+        android:id="@+id/nav_drawer_item_title"
+        style="@style/NavDrawerRowText"
+        android:text="@string/presentations" />
+
+    </com.thespeakers_studio.thespeakersstudioapp.ui.NavDrawerItemView>

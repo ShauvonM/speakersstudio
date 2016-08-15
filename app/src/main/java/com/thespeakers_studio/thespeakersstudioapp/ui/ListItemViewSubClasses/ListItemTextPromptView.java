@@ -1,6 +1,7 @@
 package com.thespeakers_studio.thespeakersstudioapp.ui.ListItemViewSubClasses;
 
 import android.content.Context;
+import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
@@ -53,6 +54,9 @@ public class ListItemTextPromptView extends ListItemPromptView implements TextWa
             EditText input = (EditText) findViewById(R.id.prompt_input);
             input.setText(answer);
             input.addTextChangedListener(this);
+
+            TextInputLayout layout = (TextInputLayout) findViewById(R.id.prompt_input_layout);
+            layout.setHint(mPrompt.getText());
 
             // impose the character limit
             if (mPrompt.getCharLimit() > 0) {

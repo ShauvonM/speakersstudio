@@ -168,6 +168,9 @@ public class PresentationMainActivity extends BaseActivity
         }
 
         inflater.inflate(menuId, menu);
+
+        setMenuViewIcon();
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -209,8 +212,6 @@ public class PresentationMainActivity extends BaseActivity
             super.onBackPressed();
         }
     }
-
-
 
     @Override
     public void onPresentationSelected(PresentationData presentation) {
@@ -349,6 +350,8 @@ public class PresentationMainActivity extends BaseActivity
             mRecyclerView.setLayoutManager(mTwoColumnManager);
             mIsTwoColumn = true;
         }
+
+        setMenuViewIcon();
     }
     public boolean toggleView() {
         toggleView(!mIsTwoColumn);
@@ -358,12 +361,16 @@ public class PresentationMainActivity extends BaseActivity
         boolean twoCol = toggleView();
 
         SettingsUtils.setPresentationListTwoColumns(this, twoCol);
+    }
 
+    private void setMenuViewIcon() {
         if (mMenu != null) {
-            if (twoCol) {
-                mMenu.findItem(R.id.menu_action_view).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_view_agenda_white_24dp));
+            if (mIsTwoColumn) {
+                mMenu.findItem(R.id.menu_action_view).setIcon(
+                        ContextCompat.getDrawable(this, R.drawable.ic_view_agenda_white_24dp));
             } else {
-                mMenu.findItem(R.id.menu_action_view).setIcon(ContextCompat.getDrawable(this, R.drawable.ic_view_quilt_white_24dp));
+                mMenu.findItem(R.id.menu_action_view).setIcon(
+                        ContextCompat.getDrawable(this, R.drawable.ic_view_quilt_white_24dp));
             }
         }
     }

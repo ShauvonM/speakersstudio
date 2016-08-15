@@ -103,7 +103,7 @@
     <string name="curious_copy">Schedule a fifteen minute phone call, and we can figure out how The Speaker\'s Studio can make you a better you. Select a date and time below, and then you will be able to tell us a little about yourself.</string>
 
     <string name="outline_item_intro">Intro</string>
-    <string name="outline_item_conclusion">Conclusion</string>
+    <string name="outline_item_conclusion">Closing</string>
     <string name="outline_item_mention">Mention:</string>
     <string name="outline_duration">(%1$d Minutes)</string>
 
