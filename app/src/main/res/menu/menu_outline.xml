@@ -4,6 +4,10 @@
 
     <item android:id="@+id/menu_action_goto_steplist" android:title="Return to List of Questions"
         app:showAsAction="ifRoom" android:icon="@drawable/ic_receipt_black_24dp" />
+
+    <item android:id="@+id/menu_action_reset" android:title="@string/action_reset_outline"
+            app:showAsAction="ifRoom" android:icon="@drawable/ic_assignment_late_black_24dp" />
+
     <item android:id="@+id/menu_action_edit_outline" android:visible="false" android:title="Edit Outline"
         app:showAsAction="ifRoom" android:icon="@drawable/ic_create_black_24dp" />
     <item android:id="@+id/menu_action_save_outline" android:visible="false" android:title="Save Outline to Google Drive"

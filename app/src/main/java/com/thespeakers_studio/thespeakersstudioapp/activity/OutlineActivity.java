@@ -1,11 +1,13 @@
 package com.thespeakers_studio.thespeakersstudioapp.activity;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -198,6 +200,9 @@ public class OutlineActivity extends BaseActivity implements
                         PresentationUtils.getThemeForColor(this, mPresentation.getColor()));
                 startActivityForResult(intent, Utils.REQUEST_CODE_EDIT_PRESENTATION);
                 break;
+            case R.id.menu_action_reset:
+                resetOutline();
+                break;
             case android.R.id.home:
                 onBackPressed();
                 break;
@@ -214,6 +219,23 @@ public class OutlineActivity extends BaseActivity implements
         } else {
             navigateUpOrBack(this, getIntent().getExtras(), null);
         }
+    }
+
+    private void resetOutline() {
+        new AlertDialog.Builder(this)
+                .setMessage(getString(R.string.confirm_reset_outline))
+                .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        doResetOutline();
+                    }
+                })
+                .setNegativeButton(getString(R.string.no), null)
+                .show();
+    }
+    private void doResetOutline() {
+        mOutlineDbHelper.resetOutline(mPresentation.getId());
+        render();
     }
 
     private void returnActivityResult() {

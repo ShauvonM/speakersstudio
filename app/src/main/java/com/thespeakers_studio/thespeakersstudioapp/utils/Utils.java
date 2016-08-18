@@ -200,6 +200,10 @@ public class Utils {
         return Math.round((float)(num / 1000)) * 1000;
     }
 
+    public static long roundDownToThousand (long num) {
+        return (long) Math.floor((float)(num / 1000)) * 1000;
+    }
+
     public static int getScreenWidthInPx(@NonNull final Context context) {
         return context.getResources().getDisplayMetrics().widthPixels;
     }

@@ -283,47 +283,49 @@ public class PracticeSetupActivity extends BaseActivity implements
             }
         }
 
-        // save user's thoughts on this practice
-        AlertDialog.Builder thoughtsDialogBuilder = new AlertDialog.Builder(this);
+        if (finished) {
+            // save user's thoughts on this practice
+            AlertDialog.Builder thoughtsDialogBuilder = new AlertDialog.Builder(this);
 
-        View practiceResponseDialogContents =
-                getLayoutInflater().inflate(R.layout.practice_response_dialog, null);
+            View practiceResponseDialogContents =
+                    getLayoutInflater().inflate(R.layout.practice_response_dialog, null);
 
-        thoughtsDialogBuilder.setView(practiceResponseDialogContents);
+            thoughtsDialogBuilder.setView(practiceResponseDialogContents);
 
-        final TextInputEditText messageView = (TextInputEditText) practiceResponseDialogContents
-                        .findViewById(R.id.practice_response);
-        final AppCompatRatingBar ratingBar = (AppCompatRatingBar) practiceResponseDialogContents
-                        .findViewById(R.id.practice_rating);
+            final TextInputEditText messageView = (TextInputEditText) practiceResponseDialogContents
+                    .findViewById(R.id.practice_response);
+            final AppCompatRatingBar ratingBar = (AppCompatRatingBar) practiceResponseDialogContents
+                    .findViewById(R.id.practice_rating);
 
-        thoughtsDialogBuilder
-                .setCancelable(false)
-                .setTitle(R.string.practice_response_title)
-                .setPositiveButton(R.string.save,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                String message = messageView.getText().toString();
-                                float rating = ratingBar.getRating();
-                                mOutlineDbHelper.savePracticeResponse(
-                                        mPresentation.getId(), rating, message);
+            thoughtsDialogBuilder
+                    .setCancelable(false)
+                    .setTitle(R.string.practice_response_title)
+                    .setPositiveButton(R.string.save,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    String message = messageView.getText().toString();
+                                    float rating = ratingBar.getRating();
+                                    mOutlineDbHelper.savePracticeResponse(
+                                            mPresentation.getId(), rating, message);
 
-                                mPractices = mOutlineDbHelper.getPractices(mPresentation.getId());
-                                mRecyclerView.getAdapter().notifyDataSetChanged();
+                                    mPractices = mOutlineDbHelper.getPractices(mPresentation.getId());
+                                    mRecyclerView.getAdapter().notifyDataSetChanged();
+                                }
                             }
-                        }
-                )
-                .setNegativeButton(R.string.practice_response_cancel,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                    )
+                    .setNegativeButton(R.string.practice_response_cancel,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
 
+                                }
                             }
-                        }
-                );
+                    );
 
-        AlertDialog dialog = thoughtsDialogBuilder.create();
-        dialog.show();
+            AlertDialog dialog = thoughtsDialogBuilder.create();
+            dialog.show();
+        }
     }
 
     @Override

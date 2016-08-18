@@ -91,6 +91,14 @@ public class OutlineDbHelper {
         return items;
     }
 
+    public void resetOutline(String presentationId) {
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        db.delete(OutlineDataContract.OutlineItemEntry.TABLE_NAME,
+                OutlineDataContract.OutlineItemEntry.COLUMN_NAME_PRESENTATION_ID + "=?",
+                new String[] {presentationId});
+        db.close();
+    }
+
     public ArrayList<OutlineItem> getOutlineItemsByParentId(String parentId) {
         ArrayList<OutlineItem> items = new ArrayList<>();
         SQLiteDatabase db = mDbHelper.getReadableDatabase();

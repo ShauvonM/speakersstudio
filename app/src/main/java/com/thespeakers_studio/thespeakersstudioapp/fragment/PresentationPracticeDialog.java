@@ -345,6 +345,7 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
                     // collect any time left over from the last item
                     // (which will be > 0 if the user skipped to the next item)
                     long remainingTime = mCurrentExpiration - mElapsed;
+                    LOGD(TAG, "remaining time: " + remainingTime);
 
                     // set the timer value - this is what the timer is counting down to
                     mCurrentExpiration = mElapsed + (remainingTime + thisDuration);
@@ -576,7 +577,8 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
                 mStartTime = now();
             }
 
-            mElapsed = Utils.roundToThousand(now() - mStartTime);
+            long elapsed = now() - mStartTime;
+            mElapsed = Utils.roundDownToThousand(elapsed);
             long totalRemaining = mOutlineDuration - mElapsed;
             long currentRemaining = mCurrentExpiration - mElapsed;
 
