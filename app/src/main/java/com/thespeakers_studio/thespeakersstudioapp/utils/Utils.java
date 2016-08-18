@@ -176,14 +176,16 @@ public class Utils {
     }
 
     public static String getTimeStringFromMillis (long millis, Resources r) {
-        int secs = (int) (millis / 1000);
-        if (millis % 1000 > 1) {
+        long use = Math.abs(millis);
+        int secs = (int) (use / 1000);
+        if (use % 1000 > 1) {
             secs += 1;
         }
         int mins = secs / 60;
         secs = secs % 60;
 
-        return String.format(r.getString(R.string.timer_output), mins, secs);
+        int formatString = millis > 0 ? R.string.timer_output : R.string.timer_output_negative;
+        return String.format(r.getString(formatString), mins, secs);
     }
 
     public static String secondsFromMillis (long millis) {

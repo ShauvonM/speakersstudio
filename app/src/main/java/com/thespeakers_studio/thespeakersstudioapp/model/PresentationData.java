@@ -34,7 +34,10 @@ public class PresentationData {
     public static final int PRESENTATION_LIST_ERROR = 25;
 
     // header and next are for the com.thespeakers_studio.thespeakersstudioapp.view to display cards for the step name and the next button
-    public static final int NONE = -1, HEADER = 0, NEXT = 1, TEXT = 2, DATETIME = 3, LOCATION = 4, CONTACTINFO = 5, PARAGRAPH = 6, DURATION = 7, LIST = 8;
+    public static final int NONE = -1, HEADER = 0, NEXT = 1, TEXT = 2, DATETIME = 3, LOCATION = 4,
+            CONTACTINFO = 5, PARAGRAPH = 6, DURATION = 7, LIST = 8;
+
+    // TODO: make constants for answer keys, duh
 
     public PresentationData(Context context, String id, String modifiedDate, int color) {
         this.mContext = context;
@@ -122,6 +125,27 @@ public class PresentationData {
     public PromptAnswer getAnswerByKey (int promptId, String answerKey) {
         Prompt p = getPromptById(promptId);
         return p.getAnswerByKey(answerKey);
+    }
+
+    public PromptAnswer getPrimaryAnswerForPrompt (int promptId) {
+        Prompt p = getPromptById(promptId);
+        switch(p.getType()) {
+            case TEXT:
+            case PARAGRAPH:
+                return getAnswerByKey(promptId, "text");
+            case DATETIME:
+                return getAnswerByKey(promptId, "timestamp");
+            case LOCATION:
+                return getAnswerByKey(promptId, "name");
+            case CONTACTINFO:
+                return getAnswerByKey(promptId, "name");
+            case DURATION:
+                return getAnswerByKey(promptId, "duration");
+            case LIST:
+                return getAnswerByKey(promptId, "list_1");
+            default:
+                return getAnswer(promptId).get(0);
+        }
     }
 
     public String getTopic() {
@@ -294,6 +318,8 @@ public class PresentationData {
 
                     PromptAnswer thisAnswer = new PromptAnswer(answerId, answerKey, answerValue, promptId, answerCreatedBy, answerModifiedBy, answerCreatedDate, answerModifiedDate, answerLinkId);
                     Prompt prompt = getPromptById(promptId);
+
+                    thisAnswer.setPromptType(prompt.getType());
 
                     prompt.addAnswer(thisAnswer);
                 }

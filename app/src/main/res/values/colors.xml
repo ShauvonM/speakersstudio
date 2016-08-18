@@ -18,6 +18,7 @@
 
     <color name="shadow">#88444444</color>
     <color name="error">#FF0000</color>
+    <color name="success">#47A447</color>
 
     <!-- navigation drawer -->
     <color name="navigation_drawer_background">#FFFFFF</color>

@@ -57,8 +57,6 @@ public class OutlineActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
 
         mOutlineDbHelper = new OutlineDbHelper(this);
-        SQLiteDatabase db = mOutlineDbHelper.getReadableDatabase();
-        db.close();
 
         setContentView(R.layout.activity_outline);
 
@@ -129,10 +127,16 @@ public class OutlineActivity extends BaseActivity implements
             TextView timeView = (TextView) itemLayout.findViewById(R.id.list_duration);
             if (duration > 0) {
                 timeView.setText(Utils.getTimeStringFromMillis(duration, getResources()));
-                //timeView.setText("" + duration);
             } else {
                 timeView.setText("");
             }
+            /* DEBUG
+            if (duration > 0) {
+                timeView.setText(item.getOrder() + " : " + duration);
+            } else {
+                timeView.setText("" + item.getOrder());
+            }
+            */
 
             renderList((LinearLayout) itemLayout.findViewById(R.id.outline_sub_item_wrapper),
                     item.getId(),

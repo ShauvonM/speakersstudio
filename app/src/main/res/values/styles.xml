@@ -231,6 +231,17 @@
     <style name="PresentationListCardModified.OneColumn">
         <item name="android:layout_toRightOf">@id/presentation_progress</item>
     </style>
+    <!-- end of presentation list -->
+
+    <!-- practice list -->
+    <style name="PracticeListCardTimestamp" parent="PresentationListCardModified">
+        <item name="android:textColor">@color/textColorPrimary</item>
+        <item name="android:layout_marginBottom">@dimen/pres_list_card_padding</item>
+        <item name="android:layout_marginLeft">0dp</item>
+        <item name="android:layout_below">@id/practice_rating</item>
+        <item name="android:layout_centerHorizontal">true</item>
+    </style>
+    <!-- end of practice list -->
 
 
     <style name="StepListView">

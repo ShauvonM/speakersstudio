@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res/android"
+    style="@style/PresentationListCard.OneColumn">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:visibility="gone"
+            android:id="@+id/presentation_submenu"
+            style="@style/PresentationListCardSubmenu"
+            />
+
+        <android.support.v7.widget.AppCompatRatingBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numStars="@integer/rating_star_count"
+            android:layout_centerInParent="true"
+            android:isIndicator="true"
+            android:id="@+id/practice_rating"
+            />
+
+        <TextView
+            android:id="@+id/practice_timestamp"
+            android:text="@string/practice_timestamp"
+            style="@style/PracticeListCardTimestamp"
+            />
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

@@ -43,6 +43,14 @@
                         android:text="@string/no_saved_practices"
                         />
 
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/saved_practice_list"
+                        android:padding="@dimen/practice_list_padding"
+                        android:clipToPadding="false"
+                        android:clipChildren="false"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
                 </FrameLayout>
                 <!-- end of content -->
 

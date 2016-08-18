@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.os.Vibrator;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
@@ -142,7 +143,8 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         mDialog = new Dialog(getActivity(), android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         mDialog.setContentView(R.layout.dialog_practice);
-        mDialog.getWindow().setLayout(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+        mDialog.getWindow().setLayout(RelativeLayout.LayoutParams.MATCH_PARENT,
+                RelativeLayout.LayoutParams.MATCH_PARENT);
 
         mTimerTotalView = (TextView) mDialog.findViewById(R.id.practice_timer_total);
         mOutputSubView = (TextView) mDialog.findViewById(R.id.practice_sub);
@@ -347,7 +349,8 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
                     // set the timer value - this is what the timer is counting down to
                     mCurrentExpiration = mElapsed + (remainingTime + thisDuration);
 
-                    // store this item's duration, so we can know how long it takes (if the user skips it early)
+                    // store this item's duration, so we can know how long it takes
+                    //  (if the user skips it early)
                     mCurrentItemDuration = remainingTime + thisDuration;
 
                     // see if this item has children, which we will show as a bulleted list
@@ -394,10 +397,12 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
                     }
 
                     if (!mTopicText.isEmpty()) {
-                        // mTopicText will hold the topic name, so that we can put it in the topic text view
+                        // mTopicText will hold the topic name, so that we can put it
+                        // in the topic text view
                         showText(mOutputSubView, mTopicText);
                         mTopicText = "";
-                        // remove time from the current item for the time we wasted looking at the topic name
+                        // remove time from the current item for the time we wasted looking
+                        // at the topic name
                         mCurrentExpiration -= INTERSTITIAL_DURATION;
                     }
 
@@ -571,38 +576,40 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
                 mStartTime = now();
             }
 
-            mElapsed = now() - mStartTime;
+            mElapsed = Utils.roundToThousand(now() - mStartTime);
             long totalRemaining = mOutlineDuration - mElapsed;
             long currentRemaining = mCurrentExpiration - mElapsed;
 
+            //LOGD(TAG, "elapsed time: " + mElapsed + " " + totalRemaining + " " + currentRemaining);
+
             if (currentRemaining <= 0 && !mFinished) {
                 nextItem();
-            }
-
-            if (!mFinished) {
-                if (mStarted && mDisplayTimer && mIsPractice) {
-                    setTimer(mTimerTotalView, totalRemaining);
-                }
-                if (mDisplayTimer && mTopicText.isEmpty()) {
-                    if (mStarted) {
-                        // show the current remaining time in 0:00 format
-                        setTimer(mTimerView, currentRemaining);
+            } else {
+                if (!mFinished) {
+                    if (mStarted && mDisplayTimer && mIsPractice) {
+                        setTimer(mTimerTotalView, totalRemaining);
+                    }
+                    if (mDisplayTimer && mTopicText.isEmpty()) {
+                        if (mStarted) {
+                            // show the current remaining time in 0:00 format
+                            setTimer(mTimerView, currentRemaining);
+                        } else {
+                            // show the 5, 4, 3, 2, 1 countdown
+                            showText(mTimerView, Utils.secondsFromMillis(currentRemaining));
+                        }
                     } else {
-                        // show the 5, 4, 3, 2, 1 countdown
-                        showText(mTimerView, Utils.secondsFromMillis(currentRemaining));
+                        // if we don't want to show the timer, don't show the timer
+                        // if mTopicText is not empty, we are showing the topic name for a second
+                        mTimerView.setText("");
                     }
                 } else {
-                    // if we don't want to show the timer, don't show the timer
-                    // if mTopicText is not empty, we are showing the topic name for a second
-                    mTimerView.setText("");
+                    // we are totally done, so we can begin counting up!
+                    mTimerView.setTextColor(ContextCompat.getColor(getActivity(), R.color.success));
+                    setTimer(mTimerView, -mElapsed);
                 }
-                //Log.d("SS", "total remaining: " + totalRemaining + " - current remaining: " + currentRemaining);
-            } else {
-                // we are totally done, so we can begin counting up!
-                setTimer(mTimerView, mElapsed);
             }
 
-            mTimeHandler.postDelayed(this, 0);
+            mTimeHandler.postDelayed(this, 100);
 
             if (mStarted && mShowWarning && !mFinished) {
                 if (totalRemaining <= WARNING_TIME && totalRemaining >= WARNING_TIME - 100) {

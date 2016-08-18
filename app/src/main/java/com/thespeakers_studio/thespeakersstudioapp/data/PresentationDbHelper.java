@@ -20,11 +20,12 @@ import java.util.UUID;
 /**
  * Created by smcgi_000 on 4/21/2016.
  */
-public class PresentationDbHelper extends SQLiteOpenHelper {
+public class PresentationDbHelper {
     public static final int DATABASE_VERSION = PresentationDataContract.DATABASE_VERSION;
     public static final String DATABASE_NAME = PresentationDataContract.DATABASE_NAME;
 
     private Context mContext;
+    private SpeakersStudioDbHelper mDbHelper;
 
     private String[] PRESENTATION_PROJECTION = {
                 PresentationDataContract.PresentationEntry._ID,
@@ -56,25 +57,8 @@ public class PresentationDbHelper extends SQLiteOpenHelper {
     private final String PRESENTATION_SORT_ORDER = PresentationDataContract.PresentationEntry.COLUMN_NAME_DATE_MODIFIED + " DESC";
 
     public PresentationDbHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
         mContext = context;
-    }
-
-    @Override
-    public void onCreate(SQLiteDatabase db) {
-        db.execSQL(PresentationDataContract.PresentationEntry.SQL_CREATE_ENTRIES);
-        db.execSQL(PresentationDataContract.PresentationAnswerEntry.SQL_CREATE_ENTRIES);
-    }
-
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion < 3) {
-            db.execSQL(PresentationDataContract.PresentationEntry.SQL_DELETE_ENTRIES);
-            db.execSQL(PresentationDataContract.PresentationEntry.SQL_CREATE_ENTRIES);
-
-            db.execSQL(PresentationDataContract.PresentationAnswerEntry.SQL_DELETE_ENTRIES);
-            db.execSQL(PresentationDataContract.PresentationAnswerEntry.SQL_CREATE_ENTRIES);
-        }
+        mDbHelper = new SpeakersStudioDbHelper(context);
     }
 
     public String[] getIdSelectionClause (String presentationId) {
@@ -82,7 +66,7 @@ public class PresentationDbHelper extends SQLiteOpenHelper {
     }
 
     public ArrayList<PresentationData> loadPresentations() {
-        SQLiteDatabase db = getReadableDatabase();
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
         ArrayList<PresentationData> presies = new ArrayList<>();
 
         // fetch the presentation
@@ -145,7 +129,7 @@ public class PresentationDbHelper extends SQLiteOpenHelper {
     }
 
     public PresentationData loadPresentationById(String presentationId) {
-        SQLiteDatabase db = getReadableDatabase();
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
         Cursor presCursor = db.query(
                 PresentationDataContract.PresentationEntry.TABLE_NAME,
                 PRESENTATION_PROJECTION,
@@ -171,7 +155,7 @@ public class PresentationDbHelper extends SQLiteOpenHelper {
     }
 
     public PresentationData createNewPresentation() {
-        SQLiteDatabase db = getWritableDatabase();
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
         String id = UUID.randomUUID().toString();
 
@@ -191,7 +175,7 @@ public class PresentationDbHelper extends SQLiteOpenHelper {
     }
 
     public void resetPresentation(PresentationData presentation) {
-        SQLiteDatabase db = getWritableDatabase();
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
         db.delete(PresentationDataContract.PresentationAnswerEntry.TABLE_NAME,
                 ANSWER_SELECTION_CLAUSE,
                 getIdSelectionClause(presentation.getId()));
@@ -203,7 +187,7 @@ public class PresentationDbHelper extends SQLiteOpenHelper {
     }
 
     public void savePresentationColor(String presentationId, int color) {
-        SQLiteDatabase db = getWritableDatabase();
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
         String datetime = Utils.getDateTimeStamp();
         ContentValues values = new ContentValues();
 
@@ -219,7 +203,7 @@ public class PresentationDbHelper extends SQLiteOpenHelper {
     }
 
     public void savePrompt(String presentationId, Prompt prompt) {
-        SQLiteDatabase db = getWritableDatabase();
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
         String id;
         ContentValues values = new ContentValues();
 
@@ -275,7 +259,7 @@ public class PresentationDbHelper extends SQLiteOpenHelper {
     }
 
     public void updatePresentationModifiedDate(String presentationId) {
-        SQLiteDatabase db = getWritableDatabase();
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
         String datetime = Utils.getDateTimeStamp();
 
         // update the modified date property on the presentation
@@ -291,7 +275,7 @@ public class PresentationDbHelper extends SQLiteOpenHelper {
     }
 
     public void deletePresentation(ArrayList<PresentationData> presentations) {
-        SQLiteDatabase db = getWritableDatabase();
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
         for (PresentationData pres : presentations) {
             String thisid = pres.getId();
 

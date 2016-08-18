@@ -9,8 +9,14 @@ import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.support.design.widget.FloatingActionButton;
 import android.app.FragmentTransaction;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.widget.AppCompatRatingBar;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
+import android.text.Layout;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,15 +32,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.thespeakers_studio.thespeakersstudioapp.R;
+import com.thespeakers_studio.thespeakersstudioapp.adapter.PracticeListAdapter;
 import com.thespeakers_studio.thespeakersstudioapp.data.OutlineDbHelper;
 import com.thespeakers_studio.thespeakersstudioapp.fragment.PresentationPracticeDialog;
 import com.thespeakers_studio.thespeakersstudioapp.model.Outline;
 import com.thespeakers_studio.thespeakersstudioapp.model.OutlineItem;
+import com.thespeakers_studio.thespeakersstudioapp.model.Practice;
 import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
 import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.AnalyticsHelper;
 import com.thespeakers_studio.thespeakersstudioapp.utils.OutlineHelper;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
+
+import java.util.ArrayList;
 
 import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
 import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.makeLogTag;
@@ -43,7 +53,7 @@ import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.makeLog
  * Created by smcgi_000 on 8/5/2016.
  */
 public class PracticeSetupActivity extends BaseActivity implements
-        View.OnClickListener {
+        View.OnClickListener, PresentationPracticeDialog.PresentationPracticeDialogInterface {
 
     private static final String TAG = makeLogTag(OutlineActivity.class);
     private static final String SCREEN_LABEL = "Presentation Outline";
@@ -59,11 +69,16 @@ public class PracticeSetupActivity extends BaseActivity implements
     private OutlineHelper mHelper;
     private Outline mOutline;
 
+    private RecyclerView mRecyclerView;
+
     private boolean mHeaderSetup;
 
     private float mMaxFABElevation;
 
     private int mDuration;
+
+    private OutlineDbHelper mOutlineDbHelper;
+    private ArrayList<Practice> mPractices;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +93,9 @@ public class PracticeSetupActivity extends BaseActivity implements
         mContentWrapper = findViewById(R.id.content_wrapper);
         mStartButton = (FloatingActionButton) findViewById(R.id.fab_practice);
 
+        mRecyclerView = (RecyclerView) findViewById(R.id.saved_practice_list);
+        mRecyclerView.setHasFixedSize(true);
+
         mDuration = SettingsUtils.getDefaultTimerDuration(this);
 
         setPresentationId(getIntent().getStringExtra(Utils.INTENT_PRESENTATION_ID));
@@ -87,10 +105,31 @@ public class PracticeSetupActivity extends BaseActivity implements
         if (id != null) {
             mPresentation = mDbHelper.loadPresentationById(id);
             mOutline = Outline.fromPresentation(this, mPresentation);
+
+            if (mPresentation != null) {
+                // load the saved practices for this presentation
+                mOutlineDbHelper = new OutlineDbHelper(this);
+
+                mPractices = mOutlineDbHelper.getPractices(mPresentation.getId());
+                PracticeListAdapter adapter = new PracticeListAdapter(mPractices);
+                mRecyclerView.setLayoutManager(new LinearLayoutManager(this,
+                        LinearLayoutManager.VERTICAL, false));
+                mRecyclerView.setAdapter(adapter);
+
+                showMessageIfEmpty();
+            }
         }
         isPractice = mOutline != null;
 
         setup();
+    }
+
+    private void showMessageIfEmpty() {
+        if (mRecyclerView.getAdapter().getItemCount() == 0) {
+            findViewById(R.id.no_results).setVisibility(View.VISIBLE);
+        } else {
+            findViewById(R.id.no_results).setVisibility(View.GONE);
+        }
     }
 
     private void setup() {
@@ -99,7 +138,8 @@ public class PracticeSetupActivity extends BaseActivity implements
         EditText timerDurationInput = (EditText) findViewById(R.id.timer_duration_input);
         View fab = findViewById(R.id.fab_practice);
 
-        final PracticeSettingsFragment fragment = (PracticeSettingsFragment) getFragmentManager().findFragmentById(R.id.settings_fragment);
+        final PracticeSettingsFragment fragment = (PracticeSettingsFragment) getFragmentManager()
+                .findFragmentById(R.id.settings_fragment);
         fragment.setPractice(isPractice);
 
         if (isPractice) {
@@ -217,25 +257,10 @@ public class PracticeSetupActivity extends BaseActivity implements
         PresentationPracticeDialog dialog = new PresentationPracticeDialog();
         if (isPractice) {
             dialog.setup(mOutline);
-            dialog.setInterface(new PresentationPracticeDialog.PresentationPracticeDialogInterface() {
-                @Override
-                public void onDialogDismissed(Outline outline, boolean finished) {
-                    OutlineDbHelper dbHelper = new OutlineDbHelper(getApplicationContext());
-                    if (SettingsUtils.getTimerTrack(getApplicationContext()) && finished) {
-                        // we will save any recorded timings to the database here
-                        for (OutlineItem item : outline.getItems()) {
-                            if (item.getTimedDuration() > 0) {
-                                OutlineItem durationItem = OutlineItem.createDurationItem(item);
-                                dbHelper.saveOutlineItem(durationItem);
-                            }
-                        }
-
-                        // TODO: save user's thoughts on this practice
-                    }
-                }
-            });
+            dialog.setInterface(this);
         } else {
-            mDuration = Integer.parseInt(((TextView) findViewById(R.id.timer_duration_input)).getText().toString());
+            mDuration = Integer.parseInt(((TextView) findViewById(R.id.timer_duration_input))
+                    .getText().toString());
             if (mDuration <= 0) {
                 return;
             }
@@ -244,6 +269,61 @@ public class PracticeSetupActivity extends BaseActivity implements
         }
         dialog.show(getSupportFragmentManager(), PresentationPracticeDialog.TAG);
         //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+    }
+
+    @Override
+    public void onDialogDismissed(Outline outline, boolean finished) {
+        if (SettingsUtils.getTimerTrack(getApplicationContext()) && finished) {
+            // we will save any recorded timings to the database here
+            for (OutlineItem item : outline.getItems()) {
+                if (item.getTimedDuration() > 0) {
+                    OutlineItem durationItem = OutlineItem.createDurationItem(item);
+                    mOutlineDbHelper.saveOutlineItem(durationItem);
+                }
+            }
+        }
+
+        // save user's thoughts on this practice
+        AlertDialog.Builder thoughtsDialogBuilder = new AlertDialog.Builder(this);
+
+        View practiceResponseDialogContents =
+                getLayoutInflater().inflate(R.layout.practice_response_dialog, null);
+
+        thoughtsDialogBuilder.setView(practiceResponseDialogContents);
+
+        final TextInputEditText messageView = (TextInputEditText) practiceResponseDialogContents
+                        .findViewById(R.id.practice_response);
+        final AppCompatRatingBar ratingBar = (AppCompatRatingBar) practiceResponseDialogContents
+                        .findViewById(R.id.practice_rating);
+
+        thoughtsDialogBuilder
+                .setCancelable(false)
+                .setTitle(R.string.practice_response_title)
+                .setPositiveButton(R.string.save,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String message = messageView.getText().toString();
+                                float rating = ratingBar.getRating();
+                                mOutlineDbHelper.savePracticeResponse(
+                                        mPresentation.getId(), rating, message);
+
+                                mPractices = mOutlineDbHelper.getPractices(mPresentation.getId());
+                                mRecyclerView.getAdapter().notifyDataSetChanged();
+                            }
+                        }
+                )
+                .setNegativeButton(R.string.practice_response_cancel,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        }
+                );
+
+        AlertDialog dialog = thoughtsDialogBuilder.create();
+        dialog.show();
     }
 
     @Override

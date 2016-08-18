@@ -4,6 +4,8 @@
 
     <string name="app_version">Version %1$s</string>
 
+    <string name="save">Save</string>
+
     <string name="about">About</string>
     <string name="curious">Curious for more?</string>
     <string name="app_name">The Speaker\'s Studio App</string>
@@ -97,8 +99,15 @@
     <string name="no_presentations">You have no saved presentations.</string>
     <string name="no_stories">You have no saved stories.</string>
     <string name="no_stories_placeholder">You cannot save stories just yet. I know, tell me about it.</string>
-    <string name="no_saved_practices">You have no saved practices.</string>
+    <string name="no_saved_practices">You have not practiced this Presentation yet.</string>
     <string name="no_saved_timers">You have no saved timers.</string>
+
+    <string name="practice_response_title">Practice finished!</string>
+    <string name="practice_response_rate_prompt">How did that practice go for you?</string>
+    <string name="practice_response_notes_prompt">What thoughts do you have?</string>
+    <string name="practice_response_cancel">Cancel</string>
+
+    <string name="practice_timestamp">Practice Finished: %1$s</string>
 
     <string name="curious_copy">Schedule a fifteen minute phone call, and we can figure out how The Speaker\'s Studio can make you a better you. Select a date and time below, and then you will be able to tell us a little about yourself.</string>
 
@@ -112,12 +121,9 @@
     <string name="get_ready">Get ready&#8230;</string>
     <string name="done">All done!</string>
     <string name="timer_output">%1$d:%2$02d</string>
+    <string name="timer_output_negative">-%1$d:%2$02d</string>
     <string name="paused">Paused</string>
     <string name="five_minutes_left">Five Minutes Left</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_main">MainActivity</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>

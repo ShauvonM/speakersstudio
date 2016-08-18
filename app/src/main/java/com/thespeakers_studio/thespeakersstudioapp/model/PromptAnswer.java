@@ -10,6 +10,7 @@ public class PromptAnswer {
     private String value;
     private int promptId;
     private String answerLinkId;
+    private int promptType;
     private String createdBy;
     private String modifiedBy;
     private String createdDate;
@@ -82,5 +83,19 @@ public class PromptAnswer {
     }
     public void setAnswerLinkId(String answerLinkId) {
         this.answerLinkId = answerLinkId;
+    }
+
+    public void setPromptId (int id) {
+        this.promptId = id;
+    }
+    public int getPromptId() {
+        return this.promptId;
+    }
+
+    public void setPromptType (int type) {
+        this.promptType = type;
+    }
+    public int getPromptType(){
+        return this.promptType;
     }
 }
