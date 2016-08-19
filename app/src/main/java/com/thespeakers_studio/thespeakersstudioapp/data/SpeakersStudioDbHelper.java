@@ -32,10 +32,15 @@ public class SpeakersStudioDbHelper extends SQLiteOpenHelper {
             db.execSQL(PresentationDataContract.PresentationAnswerEntry.SQL_DELETE_ENTRIES);
             db.execSQL(PresentationDataContract.PresentationAnswerEntry.SQL_CREATE_ENTRIES);
         }
-        db.execSQL(OutlineDataContract.OutlineItemEntry.SQL_DELETE_ENTRIES);
-        db.execSQL(OutlineDataContract.OutlineItemEntry.SQL_CREATE_ENTRIES);
+        if (oldVersion < 8) { // version 8 is the main outline item update
+            db.execSQL(OutlineDataContract.OutlineItemEntry.SQL_DELETE_ENTRIES);
+            db.execSQL(OutlineDataContract.OutlineItemEntry.SQL_CREATE_ENTRIES);
 
-        db.execSQL(OutlineDataContract.PracticeEntry.SQL_DELETE_ENTRIES);
-        db.execSQL(OutlineDataContract.PracticeEntry.SQL_CREATE_ENTRIES);
+            db.execSQL(OutlineDataContract.PracticeEntry.SQL_DELETE_ENTRIES);
+            db.execSQL(OutlineDataContract.PracticeEntry.SQL_CREATE_ENTRIES);
+        }
+        if (oldVersion == 8) { // version 9 introduced practice_id into outline items
+            db.execSQL(OutlineDataContract.OutlineItemEntry.SQL_ADD_PRACTICE_ID_COLUMN);
+        }
     }
 }

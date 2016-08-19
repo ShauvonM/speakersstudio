@@ -23,6 +23,7 @@ public class OutlineItem {
     private long mDuration;
     private String mPresentationId;
     private long mTimedDuration;
+    private String mPracticeId;
 
     public static final String INTRO = "intro";
     public static final String CONCLUSION = "conclusion";
@@ -121,5 +122,12 @@ public class OutlineItem {
         durationItem.setIsFromDB();
 
         return durationItem;
+    }
+
+    public void setPracticeId(String practiceId) {
+        mPracticeId = practiceId;
+    }
+    public String getPracticeId() {
+        return mPracticeId;
     }
 }

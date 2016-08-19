@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools" tools:context=".PresentationMain">
 
     <item android:id="@+id/menu_action_goto_steplist" android:title="Return to List of Questions"
-        app:showAsAction="ifRoom" android:icon="@drawable/ic_receipt_black_24dp" />
+        app:showAsAction="ifRoom" android:icon="@drawable/ic_create_black_24dp" />
 
     <item android:id="@+id/menu_action_reset" android:title="@string/action_reset_outline"
             app:showAsAction="ifRoom" android:icon="@drawable/ic_assignment_late_black_24dp" />

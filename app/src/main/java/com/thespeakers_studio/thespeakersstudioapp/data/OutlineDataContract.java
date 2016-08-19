@@ -18,6 +18,8 @@ public class OutlineDataContract extends BasicDataContract {
                 PresentationDataContract.PresentationEntry.COLUMN_NAME_PRESENTATION_ID;
         public static final String COLUMN_NAME_ANSWER_ID =
                 PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_ID;
+        public static final String COLUMN_NAME_PRACTICE_ID =
+                PracticeEntry.COLUMN_NAME_PRACTICE_ID;
 
         public static final String COLUMN_NAME_ORDER = "item_position";
         public static final String COLUMN_NAME_DURATION = "item_duration";
@@ -31,6 +33,7 @@ public class OutlineDataContract extends BasicDataContract {
                         OutlineItemEntry.COLUMN_NAME_PARENT_ID + TEXT_TYPE + COMMA_SEP +
                         OutlineItemEntry.COLUMN_NAME_PRESENTATION_ID + TEXT_TYPE + COMMA_SEP +
                         OutlineItemEntry.COLUMN_NAME_ANSWER_ID + TEXT_TYPE + COMMA_SEP +
+                        OutlineItemEntry.COLUMN_NAME_PRACTICE_ID + TEXT_TYPE + COMMA_SEP +
 
                         OutlineItemEntry.COLUMN_NAME_ORDER + INT_TYPE + COMMA_SEP +
                         OutlineItemEntry.COLUMN_NAME_DURATION + INT_TYPE + COMMA_SEP +
@@ -44,6 +47,11 @@ public class OutlineDataContract extends BasicDataContract {
 
         public static final String SQL_DELETE_ENTRIES =
                 "DROP TABLE IF EXISTS " + OutlineItemEntry.TABLE_NAME;
+
+        public static final String SQL_ADD_PRACTICE_ID_COLUMN =
+                "ALTER TABLE " + OutlineItemEntry.TABLE_NAME +
+                        " ADD COLUMN " + OutlineItemEntry.COLUMN_NAME_PRACTICE_ID +
+                        TEXT_TYPE;
 
         /*
             _id

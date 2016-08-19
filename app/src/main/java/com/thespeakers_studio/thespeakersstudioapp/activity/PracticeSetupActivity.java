@@ -8,26 +8,17 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.support.design.widget.FloatingActionButton;
-import android.app.FragmentTransaction;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.AppCompatRatingBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.InputType;
-import android.text.Layout;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.Spinner;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -63,15 +54,18 @@ public class PracticeSetupActivity extends BaseActivity implements
     private View mContentWrapper;
 
     private FloatingActionButton mStartButton;
+    private ImageButton mSettingsExpand;
 
     private boolean isPractice;
 
     private OutlineHelper mHelper;
     private Outline mOutline;
 
-    private RecyclerView mRecyclerView;
+    private PracticeSettingsFragment mSettingsFragment;
 
-    private boolean mHeaderSetup;
+    private RecyclerView mRecyclerView;
+    private int mScrollPos;
+    private int mSettingsHeight;
 
     private float mMaxFABElevation;
 
@@ -93,8 +87,24 @@ public class PracticeSetupActivity extends BaseActivity implements
         mContentWrapper = findViewById(R.id.content_wrapper);
         mStartButton = (FloatingActionButton) findViewById(R.id.fab_practice);
 
+        mSettingsExpand = (ImageButton) findViewById(R.id.settings_expand);
+        mSettingsExpand.setOnClickListener(this);
+
+        mSettingsFragment = (PracticeSettingsFragment) getFragmentManager()
+                .findFragmentById(R.id.settings_fragment);
+
         mRecyclerView = (RecyclerView) findViewById(R.id.saved_practice_list);
         mRecyclerView.setHasFixedSize(true);
+
+        mScrollPos = 0;
+        mSettingsHeight = -1;
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                onScrollChanged(dy);
+            }
+        });
 
         mDuration = SettingsUtils.getDefaultTimerDuration(this);
 
@@ -115,8 +125,6 @@ public class PracticeSetupActivity extends BaseActivity implements
                 mRecyclerView.setLayoutManager(new LinearLayoutManager(this,
                         LinearLayoutManager.VERTICAL, false));
                 mRecyclerView.setAdapter(adapter);
-
-                showMessageIfEmpty();
             }
         }
         isPractice = mOutline != null;
@@ -125,10 +133,16 @@ public class PracticeSetupActivity extends BaseActivity implements
     }
 
     private void showMessageIfEmpty() {
-        if (mRecyclerView.getAdapter().getItemCount() == 0) {
+        if (mRecyclerView.getAdapter().getItemCount() == 2) {
             findViewById(R.id.no_results).setVisibility(View.VISIBLE);
+            mSettingsExpand.setVisibility(View.GONE);
+            mRecyclerView.setVisibility(View.GONE);
+
+            onScrollChanged(-mScrollPos);
         } else {
             findViewById(R.id.no_results).setVisibility(View.GONE);
+            mSettingsExpand.setVisibility(View.VISIBLE);
+            mRecyclerView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -138,18 +152,14 @@ public class PracticeSetupActivity extends BaseActivity implements
         EditText timerDurationInput = (EditText) findViewById(R.id.timer_duration_input);
         View fab = findViewById(R.id.fab_practice);
 
-        final PracticeSettingsFragment fragment = (PracticeSettingsFragment) getFragmentManager()
-                .findFragmentById(R.id.settings_fragment);
-        fragment.setPractice(isPractice);
+        mSettingsFragment.setPractice(isPractice);
 
         if (isPractice) {
             timerDurationInput.setVisibility(View.GONE);
             presentationName.setText(mOutline.getTitle());
             presentationDuration.setText(mOutline.getDuration());
         } else {
-            //presentationName.setVisibility(View.GONE);
             presentationDuration.setVisibility(View.GONE);
-            //durationSpinner.setVisibility(View.VISIBLE);
 
             timerDurationInput.setVisibility(View.VISIBLE);
             timerDurationInput.setText(String.valueOf(mDuration));
@@ -162,38 +172,28 @@ public class PracticeSetupActivity extends BaseActivity implements
 
         fab.setOnClickListener(this);
 
-        /* WIP - use the scroll magic to collapse the settings section
-        DO NOT REMOVE
-
-        final View settingsView = findViewById(R.id.practice_settings);
-        final View contentView = findViewById(R.id.saved_timer_list);
-        final View settingsLabel = findViewById(R.id.settings_label);
-
-        ViewTreeObserver vto = settingsView.getViewTreeObserver();
+        ViewTreeObserver vto = mSettingsFragment.getView().getViewTreeObserver();
         if (vto.isAlive()) {
             vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
-                    if (!mHeaderSetup) {
-                        int height = settingsView.getHeight();
-                        int layoutHeight = contentView.getHeight();
+                    // only do this once
+                    if (mSettingsHeight == -1) {
+                        mSettingsHeight = mSettingsFragment.getView().getHeight();
+                        mRecyclerView.scrollBy(0, mSettingsHeight);
+                        mScrollPos = mSettingsHeight;
+                        setSettingsExpandIcon();
 
-                        int h = height; // - settingsLabel.getHeight();
-                        if (layoutHeight < h) {
-                            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) contentView.getLayoutParams();
-                            layoutParams.height = h;
-                            contentView.setLayoutParams(layoutParams);
-                        }
-
-                        LOGD(TAG, "h " + h);
-
-                        findViewById(R.id.headerbar_scroll).scrollBy(0, h);
-                        mHeaderSetup = true;
+                        showMessageIfEmpty();
                     }
                 }
             });
         }
-        */
+    }
+
+    @Override
+    protected int getMinHeaderHeight() {
+        return mHeaderDetailsHeightPixels - mSettingsHeight;
     }
 
     @Override
@@ -207,50 +207,80 @@ public class PracticeSetupActivity extends BaseActivity implements
 
     @Override
     protected void setLayoutPadding(int actionBarSize) {
+        /*
+        View header = findViewById(R.id.saved_practices_header);
         ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams)
-                mContentWrapper.getLayoutParams();
+                header.getLayoutParams();
         if (mlp.topMargin != actionBarSize) {
             mlp.topMargin = actionBarSize;
-            mContentWrapper.setLayoutParams(mlp);
+            header.setLayoutParams(mlp);
         }
+        */
+
+        findViewById(R.id.no_results).setPadding(0, actionBarSize, 0, 0);
+
+
+        ((PracticeListAdapter) mRecyclerView.getAdapter()).setTopMargin(
+                actionBarSize);
+
+        //mRecyclerView.scrollTo(0, mSettingsFragment.getView().getHeight());
     }
 
-    @Override
-    public void onScrollChanged(int deltaX, int deltaY) {
-        super.onScrollChanged(deltaX, deltaY);
-
-        int scrollY = findViewById(R.id.headerbar_scroll).getScrollY();
+    public void onScrollChanged(int dy) {
+        mScrollPos += dy;
 
         int fabHeight = getResources().getDimensionPixelSize(R.dimen.fab_button) +
                 (getResources().getDimensionPixelSize(R.dimen.fab_margin) * 2);
         int headerHeight = getSupportActionBar() != null ? getSupportActionBar().getHeight() : 0;
         int baseHeight = mHeaderDetailsHeightPixels + headerHeight;
 
-        float newHeight = Math.min(baseHeight, (float)scrollY); // (scrollY * 0.4));
+        int headerPosition = Math.max((baseHeight - (fabHeight / 2)) - mScrollPos, 0);
+        mStartButton.setTranslationY(headerPosition);
 
-        //float ratio = (float) headerDetailsHeight / (float) mHeaderDetailsHeightPixels;
-        //mStartWrapper.setTranslationY(endPos + ((startPos - endPos) * ratio));
-        mStartButton.setTranslationY(baseHeight - newHeight - (fabHeight / 2));
+        ViewGroup.LayoutParams params = mHeaderDetails.getLayoutParams();
+        params.height = getNewHeaderDetailsHeight(mScrollPos, false);
+        mHeaderDetails.setLayoutParams(params);
 
-        float gapFillProgress;
-        gapFillProgress = Math.min(
-                Math.max(Utils.getProgress(scrollY, 0, mHeaderHeightPixels), 0),
-                1);
-
+        float gapFillProgress = setHeaderElevation(mScrollPos);
+        // set the start button elevation, too
         ViewCompat.setElevation(mStartButton, (mMaxFABElevation / 2) + (gapFillProgress * (mMaxFABElevation / 2)));
+
+        setSettingsExpandIcon();
+    }
+
+    private void setSettingsExpandIcon() {
+        if (mScrollPos <= mSettingsHeight - 50) {
+            mSettingsExpand.setBackgroundResource(R.drawable.ic_expand_less_white_24dp);
+        } else {
+            mSettingsExpand.setBackgroundResource(R.drawable.ic_expand_more_white_24dp);
+        }
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.presentation_name:
-                //EditText timerDurationInput = (EditText) findViewById(R.id.timer_duration_input);
-                //timerDurationInput.requestFocus();
+                EditText timerDurationInput = (EditText) findViewById(R.id.timer_duration_input);
+                timerDurationInput.requestFocus();
                 break;
             case R.id.fab_practice:
                 startPractice();
-            break;
+                break;
+            case R.id.settings_expand:
+                if (mScrollPos <= mSettingsHeight - 50) {
+                    collapseSettings();
+                } else {
+                    expandSettings();
+                }
+                break;
         }
+    }
+
+    private void expandSettings() {
+        mRecyclerView.smoothScrollBy(0, -mScrollPos);
+    }
+    private void collapseSettings() {
+        mRecyclerView.smoothScrollBy(0, mSettingsHeight - mScrollPos);
     }
 
     private void startPractice() {
@@ -272,23 +302,13 @@ public class PracticeSetupActivity extends BaseActivity implements
     }
 
     @Override
-    public void onDialogDismissed(Outline outline, boolean finished) {
-        if (SettingsUtils.getTimerTrack(getApplicationContext()) && finished) {
-            // we will save any recorded timings to the database here
-            for (OutlineItem item : outline.getItems()) {
-                if (item.getTimedDuration() > 0) {
-                    OutlineItem durationItem = OutlineItem.createDurationItem(item);
-                    mOutlineDbHelper.saveOutlineItem(durationItem);
-                }
-            }
-        }
-
+    public void onDialogDismissed(final Outline outline, boolean finished) {
         if (finished) {
             // save user's thoughts on this practice
             AlertDialog.Builder thoughtsDialogBuilder = new AlertDialog.Builder(this);
 
             View practiceResponseDialogContents =
-                    getLayoutInflater().inflate(R.layout.practice_response_dialog, null);
+                    getLayoutInflater().inflate(R.layout.dialog_practice_response, null);
 
             thoughtsDialogBuilder.setView(practiceResponseDialogContents);
 
@@ -298,7 +318,8 @@ public class PracticeSetupActivity extends BaseActivity implements
                     .findViewById(R.id.practice_rating);
 
             thoughtsDialogBuilder
-                    .setCancelable(false)
+                    .setCancelable(true)
+                    .setIcon(R.drawable.ic_record_voice_over_white_24dp)
                     .setTitle(R.string.practice_response_title)
                     .setPositiveButton(R.string.save,
                             new DialogInterface.OnClickListener() {
@@ -306,11 +327,19 @@ public class PracticeSetupActivity extends BaseActivity implements
                                 public void onClick(DialogInterface dialog, int which) {
                                     String message = messageView.getText().toString();
                                     float rating = ratingBar.getRating();
-                                    mOutlineDbHelper.savePracticeResponse(
-                                            mPresentation.getId(), rating, message);
+                                    String id = Utils.getUUID();
 
-                                    mPractices = mOutlineDbHelper.getPractices(mPresentation.getId());
+                                    mOutlineDbHelper.savePracticeResponse(
+                                            mPresentation.getId(), rating, message, id);
+
+                                    ArrayList<OutlineItem> savedItems =
+                                            savePracticeTrackedInfo(outline, id);
+
+                                    mPractices.add(0, new Practice(id, mPresentation.getId(),
+                                            rating, message, Utils.getDateTimeStamp(), savedItems));
                                     mRecyclerView.getAdapter().notifyDataSetChanged();
+
+                                    showMessageIfEmpty();
                                 }
                             }
                     )
@@ -318,7 +347,7 @@ public class PracticeSetupActivity extends BaseActivity implements
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-
+                                    savePracticeTrackedInfo(outline, "");
                                 }
                             }
                     );
@@ -326,6 +355,22 @@ public class PracticeSetupActivity extends BaseActivity implements
             AlertDialog dialog = thoughtsDialogBuilder.create();
             dialog.show();
         }
+    }
+
+    private ArrayList<OutlineItem> savePracticeTrackedInfo(Outline outline, String practiceId) {
+        ArrayList<OutlineItem> savedItems = new ArrayList<>();
+        if (SettingsUtils.getTimerTrack(getApplicationContext())) {
+            // we will save any recorded timings to the database here
+            for (OutlineItem item : outline.getItems()) {
+                if (item.getTimedDuration() > 0) {
+                    OutlineItem durationItem = OutlineItem.createDurationItem(item);
+                    durationItem.setPracticeId(practiceId);
+                    mOutlineDbHelper.saveOutlineItem(durationItem);
+                    savedItems.add(durationItem);
+                }
+            }
+        }
+        return savedItems;
     }
 
     @Override

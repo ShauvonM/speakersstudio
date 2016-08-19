@@ -102,12 +102,17 @@
     <string name="no_stories">You have no saved stories.</string>
     <string name="no_stories_placeholder">You cannot save stories just yet. I know, tell me about it.</string>
     <string name="no_saved_practices">You have not practiced this Presentation yet.</string>
+    <string name="saved_practices_header">Your Practice History</string>
     <string name="no_saved_timers">You have no saved timers.</string>
 
-    <string name="practice_response_title">Practice finished!</string>
+    <string name="practice_response_title">Practice Finished!</string>
+    <string name="practice_response_view_title">Practice History</string>
     <string name="practice_response_rate_prompt">How did that practice go for you?</string>
     <string name="practice_response_notes_prompt">What thoughts do you have?</string>
+    <string name="practice_response_view_notes">These were your thoughts:</string>
+    <string name="practice_response_outline_items">* This practice tracked %1$d duration change(s).</string>
     <string name="practice_response_cancel">Cancel</string>
+    <string name="asterisk">*</string>
 
     <string name="practice_timestamp">Practice Finished: %1$s</string>
 

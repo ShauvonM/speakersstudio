@@ -428,10 +428,14 @@ public abstract class BaseActivity extends AppCompatActivity
 
         if (mHeaderDetails != null) {
             ViewGroup.LayoutParams params = mHeaderDetails.getLayoutParams();
-            params.height = getNewHeaderDetailsHeight(scrollY);
+            params.height = getNewHeaderDetailsHeight(scrollY, true);
             mHeaderDetails.setLayoutParams(params);
         }
 
+        setHeaderElevation(scrollY);
+    }
+
+    protected float setHeaderElevation(int scrollY) {
         // the headerbar will show a shadow as the user scrolls
         float gapFillProgress = 1;
         gapFillProgress = Math.min(Math.max(Utils.getProgress(scrollY,
@@ -439,14 +443,16 @@ public abstract class BaseActivity extends AppCompatActivity
                 mHeaderHeightPixels), 0), 1);
 
         ViewCompat.setElevation(mHeaderBar, gapFillProgress * mMaxHeaderElevation);
+        return gapFillProgress;
     }
 
-    protected int getNewHeaderDetailsHeight(int scrollY) {
+    protected int getNewHeaderDetailsHeight(int scrollY, boolean parallax) {
         int minHeaderDetailsHeight = getMinHeaderHeight(); //mHeaderDetails.getMinHeight();
         // the details text will shrink as the user scrolls
-        // multiply scrollY by 0.4 to give it a bit of a parallax effect
-        float newHeight = Math.min(mHeaderDetailsHeightPixels - minHeaderDetailsHeight, (float) (scrollY * 0.75));
-        return mHeaderDetailsHeightPixels - (int) newHeight;
+        // multiply scrollY by a fraction to give it a bit of a parallax effect
+        float factor = parallax ? (float) (scrollY * 0.75) : scrollY;
+        float heightDifference = Math.min(mHeaderDetailsHeightPixels - minHeaderDetailsHeight, factor);
+        return mHeaderDetailsHeightPixels - (int) heightDifference;
     }
 
     // override this to make the header details area shrink to a specific size instead of 0

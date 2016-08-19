@@ -1,5 +1,7 @@
 package com.thespeakers_studio.thespeakersstudioapp.model;
 
+import java.util.ArrayList;
+
 /**
  * Created by smcgi_000 on 8/16/2016.
  */
@@ -10,14 +12,16 @@ public class Practice {
     private float rating;
     private String presentationId;
     private String modifiedDate;
+    private ArrayList<OutlineItem> mOutlineItems;
 
     public Practice(String id, String presentationId, float rating, String message,
-                    String modifiedDate) {
+                    String modifiedDate, ArrayList<OutlineItem> items) {
         this.id = id;
         this.presentationId = presentationId;
         this.rating = rating;
         this.message = message;
         this.modifiedDate = modifiedDate;
+        this.mOutlineItems = items;
     }
 
     public String getMessage() {
@@ -32,4 +36,15 @@ public class Practice {
         return modifiedDate;
     }
 
+    public String getPresentationId() {
+        return presentationId;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public ArrayList<OutlineItem> getOutlineItems() {
+        return mOutlineItems;
+    }
 }

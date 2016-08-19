@@ -259,4 +259,8 @@ public class Utils {
         a.recycle();
         return primaryColor;
     }
+
+    public static String getUUID() {
+        return java.util.UUID.randomUUID().toString();
+    }
 }

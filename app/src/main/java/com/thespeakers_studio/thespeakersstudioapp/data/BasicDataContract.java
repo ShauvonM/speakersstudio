@@ -4,7 +4,7 @@ package com.thespeakers_studio.thespeakersstudioapp.data;
  * Created by smcgi_000 on 8/9/2016.
  */
 public class BasicDataContract {
-    public static final int DATABASE_VERSION = 8;
+    public static final int DATABASE_VERSION = 9;
     public static final String DATABASE_NAME = "SpeakersStudio.db";
 
     public BasicDataContract() {}

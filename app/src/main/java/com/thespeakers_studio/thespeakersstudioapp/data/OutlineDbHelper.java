@@ -81,7 +81,9 @@ public class OutlineDbHelper {
                                         OutlineDataContract.COLUMN_NAME_DATE_MODIFIED)
                         );
 
-                items.add(new Practice(id, presentationId, rating, message, modifiedDate));
+                ArrayList<OutlineItem> outlineItems = getOutlineItemsByPracticeId(id);
+
+                items.add(new Practice(id, presentationId, rating, message, modifiedDate, outlineItems));
 
                 practCursor.moveToNext();
             }
@@ -116,8 +118,21 @@ public class OutlineDbHelper {
         return items;
     }
 
+    public ArrayList<OutlineItem> getOutlineItemsByPracticeId(String practiceId) {
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor itemCursor = db.query(
+            OutlineDataContract.OutlineItemEntry.TABLE_NAME,
+            OUTLINE_ITEM_PROJECTION,
+            OutlineDataContract.OutlineItemEntry.COLUMN_NAME_PRACTICE_ID + "=? ",
+            new String[] { practiceId },
+            null, null,
+            OutlineDataContract.OutlineItemEntry.COLUMN_NAME_ORDER
+        );
+
+        return cursorToOutlineItems(itemCursor);
+    }
+
     public ArrayList<OutlineItem> getOutlineItemsByAnswerId(String answerId, String presentationId) {
-        ArrayList<OutlineItem> items = new ArrayList<>();
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         Cursor itemCursor = db.query(
                 OutlineDataContract.OutlineItemEntry.TABLE_NAME,
@@ -129,6 +144,11 @@ public class OutlineDbHelper {
                 OutlineDataContract.COLUMN_NAME_DATE_MODIFIED
         );
 
+        return cursorToOutlineItems(itemCursor);
+    }
+
+    private ArrayList<OutlineItem> cursorToOutlineItems(Cursor itemCursor) {
+        ArrayList<OutlineItem> items = new ArrayList<>();
         itemCursor.moveToFirst();
         try {
             while (!itemCursor.isAfterLast()) {
@@ -150,6 +170,13 @@ public class OutlineDbHelper {
                 String modifiedDate = itemCursor.getString(
                         itemCursor.getColumnIndexOrThrow(
                                 OutlineDataContract.COLUMN_NAME_DATE_MODIFIED));
+                String answerId = itemCursor.getString(
+                        itemCursor.getColumnIndexOrThrow(
+                                OutlineDataContract.OutlineItemEntry.COLUMN_NAME_ANSWER_ID));
+                String presentationId = itemCursor.getString(
+                        itemCursor.getColumnIndexOrThrow(
+                                OutlineDataContract.OutlineItemEntry.COLUMN_NAME_PRESENTATION_ID));
+
 
                 items.add(new OutlineItem(
                         id,
@@ -196,12 +223,12 @@ public class OutlineDbHelper {
         db.close();
     }
 
-    public void savePracticeResponse(String presentationId, float rating, String message) {
+    public void savePracticeResponse(String presentationId, float rating, String message, String UUID) {
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
 
         String datetime = Utils.getDateTimeStamp();
-        String id = java.util.UUID.randomUUID().toString();
+        String id = UUID.isEmpty() ? Utils.getUUID() : UUID;
 
         values.put(OutlineDataContract.PracticeEntry.COLUMN_NAME_PRACTICE_ID, id);
         values.put(OutlineDataContract.PracticeEntry.COLUMN_NAME_PRESENTATION_ID, presentationId);
