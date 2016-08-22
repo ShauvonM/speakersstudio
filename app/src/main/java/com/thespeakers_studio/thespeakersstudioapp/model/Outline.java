@@ -136,6 +136,7 @@ public class Outline {
     }
 
     // used for the Intro and Closing items to load all of the default sub-items for those things
+    // takes a
     private long loadSubItemsFromPrompts(int[] promptIDs, String parentId,
                                          long duration, long durationLeftover) {
 
@@ -229,7 +230,7 @@ public class Outline {
 
         OutlineItem thisItem = new OutlineItem();
 
-        // load up any saved entries for this answer id
+        // load up any saved entries for this answer id, which will have their own durations
         ArrayList<OutlineItem> dbItems = mDbHelper
                 .getOutlineItemsByAnswerId(answerId, presentationId);
 
@@ -282,36 +283,40 @@ public class Outline {
             thisDuration = thisDefaultDuration + tracker.getDurationLeftover();
         }
 
-        /* TODO: I don't think this is correct - I think the last item will just handle itself
-        // if this is the last item, we should just dump all the remaining time in there
-        if (lastItem) {
-            thisDuration += tracker.getDurationRemainder() + tracker.getDurationLeftover();
-        }
-        */
-
         thisItem.setDuration(thisDuration);
         tracker.addDuration(thisDuration);
 
         // add this thing to the outline, depending on what type of thing it is
         if (answer.getPromptType() == PresentationData.LIST) {
-            // we have to add all the answers as their own sub-item, so we can treat them
-            // individually if we need to
-            thisItem.setText(mContext.getResources().getString(R.string.outline_item_mention));
-            addItem(thisItem);
-
             ArrayList<PromptAnswer> answers = mPresentation.getAnswer(answer.getPromptId());
-            for (PromptAnswer thisAnswer : answers) {
-                OutlineItem answerItem = new OutlineItem(
-                        "",
-                        itemId,
-                        getItemCount(),
-                        thisAnswer.getValue(),
-                        thisAnswer.getId(),
-                        false,
-                        0,
-                        mPresentation.getId()
-                );
-                addItem(answerItem);
+
+            if (answers.size() > 1) {
+                // we have to add all the answers as their own sub-item, so we can treat them
+                // individually if we need to
+                thisItem.setText(mContext.getResources().getString(R.string.outline_item_mention));
+                addItem(thisItem);
+
+                for (PromptAnswer thisAnswer : answers) {
+                    OutlineItem answerItem = new OutlineItem(
+                            "",
+                            itemId,
+                            getItemCount(),
+                            thisAnswer.getValue(),
+                            thisAnswer.getId(),
+                            false,
+                            0,
+                            mPresentation.getId()
+                    );
+                    addItem(answerItem);
+                }
+            } else {
+
+                thisItem.setText(String.format(
+                        mContext.getResources().getString(R.string.outline_item_mention_concat),
+                        answers.get(0).getValue()
+                ));
+                addItem(thisItem);
+
             }
         } else {
             // all other types can just dump the answer up in there

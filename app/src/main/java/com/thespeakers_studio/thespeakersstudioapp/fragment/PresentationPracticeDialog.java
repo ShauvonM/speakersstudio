@@ -313,7 +313,7 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
             }
             mOutlineItemIndex++;
             if (mOutlineItemIndex < mOutline.getItemCount()) {
-                OutlineItem item = mOutline.getItem(mOutlineItemIndex);
+                final OutlineItem item = mOutline.getItem(mOutlineItemIndex);
                 // skip items with 0 duration
                 if (item.getDuration() == 0) {
                     nextItem();
@@ -333,88 +333,40 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
                     mTopicText = item.getText();
 
                     // we'll only show top level items for a second
-                    mCurrentExpiration = mElapsed + INTERSTITIAL_DURATION;
+                    //mCurrentExpiration = mElapsed + INTERSTITIAL_DURATION;
 
                     vibrate(PULSE);
                     hideButton(mButtonLeft);
                     hideButton(mButtonRight);
+
+                    // move on to the next item to set up the duration
+                    nextItem();
                 } else {
                     //this is a sub-item
+                    configureOutlineItemDuration(item);
 
-                    long thisDuration = item.getDuration();
-                    // collect any time left over from the last item
-                    // (which will be > 0 if the user skipped to the next item)
-                    long remainingTime = mCurrentExpiration - mElapsed;
-                    LOGD(TAG, "remaining time: " + remainingTime);
-
-                    // set the timer value - this is what the timer is counting down to
-                    mCurrentExpiration = mElapsed + (remainingTime + thisDuration);
-
-                    // store this item's duration, so we can know how long it takes
-                    //  (if the user skips it early)
-                    mCurrentItemDuration = remainingTime + thisDuration;
-
-                    // see if this item has children, which we will show as a bulleted list
-                    final ArrayList<OutlineItem> children = mOutline.getItemsByParentId(item.getId());
-
-                    // if we have children, show the item as a bulleted list, otherwise just show the thing
-                    if (children.size() > 0) {
-
-                        showText(mOutputMainView, "");
-                        mBulletListWrapper.setVisibility(View.VISIBLE);
-
-                        showText(mBulletListHeader, item.getText());
-
-                        showView(mBulletList, true, "", new showViewInterface() {
-                            @Override
-                            public void onReadyToShow(View v) {
-                                mBulletList.removeAllViews();
-                                int cnt = 1;
-                                for (OutlineItem child : children) {
-                                    TextView tv = new TextView(getContext());
-                                    ViewGroup.MarginLayoutParams mlp = new ViewGroup.MarginLayoutParams(
-                                            ViewGroup.LayoutParams.WRAP_CONTENT,
-                                            ViewGroup.LayoutParams.WRAP_CONTENT);
-                                    int m = getContext().getResources().getDimensionPixelSize(R.dimen.spacing_8);
-                                    mlp.setMargins(m, m, m, m);
-                                    tv.setLayoutParams(mlp);
-                                    tv.setTextSize(getContext().getResources()
-                                            .getDimension(R.dimen.practice_bullet_list_font_size));
-                                    mBulletList.addView(tv);
-
-                                    tv.setText(mOutlineHelper.getBullet(3, cnt)
-                                            + " " + child.getText());
-                                    cnt++;
-                                }
-                            }
-                        });
-
+                    if (mTopicText.isEmpty()) {
+                        showOutlineItem(item);
                     } else {
-
-                        showText(mOutputMainView, item.getText());
-                        showText(mBulletListHeader, "");
-                        hideView(mBulletList);
-
+                        // delay showing the next item for a second
+                        final Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                showText(mOutputSubView, mTopicText);
+                                mTopicText = "";
+                                showOutlineItem(item);
+                            }
+                        }, INTERSTITIAL_DURATION);
                     }
-
-                    if (!mTopicText.isEmpty()) {
-                        // mTopicText will hold the topic name, so that we can put it
-                        // in the topic text view
-                        showText(mOutputSubView, mTopicText);
-                        mTopicText = "";
-                        // remove time from the current item for the time we wasted looking
-                        // at the topic name
-                        mCurrentExpiration -= INTERSTITIAL_DURATION;
-                    }
-
-                    //showButton(mButtonLeft);
-                    showButton(mButtonRight);
                 }
             } else {
                 // we're done!
                 finish();
             }
-        } else {
+
+        } else { // isPractice == false
+
             // this is a timer, so just show a timer
             showText(mOutputSubView, R.string.timer);
             showText(mOutputMainView, "");
@@ -426,9 +378,74 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
             } else {
                 finish();
             }
+
         }
 
         //mTimeHandler.postDelayed(updateTimerThread, 0);
+    }
+
+    private void configureOutlineItemDuration(OutlineItem item) {
+        long thisDuration = item.getDuration();
+        // collect any time left over from the last item
+        // (which will be > 0 if the user skipped to the next item)
+        long remainingTime = mCurrentExpiration - mElapsed;
+
+        // set the timer value - this is what the timer is counting down to
+        mCurrentExpiration = mElapsed + (remainingTime + thisDuration);
+
+        // store this item's duration, so we can know how long it takes
+        //  (if the user skips it early)
+        mCurrentItemDuration = remainingTime + thisDuration;
+    }
+
+    private void showOutlineItem(OutlineItem item) {
+        // see if this item has children, which we will show as a bulleted list
+        final ArrayList<OutlineItem> children = mOutline.getItemsByParentId(item.getId());
+
+        // if we have children, show the item as a bulleted list, otherwise just show the thing
+        if (children.size() > 0) {
+
+            showText(mOutputMainView, "");
+            mBulletListWrapper.setVisibility(View.VISIBLE);
+
+            showText(mBulletListHeader, item.getText());
+
+            showView(mBulletList, true, "", new showViewInterface() {
+                @Override
+                public void onReadyToShow(View v) {
+                    mBulletList.removeAllViews();
+                    int cnt = 1;
+                    for (OutlineItem child : children) {
+                        TextView tv = new TextView(getContext());
+                        ViewGroup.MarginLayoutParams mlp = new ViewGroup.MarginLayoutParams(
+                                ViewGroup.LayoutParams.WRAP_CONTENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT);
+                        int m = getContext().getResources().getDimensionPixelSize(R.dimen.spacing_8);
+                        mlp.setMargins(m, m, m, m);
+                        tv.setLayoutParams(mlp);
+                        tv.setTextSize(getContext().getResources()
+                                .getDimension(R.dimen.practice_bullet_list_font_size));
+                        mBulletList.addView(tv);
+
+                        tv.setText(mOutlineHelper.getBullet(3, cnt)
+                                + " " + child.getText());
+                        cnt++;
+                    }
+                }
+            });
+
+        } else {
+
+            // show the text for this item
+            showText(mOutputMainView, item.getText());
+            // hide the bulleted list
+            showText(mBulletListHeader, "");
+            hideView(mBulletList);
+
+        }
+
+        //showButton(mButtonLeft);
+        showButton(mButtonRight);
     }
 
     private void finish() {
@@ -542,6 +559,11 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
                             long currentRemaining = mCurrentExpiration - mElapsed;
                             currentItem.setTimedDuration(mCurrentItemDuration - currentRemaining);
                         }
+                        // fudge the time a little bit so that we are sure we are on the second
+                        // yes this will technically throw off the duration,
+                        // but by less than a second
+                        mStartTime = now() - mElapsed;
+
                         nextItem();
                     } else {
                         // we are done, so close the thing
@@ -579,7 +601,9 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
 
             long elapsed = now() - mStartTime;
             mElapsed = Utils.roundDownToThousand(elapsed);
-            long totalRemaining = mOutlineDuration - mElapsed;
+            // totalRemaining is the duration of the entire presentation, which we want to stop at 0
+            long totalRemaining = Math.max(mOutlineDuration - mElapsed, 0);
+            // currentRemaining is the duration of the current section of the outline
             long currentRemaining = mCurrentExpiration - mElapsed;
 
             //LOGD(TAG, "elapsed time: " + mElapsed + " " + totalRemaining + " " + currentRemaining);
@@ -587,11 +611,11 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
             if (currentRemaining <= 0 && !mFinished) {
                 nextItem();
             } else {
+                if (mStarted && mDisplayTimer && mIsPractice) {
+                    setTimer(mTimerTotalView, totalRemaining);
+                }
                 if (!mFinished) {
-                    if (mStarted && mDisplayTimer && mIsPractice) {
-                        setTimer(mTimerTotalView, totalRemaining);
-                    }
-                    if (mDisplayTimer && mTopicText.isEmpty()) {
+                    if (mDisplayTimer) { // && mTopicText.isEmpty()) {
                         if (mStarted) {
                             // show the current remaining time in 0:00 format
                             setTimer(mTimerView, currentRemaining);

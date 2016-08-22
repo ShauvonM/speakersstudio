@@ -142,7 +142,7 @@ public class PresentationData {
             case DURATION:
                 return getAnswerByKey(promptId, "duration");
             case LIST:
-                return getAnswerByKey(promptId, "list_1");
+                return getAnswerByKey(promptId, "list_0");
             default:
                 return getAnswer(promptId).get(0);
         }

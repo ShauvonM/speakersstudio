@@ -121,6 +121,7 @@
     <string name="outline_item_intro">Intro</string>
     <string name="outline_item_conclusion">Closing</string>
     <string name="outline_item_mention">Mention:</string>
+    <string name="outline_item_mention_concat">Mention \"%1$s\"</string>
     <string name="outline_duration">(%1$d Minutes)</string>
 
     <string name="practice_presentation">Practice Presentation</string>

@@ -184,7 +184,7 @@ public class Utils {
         int mins = secs / 60;
         secs = secs % 60;
 
-        int formatString = millis > 0 ? R.string.timer_output : R.string.timer_output_negative;
+        int formatString = millis >= 0 ? R.string.timer_output : R.string.timer_output_negative;
         return String.format(r.getString(formatString), mins, secs);
     }
 
