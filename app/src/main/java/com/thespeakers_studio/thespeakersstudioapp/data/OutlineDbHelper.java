@@ -214,6 +214,7 @@ public class OutlineDbHelper {
         values.put(OutlineDataContract.OutlineItemEntry.COLUMN_NAME_ORDER, item.getOrder());
         values.put(OutlineDataContract.OutlineItemEntry.COLUMN_NAME_DURATION, item.getDuration());
         values.put(OutlineDataContract.OutlineItemEntry.COLUMN_NAME_TEXT, item.getText());
+        values.put(OutlineDataContract.OutlineItemEntry.COLUMN_NAME_PRACTICE_ID, item.getPracticeId());
 
         values.put(OutlineDataContract.COLUMN_NAME_DATE_CREATED, datetime);
         values.put(OutlineDataContract.COLUMN_NAME_DATE_MODIFIED, datetime);
@@ -223,7 +224,7 @@ public class OutlineDbHelper {
         db.close();
     }
 
-    public void savePracticeResponse(String presentationId, float rating, String message, String UUID) {
+    public void savePractice(String presentationId, float rating, String message, String UUID) {
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
 

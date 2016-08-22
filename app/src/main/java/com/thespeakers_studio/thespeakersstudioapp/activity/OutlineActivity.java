@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
@@ -129,6 +130,9 @@ public class OutlineActivity extends BaseActivity implements
             TextView timeView = (TextView) itemLayout.findViewById(R.id.list_duration);
             if (duration > 0) {
                 timeView.setText(Utils.getTimeStringFromMillis(duration, getResources()));
+                if (item.getIsFromDB()) {
+                    timeView.setTypeface(null, Typeface.BOLD);
+                }
             } else {
                 timeView.setText("");
             }

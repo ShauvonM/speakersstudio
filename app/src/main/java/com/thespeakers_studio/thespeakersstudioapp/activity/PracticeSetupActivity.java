@@ -121,7 +121,7 @@ public class PracticeSetupActivity extends BaseActivity implements
                 mOutlineDbHelper = new OutlineDbHelper(this);
 
                 mPractices = mOutlineDbHelper.getPractices(mPresentation.getId());
-                PracticeListAdapter adapter = new PracticeListAdapter(mPractices);
+                PracticeListAdapter adapter = new PracticeListAdapter(mPractices, mOutline);
                 mRecyclerView.setLayoutManager(new LinearLayoutManager(this,
                         LinearLayoutManager.VERTICAL, false));
                 mRecyclerView.setAdapter(adapter);
@@ -133,16 +133,22 @@ public class PracticeSetupActivity extends BaseActivity implements
     }
 
     private void showMessageIfEmpty() {
-        if (mRecyclerView.getAdapter().getItemCount() == 2) {
+        if (!isPractice) {
             findViewById(R.id.no_results).setVisibility(View.VISIBLE);
             mSettingsExpand.setVisibility(View.GONE);
             mRecyclerView.setVisibility(View.GONE);
-
-            onScrollChanged(-mScrollPos);
         } else {
-            findViewById(R.id.no_results).setVisibility(View.GONE);
-            mSettingsExpand.setVisibility(View.VISIBLE);
-            mRecyclerView.setVisibility(View.VISIBLE);
+            if (mRecyclerView.getAdapter().getItemCount() == 2) {
+                findViewById(R.id.no_results).setVisibility(View.VISIBLE);
+                mSettingsExpand.setVisibility(View.GONE);
+                mRecyclerView.setVisibility(View.GONE);
+
+                onScrollChanged(-mScrollPos);
+            } else {
+                findViewById(R.id.no_results).setVisibility(View.GONE);
+                mSettingsExpand.setVisibility(View.VISIBLE);
+                mRecyclerView.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -181,8 +187,8 @@ public class PracticeSetupActivity extends BaseActivity implements
                     if (mSettingsHeight == -1) {
                         mSettingsHeight = mSettingsFragment.getView().getHeight();
                         mRecyclerView.scrollBy(0, mSettingsHeight);
-                        mScrollPos = mSettingsHeight;
-                        setSettingsExpandIcon();
+                        //mScrollPos = mSettingsHeight;
+                        //setSettingsExpandIcon();
 
                         showMessageIfEmpty();
                     }
@@ -207,23 +213,11 @@ public class PracticeSetupActivity extends BaseActivity implements
 
     @Override
     protected void setLayoutPadding(int actionBarSize) {
-        /*
-        View header = findViewById(R.id.saved_practices_header);
-        ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams)
-                header.getLayoutParams();
-        if (mlp.topMargin != actionBarSize) {
-            mlp.topMargin = actionBarSize;
-            header.setLayoutParams(mlp);
-        }
-        */
-
         findViewById(R.id.no_results).setPadding(0, actionBarSize, 0, 0);
 
-
-        ((PracticeListAdapter) mRecyclerView.getAdapter()).setTopMargin(
-                actionBarSize);
-
-        //mRecyclerView.scrollTo(0, mSettingsFragment.getView().getHeight());
+        if (mRecyclerView != null && mRecyclerView.getAdapter() != null) {
+            ((PracticeListAdapter) mRecyclerView.getAdapter()).setTopMargin(actionBarSize);
+        }
     }
 
     public void onScrollChanged(int dy) {
@@ -249,11 +243,15 @@ public class PracticeSetupActivity extends BaseActivity implements
     }
 
     private void setSettingsExpandIcon() {
-        if (mScrollPos <= mSettingsHeight - 50) {
-            mSettingsExpand.setBackgroundResource(R.drawable.ic_expand_less_white_24dp);
+        if (isSettingsPanelOpen()) {
+            mSettingsExpand.setImageResource(R.drawable.ic_expand_less_white_24dp);
         } else {
-            mSettingsExpand.setBackgroundResource(R.drawable.ic_expand_more_white_24dp);
+            mSettingsExpand.setImageResource(R.drawable.ic_expand_more_white_24dp);
         }
+    }
+
+    private boolean isSettingsPanelOpen() {
+        return mScrollPos <= 50;
     }
 
     @Override
@@ -267,7 +265,7 @@ public class PracticeSetupActivity extends BaseActivity implements
                 startPractice();
                 break;
             case R.id.settings_expand:
-                if (mScrollPos <= mSettingsHeight - 50) {
+                if (isSettingsPanelOpen()) {
                     collapseSettings();
                 } else {
                     expandSettings();
@@ -318,39 +316,39 @@ public class PracticeSetupActivity extends BaseActivity implements
                     .findViewById(R.id.practice_rating);
 
             thoughtsDialogBuilder
-                    .setCancelable(true)
-                    .setIcon(R.drawable.ic_record_voice_over_white_24dp)
-                    .setTitle(R.string.practice_response_title)
-                    .setPositiveButton(R.string.save,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    String message = messageView.getText().toString();
-                                    float rating = ratingBar.getRating();
-                                    String id = Utils.getUUID();
+                .setCancelable(true)
+                .setIcon(R.drawable.ic_record_voice_over_white_24dp)
+                .setTitle(R.string.practice_response_title)
+                .setPositiveButton(R.string.save,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String message = messageView.getText().toString();
+                                float rating = ratingBar.getRating();
+                                String practiceId = Utils.getUUID();
 
-                                    mOutlineDbHelper.savePracticeResponse(
-                                            mPresentation.getId(), rating, message, id);
+                                mOutlineDbHelper.savePractice(
+                                        mPresentation.getId(), rating, message, practiceId);
 
-                                    ArrayList<OutlineItem> savedItems =
-                                            savePracticeTrackedInfo(outline, id);
+                                ArrayList<OutlineItem> savedItems =
+                                        savePracticeTrackedInfo(outline, practiceId);
 
-                                    mPractices.add(0, new Practice(id, mPresentation.getId(),
-                                            rating, message, Utils.getDateTimeStamp(), savedItems));
-                                    mRecyclerView.getAdapter().notifyDataSetChanged();
+                                mPractices.add(0, new Practice(practiceId, mPresentation.getId(),
+                                        rating, message, Utils.getDateTimeStamp(), savedItems));
+                                mRecyclerView.getAdapter().notifyDataSetChanged();
 
-                                    showMessageIfEmpty();
-                                }
+                                showMessageIfEmpty();
                             }
-                    )
-                    .setNegativeButton(R.string.practice_response_cancel,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    savePracticeTrackedInfo(outline, "");
-                                }
+                        }
+                )
+                .setNegativeButton(R.string.practice_response_cancel,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                savePracticeTrackedInfo(outline, "");
                             }
-                    );
+                        }
+                );
 
             AlertDialog dialog = thoughtsDialogBuilder.create();
             dialog.show();
@@ -423,7 +421,6 @@ public class PracticeSetupActivity extends BaseActivity implements
             addPreferencesFromResource(R.xml.settings_timer);
 
             SettingsUtils.registerOnSharedPreferenceChangeListener(getActivity(), this);
-
         }
 
         @Override

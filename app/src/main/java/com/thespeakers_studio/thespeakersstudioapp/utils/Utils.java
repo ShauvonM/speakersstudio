@@ -188,6 +188,25 @@ public class Utils {
         return String.format(r.getString(formatString), mins, secs);
     }
 
+    public static String getTimeStringFromMillisInText (long millis, Resources r) {
+        long use = Math.abs(millis);
+        int secs = (int) (use / 1000);
+        if (use % 1000 > 1) {
+            secs += 1;
+        }
+        int mins = secs / 60;
+        secs = secs % 60;
+
+        if (mins > 0 && secs > 0) {
+            return String.format(r.getString(R.string.text_time_display_minutes_and_seconds),
+                    mins, secs);
+        } else if (mins > 0) {
+            return String.format(r.getString(R.string.text_time_display_minutes), mins);
+        } else {
+            return String.format(r.getString(R.string.text_time_display_seconds), secs);
+        }
+    }
+
     public static String secondsFromMillis (long millis) {
         int secs = (int) (millis / 1000);
         if (millis % 1000 > 1) {

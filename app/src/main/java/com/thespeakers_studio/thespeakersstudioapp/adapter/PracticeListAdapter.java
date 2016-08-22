@@ -1,21 +1,30 @@
 package com.thespeakers_studio.thespeakersstudioapp.adapter;
 
+import android.content.Context;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatRatingBar;
+import android.support.v7.widget.ListViewCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.thespeakers_studio.thespeakersstudioapp.R;
 import com.thespeakers_studio.thespeakersstudioapp.data.OutlineDbHelper;
+import com.thespeakers_studio.thespeakersstudioapp.model.Outline;
 import com.thespeakers_studio.thespeakersstudioapp.model.OutlineItem;
 import com.thespeakers_studio.thespeakersstudioapp.model.Practice;
+import com.thespeakers_studio.thespeakersstudioapp.utils.OutlineHelper;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
 
@@ -25,9 +34,11 @@ import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
 public class PracticeListAdapter extends RecyclerView.Adapter<PracticeListAdapter.PracticeListViewHolder> {
 
     private ArrayList<Practice> mPractices;
+    private Outline mOutline;
 
-    public PracticeListAdapter(ArrayList<Practice> practices) {
+    public PracticeListAdapter(ArrayList<Practice> practices, Outline outline) {
         mPractices = practices;
+        mOutline = outline;
     }
 
     private int mTopMargin;
@@ -133,7 +144,6 @@ public class PracticeListAdapter extends RecyclerView.Adapter<PracticeListAdapte
         @Override
         public void onClick(View v) {
             AppCompatActivity context = (AppCompatActivity) v.getContext();
-            OutlineDbHelper dbHelper = new OutlineDbHelper(context);
 
             // show user's thoughts on this practice
             AlertDialog.Builder thoughtsDialogBuilder = new AlertDialog.Builder(context);
@@ -152,6 +162,8 @@ public class PracticeListAdapter extends RecyclerView.Adapter<PracticeListAdapte
             TextView outlineItemsCount = (TextView) practiceResponseDialogContents
                     .findViewById(R.id.outline_items_count);
             View asterisk = practiceResponseDialogContents.findViewById(R.id.practice_contains_outline_items);
+            ListViewCompat outlineItemsList = (ListViewCompat) practiceResponseDialogContents
+                    .findViewById(R.id.outline_items_list);
 
             messageView.setText(mPractice.getMessage());
 
@@ -163,13 +175,46 @@ public class PracticeListAdapter extends RecyclerView.Adapter<PracticeListAdapte
             ratingBar.setRating(mPractice.getRating());
 
             if (mPractice.getOutlineItems().size() > 0) {
+                LOGD("SS", "Outline item answer ID: " + mPractice.getOutlineItems().get(0).getAnswerId());
                 outlineItemsCount.setText(String.format(
                         itemView.getContext().getString(R.string.practice_response_outline_items),
                         mPractice.getOutlineItems().size()
                 ));
+                OutlineHelper outlineHelper = new OutlineHelper();
+                String[] trackingStrings = new String[mPractice.getOutlineItems().size()];
+                int cnt = 0;
+                for (OutlineItem item : mPractice.getOutlineItems()) {
+                    String answerId = item.getAnswerId();
+
+                    OutlineItem thisItemInOutline = mOutline.getItemByAnswerId(answerId);
+                    OutlineItem parent = mOutline.getItemById(thisItemInOutline.getParentId());
+
+                    int parentIndex = mOutline.getIndexInGroup(parent);
+                    String parentText = parent.getText();
+                    int indexInGroup = mOutline.getIndexInGroup(thisItemInOutline);
+                    String text = thisItemInOutline.getText();
+                    String duration = Utils.getTimeStringFromMillisInText(
+                            item.getDuration(), context.getResources());
+
+                    String output = String.format(
+                            v.getContext().getString(R.string.practice_tracked_item_description),
+
+                            outlineHelper.getBullet(1, parentIndex + 1),
+                            parentText,
+                            outlineHelper.getBullet(2, indexInGroup + 1),
+                            text,
+                            duration
+                    );
+                    trackingStrings[cnt] = output;
+                    cnt++;
+                }
+                OutlineItemListAdapter adapter = new OutlineItemListAdapter(
+                        v.getContext(), trackingStrings);
+                outlineItemsList.setAdapter(adapter);
             } else {
                 outlineItemsCount.setVisibility(View.GONE);
                 asterisk.setVisibility(View.GONE);
+                outlineItemsList.setVisibility(View.GONE);
             }
 
             thoughtsDialogBuilder
@@ -181,5 +226,24 @@ public class PracticeListAdapter extends RecyclerView.Adapter<PracticeListAdapte
             dialog.show();
         }
 
+    }
+
+    public class OutlineItemListAdapter extends ArrayAdapter<String> {
+        private String [] mItems;
+        private Context mContext;
+        public OutlineItemListAdapter(Context context, String[] objects) {
+            super(context, -1, objects);
+            mItems = objects;
+            mContext = context;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = new TextView(parent.getContext());
+            }
+            ((TextView) convertView).setText(mItems[position]);
+            return convertView;
+        }
     }
 }

@@ -55,6 +55,41 @@ public class Outline {
         return items;
     }
 
+    public OutlineItem getItemByAnswerId(String answerId) {
+        if (answerId.isEmpty()) {
+            return null;
+        }
+        for (OutlineItem item : mItems) {
+            if (item.getAnswerId().equals(answerId)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    public OutlineItem getItemById(String id) {
+        if (id.isEmpty()) {
+            return null;
+        }
+        for (OutlineItem item : mItems) {
+            if (item.getId().equals(id)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    public int getIndexInGroup(OutlineItem item) {
+        int index = 0;
+        for (OutlineItem child : getItemsByParentId(item.getParentId())) {
+            if (child.getId().equals(item.getId())) {
+                return index;
+            }
+            index++;
+        }
+        return -1;
+    }
+
     public OutlineItem getItem(int index) {
         if (index >= mItems.size()) {
             return null;
@@ -275,6 +310,7 @@ public class Outline {
             thisDuration = tally / dbItemCount;
             // since this is a custom duration, save the excess (or remove the overlap)
             tracker.incrementLeftover((thisDefaultDuration - thisDuration));
+            thisItem.setIsFromDB();
         }
 
         // maybe the saved items didn't have durations, or there weren't any at all

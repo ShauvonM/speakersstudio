@@ -103,14 +103,14 @@
     <string name="no_stories_placeholder">You cannot save stories just yet. I know, tell me about it.</string>
     <string name="no_saved_practices">You have not practiced this Presentation yet.</string>
     <string name="saved_practices_header">Your Practice History</string>
-    <string name="no_saved_timers">You have no saved timers.</string>
+    <string name="no_saved_timers">Time waits for no man. Timers also wait for no man, because you can\'t save them yet.</string>
 
     <string name="practice_response_title">Practice Finished!</string>
     <string name="practice_response_view_title">Practice History</string>
     <string name="practice_response_rate_prompt">How did that practice go for you?</string>
     <string name="practice_response_notes_prompt">What thoughts do you have?</string>
     <string name="practice_response_view_notes">These were your thoughts:</string>
-    <string name="practice_response_outline_items">* This practice tracked %1$d duration change(s).</string>
+    <string name="practice_response_outline_items">* This practice tracked %1$d duration change(s):</string>
     <string name="practice_response_cancel">Cancel</string>
     <string name="asterisk">*</string>
 
@@ -123,6 +123,11 @@
     <string name="outline_item_mention">Mention:</string>
     <string name="outline_item_mention_concat">Mention \"%1$s\"</string>
     <string name="outline_duration">(%1$d Minutes)</string>
+
+    <string name="practice_tracked_item_description">Section %1$s \"%2$s\" &gt; Subsection %3$s \"%4$s\" took <b>%5$s</b>.</string>
+    <string name="text_time_display_seconds">%1$d seconds</string>
+    <string name="text_time_display_minutes">%1$d minutes</string>
+    <string name="text_time_display_minutes_and_seconds">%1$d minutes, %2$d seconds</string>
 
     <string name="practice_presentation">Practice Presentation</string>
 
