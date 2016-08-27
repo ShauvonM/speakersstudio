@@ -187,6 +187,12 @@ public class PresentationPracticeDialog extends DialogFragment implements
         if (mOutline != null || mDuration > 0) {
             mTimeThread.setup(this, mOutline, mDuration);
             mTimeThread.start(mDelay);
+            // mTimeThread might be paused off the bat if the activity was paused while it was paused
+            // perhaps the user paused the timer and rotated the screen or checked another app
+            // TODO: or got a phone call?
+            if (mTimeThread.isPaused()) {
+                pause();
+            }
         }
     }
 
@@ -481,17 +487,25 @@ public class PresentationPracticeDialog extends DialogFragment implements
         v.setAnimation(blink);
     }
 
+    private void pause() {
+        showText(mOutputMainView, R.string.paused);
+        blink(mTimerView);
+        hideView(mButtonRight);
+        //hideView(mButtonLeft);
+    }
+    private void resume() {
+        mTimerView.clearAnimation();
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.practice_timer_current:
                 // tap the time to pause or resume the timer
                 if (mTimeThread.togglePause()) {
-                    showText(mOutputMainView, R.string.paused);
-                    blink(mTimerView);
+                    pause();
                 } else {
-                    mTimerView.clearAnimation();
-                    mTimeThread.togglePause();
+                    resume();
                 }
                 break;
             case R.id.button_next:

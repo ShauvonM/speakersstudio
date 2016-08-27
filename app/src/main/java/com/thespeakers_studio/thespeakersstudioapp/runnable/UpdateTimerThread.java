@@ -118,13 +118,8 @@ public class UpdateTimerThread {
         }
 
         if (mFromBundle) {
-            if (mOutlineItemIndex >= 0 && mOutlineItemIndex < mOutline.getItemCount()) {
-                OutlineItem item = mOutline.getItem(mOutlineItemIndex);
-                // we take a step back so that we can redo the last step
-                // and trigger all the callbacks and whatnot
-                mCurrentExpiration -= item.getDuration();
-                mOutlineItemIndex--;
-                nextItem();
+            if (!mPaused && mOutlineItemIndex >= 0 && mOutlineItemIndex < mOutline.getItemCount()) {
+                resume();
             }
         } else {
             if (delay) {
@@ -135,7 +130,14 @@ public class UpdateTimerThread {
             }
         }
 
-        mTimeHandler.postDelayed(updateTimerThread, 500);
+        if (!mPaused) {
+            mTimeHandler.postDelayed(updateTimerThread, 500);
+        } else {
+            if (mInterface != null) {
+                mInterface.updateTime(mCurrentExpiration - mElapsed,
+                        mOutlineDuration - mElapsed, mElapsed);
+            }
+        }
     }
 
     public void start() {
@@ -160,6 +162,10 @@ public class UpdateTimerThread {
 
     public boolean isFinished() {
         return mFinished;
+    }
+
+    public boolean isPaused() {
+        return mPaused;
     }
 
     public void vibrate(long[] pattern) {
@@ -270,19 +276,29 @@ public class UpdateTimerThread {
         if (mPaused) {
             mPaused = false;
             mStartTime = 0;
-            mOutlineItemIndex--;
-            nextItem();
+
+            mOutlineDuration = mOutlineDuration - mElapsed;
+            if (mStarted) {
+                mCurrentExpiration = mCurrentExpiration - mElapsed;
+            }
+
+            resume();
 
             mTimeHandler.postDelayed(updateTimerThread, 0);
         } else {
             mPaused = true;
             mTimeHandler.removeCallbacks(updateTimerThread);
-            mOutlineDuration = mOutlineDuration - mElapsed;
-            if (mStarted) {
-                mCurrentExpiration = mCurrentExpiration - mElapsed;
-            }
         }
         return mPaused;
+    }
+
+    private void resume() {
+        OutlineItem item = mOutline.getItem(mOutlineItemIndex);
+        // we take a step back so that we can redo the last step
+        // and trigger all the callbacks and whatnot
+        mCurrentExpiration -= item.getDuration();
+        mOutlineItemIndex--;
+        nextItem();
     }
 
     public long getStartTime() {
@@ -307,7 +323,7 @@ public class UpdateTimerThread {
             // currentRemaining is the duration of the current section of the outline
             long currentRemaining = mCurrentExpiration - mElapsed;
 
-            //LOGD(TAG, "elapsed time: " + mElapsed + " " + totalRemaining + " " + currentRemaining);
+            LOGD(TAG, "elapsed time: " + mElapsed + " " + totalRemaining + " " + currentRemaining);
 
             mTimeHandler.postDelayed(this, 100);
 
