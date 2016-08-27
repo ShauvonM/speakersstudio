@@ -2,6 +2,8 @@ package com.thespeakers_studio.thespeakersstudioapp.model;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Bundle;
+import android.os.Parcelable;
 
 import com.thespeakers_studio.thespeakersstudioapp.R;
 import com.thespeakers_studio.thespeakersstudioapp.data.OutlineDbHelper;
@@ -23,6 +25,9 @@ public class Outline {
     public static final int[] OUTLINE_TOPIC_ITEMS = new int[] {22, 21, 20, 23};
     public static final int[] OUTLINE_CONC_ITEMS = new int[] {13, 19};
 
+    public static final String BUNDLE_PRESENTATION = "presentation";
+    public static final String BUNDLE_ITEMS = "outline_items";
+
     /*
         default durations (these are probably placeholders)
         INTRO: 12.5%
@@ -34,6 +39,33 @@ public class Outline {
         mItems = new ArrayList<>();
         mContext = context;
         mDbHelper = new OutlineDbHelper(context);
+    }
+
+    public Outline (Context context, Bundle outlineBundle) {
+        this(context);
+
+        if (outlineBundle == null) {
+            // big problem, HUGE
+            return;
+        }
+
+        outlineBundle.setClassLoader(getClass().getClassLoader());
+        mPresentation = new PresentationData(context, outlineBundle.getBundle(BUNDLE_PRESENTATION));
+
+        mItems = outlineBundle.getParcelableArrayList(BUNDLE_ITEMS);
+    }
+
+    public Bundle toBundle() {
+        Bundle bundle = new Bundle();
+
+        bundle.putParcelableArrayList(BUNDLE_ITEMS, mItems);
+        bundle.putBundle(BUNDLE_PRESENTATION, mPresentation.toBundle());
+
+        return bundle;
+    }
+
+    public String getPresentationId() {
+        return mPresentation.getId();
     }
 
     public ArrayList<OutlineItem> getItems() {
@@ -363,8 +395,6 @@ public class Outline {
 
         // this doesn't have to return anything because the tracker will have the values in it
     }
-
-
 
     // this is the biggun - this method generates the outline list
     public static Outline fromPresentation (Context context, PresentationData pres) {

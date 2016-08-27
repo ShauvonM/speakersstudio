@@ -1,5 +1,8 @@
 package com.thespeakers_studio.thespeakersstudioapp.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -7,7 +10,7 @@ import java.util.Comparator;
 /**
  * Created by smcgi_000 on 4/21/2016.
  */
-public class Prompt {
+public class Prompt implements Parcelable {
     private int id;
     private int step;
     private int order;
@@ -219,4 +222,54 @@ public class Prompt {
     public String getReferenceDefault() {
         return referenceDefault;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeInt(step);
+        dest.writeInt(order);
+        dest.writeInt(charLimit);
+        dest.writeInt(type);
+        dest.writeString(text);
+        dest.writeString(processedText);
+        dest.writeTypedList(answer);
+        dest.writeByte((byte)(isOpen ? 1 : 0));
+        dest.writeByte((byte)(required ? 1 : 0));
+        dest.writeString(referenceDefault);
+        dest.writeInt(referenceId);
+        dest.writeString(answerId);
+    }
+
+    public Prompt(Parcel in) {
+        id = in.readInt();
+        step = in.readInt();
+        order = in.readInt();
+        charLimit = in.readInt();
+        type = in.readInt();
+        text = in.readString();
+        processedText = in.readString();
+        answer = in.createTypedArrayList(PromptAnswer.CREATOR);
+        isOpen = in.readByte() == 1;
+        required = in.readByte() == 1;
+        referenceDefault = in.readString();
+        referenceId = in.readInt();
+        answerId = in.readString();
+    }
+
+    public static final Parcelable.Creator<Prompt> CREATOR = new Creator<Prompt>() {
+        @Override
+        public Prompt createFromParcel(Parcel source) {
+            return new Prompt(source);
+        }
+
+        @Override
+        public Prompt[] newArray(int size) {
+            return new Prompt[size];
+        }
+    };
 }

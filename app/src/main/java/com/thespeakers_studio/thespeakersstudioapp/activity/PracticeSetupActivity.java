@@ -2,9 +2,12 @@ package com.thespeakers_studio.thespeakersstudioapp.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.support.design.widget.FloatingActionButton;
@@ -13,6 +16,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.AppCompatRatingBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +34,8 @@ import com.thespeakers_studio.thespeakersstudioapp.model.Outline;
 import com.thespeakers_studio.thespeakersstudioapp.model.OutlineItem;
 import com.thespeakers_studio.thespeakersstudioapp.model.Practice;
 import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
+import com.thespeakers_studio.thespeakersstudioapp.runnable.UpdateTimerThread;
+import com.thespeakers_studio.thespeakersstudioapp.service.TimerServiceUtils;
 import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.AnalyticsHelper;
 import com.thespeakers_studio.thespeakersstudioapp.utils.OutlineHelper;
@@ -53,6 +59,8 @@ public class PracticeSetupActivity extends BaseActivity implements
 
     private View mContentWrapper;
 
+    private int mScreenHeight;
+
     private FloatingActionButton mStartButton;
     private ImageButton mSettingsExpand;
 
@@ -62,6 +70,8 @@ public class PracticeSetupActivity extends BaseActivity implements
     private Outline mOutline;
 
     private PracticeSettingsFragment mSettingsFragment;
+
+    PresentationPracticeDialog mTimerDialog;
 
     private RecyclerView mRecyclerView;
     private int mScrollPos;
@@ -74,6 +84,14 @@ public class PracticeSetupActivity extends BaseActivity implements
     private OutlineDbHelper mOutlineDbHelper;
     private ArrayList<Practice> mPractices;
 
+    private boolean mIsDialogOpen;
+
+    private TimerServiceUtils mTimerServiceUtils;
+
+    private static final String BUNDLE_DURATION = "duration";
+    private static final String BUNDLE_OUTLINE = "outline";
+    private static final String BUNDLE_SCROLL_POS = "scroll_pos";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,6 +99,11 @@ public class PracticeSetupActivity extends BaseActivity implements
         setContentView(R.layout.activity_practice_setup);
 
         AnalyticsHelper.sendScreenView(SCREEN_LABEL);
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        mScreenHeight = size.y;
 
         mMaxFABElevation = getResources().getDimensionPixelSize(R.dimen.max_fab_elevation);
 
@@ -106,15 +129,44 @@ public class PracticeSetupActivity extends BaseActivity implements
             }
         });
 
-        mDuration = SettingsUtils.getDefaultTimerDuration(this);
+        //mTimerServiceUtils = new TimerServiceUtils(this);
 
-        setPresentationId(getIntent().getStringExtra(Utils.INTENT_PRESENTATION_ID));
+        mDuration = SettingsUtils.getDefaultTimerDuration(this);
+        String presentationId = getIntent().getStringExtra(Utils.INTENT_PRESENTATION_ID);
+
+        if (savedInstanceState != null) {
+            mScrollPos = savedInstanceState.getInt(BUNDLE_SCROLL_POS, 0);
+
+            if (savedInstanceState.getInt(BUNDLE_DURATION, 0) != 0) {
+                mDuration = savedInstanceState.getInt(BUNDLE_DURATION, 0);
+            }
+            if (savedInstanceState.getBundle(BUNDLE_OUTLINE) != null) {
+                setPresentationId(presentationId,
+                        new Outline(this, savedInstanceState.getBundle(BUNDLE_OUTLINE)));
+            }
+
+            Bundle runningTimerProperties =
+                    savedInstanceState.getBundle(UpdateTimerThread.BUNDLE_TIMER);
+
+            if (runningTimerProperties != null) {
+                startPractice(runningTimerProperties);
+            }
+        } else {
+            setPresentationId(getIntent().getStringExtra(Utils.INTENT_PRESENTATION_ID), null);
+        }
     }
 
-    private void setPresentationId(String id) {
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //mTimerServiceUtils.doUnbindService();
+    }
+
+    private void setPresentationId(String id, Outline outline) {
         if (id != null) {
             mPresentation = mDbHelper.loadPresentationById(id);
-            mOutline = Outline.fromPresentation(this, mPresentation);
+            mOutline = outline == null ? Outline.fromPresentation(this, mPresentation)
+                    : outline;
 
             if (mPresentation != null) {
                 // load the saved practices for this presentation
@@ -125,6 +177,8 @@ public class PracticeSetupActivity extends BaseActivity implements
                 mRecyclerView.setLayoutManager(new LinearLayoutManager(this,
                         LinearLayoutManager.VERTICAL, false));
                 mRecyclerView.setAdapter(adapter);
+
+                //mTimerServiceUtils.setOutlineBundle(mOutline.toBundle());
             }
         }
         isPractice = mOutline != null;
@@ -186,9 +240,7 @@ public class PracticeSetupActivity extends BaseActivity implements
                     // only do this once
                     if (mSettingsHeight == -1) {
                         mSettingsHeight = mSettingsFragment.getView().getHeight();
-                        mRecyclerView.scrollBy(0, mSettingsHeight);
-                        //mScrollPos = mSettingsHeight;
-                        //setSettingsExpandIcon();
+                        mRecyclerView.scrollBy(0, mSettingsHeight - mScrollPos);
 
                         showMessageIfEmpty();
                     }
@@ -215,21 +267,28 @@ public class PracticeSetupActivity extends BaseActivity implements
     protected void setLayoutPadding(int actionBarSize) {
         findViewById(R.id.no_results).setPadding(0, actionBarSize, 0, 0);
 
+        LOGD(TAG, "header height " + actionBarSize);
+
         if (mRecyclerView != null && mRecyclerView.getAdapter() != null) {
             ((PracticeListAdapter) mRecyclerView.getAdapter()).setTopMargin(actionBarSize);
         }
     }
 
     public void onScrollChanged(int dy) {
-        mScrollPos += dy;
+        mScrollPos = Math.max(mScrollPos + dy, 0);
 
         int fabHeight = getResources().getDimensionPixelSize(R.dimen.fab_button) +
                 (getResources().getDimensionPixelSize(R.dimen.fab_margin) * 2);
         int headerHeight = getSupportActionBar() != null ? getSupportActionBar().getHeight() : 0;
-        int baseHeight = mHeaderDetailsHeightPixels + headerHeight;
 
-        int headerPosition = Math.max((baseHeight - (fabHeight / 2)) - mScrollPos, 0);
-        mStartButton.setTranslationY(headerPosition);
+        int fabPosition;
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            fabPosition = headerHeight - getResources().getDimensionPixelSize(R.dimen.fab_margin);
+        } else {
+            int baseHeight = mHeaderDetailsHeightPixels + headerHeight;
+            fabPosition = Math.max((baseHeight - (fabHeight / 2)) - mScrollPos, 0);
+        }
+        mStartButton.setTranslationY(fabPosition);
 
         ViewGroup.LayoutParams params = mHeaderDetails.getLayoutParams();
         params.height = getNewHeaderDetailsHeight(mScrollPos, false);
@@ -262,7 +321,7 @@ public class PracticeSetupActivity extends BaseActivity implements
                 timerDurationInput.requestFocus();
                 break;
             case R.id.fab_practice:
-                startPractice();
+                startPractice(null);
                 break;
             case R.id.settings_expand:
                 if (isSettingsPanelOpen()) {
@@ -281,11 +340,11 @@ public class PracticeSetupActivity extends BaseActivity implements
         mRecyclerView.smoothScrollBy(0, mSettingsHeight - mScrollPos);
     }
 
-    private void startPractice() {
-        PresentationPracticeDialog dialog = new PresentationPracticeDialog();
+    private void startPractice(Bundle timerBundle) {
+        mTimerDialog = new PresentationPracticeDialog();
+        mTimerDialog.setArguments(timerBundle);
         if (isPractice) {
-            dialog.setup(mOutline);
-            dialog.setInterface(this);
+            mTimerDialog.setup(mOutline);
         } else {
             mDuration = Integer.parseInt(((TextView) findViewById(R.id.timer_duration_input))
                     .getText().toString());
@@ -293,14 +352,41 @@ public class PracticeSetupActivity extends BaseActivity implements
                 return;
             }
             SettingsUtils.setDefaultTimerDuration(this, mDuration);
-            dialog.setup(mDuration);
+            mTimerDialog.setup(mDuration);
         }
-        dialog.show(getSupportFragmentManager(), PresentationPracticeDialog.TAG);
-        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        mTimerDialog.setInterface(this);
+        mTimerDialog.show(getSupportFragmentManager(), PresentationPracticeDialog.TAG);
+        mIsDialogOpen = true;
+    }
+
+    @Override
+    protected void onPause() {
+        mRecyclerView.scrollBy(0, -mScrollPos);
+
+        super.onPause();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        if (isPractice) {
+            outState.putBundle(BUNDLE_OUTLINE, mOutline.toBundle());
+        } else {
+            mDuration = Integer.parseInt(((TextView) findViewById(R.id.timer_duration_input))
+                    .getText().toString());
+            outState.putInt(BUNDLE_DURATION, mDuration);
+        }
+
+        if (mIsDialogOpen) {
+            UpdateTimerThread timer = mTimerDialog.getTimerThread();
+            outState.putBundle(UpdateTimerThread.BUNDLE_TIMER, timer.toBundle());
+        }
     }
 
     @Override
     public void onDialogDismissed(final Outline outline, boolean finished) {
+        mIsDialogOpen = false;
         if (finished) {
             // save user's thoughts on this practice
             AlertDialog.Builder thoughtsDialogBuilder = new AlertDialog.Builder(this);

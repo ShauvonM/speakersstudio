@@ -21,6 +21,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.thespeakers_studio.thespeakersstudioapp.R;
+import com.thespeakers_studio.thespeakersstudioapp.runnable.UpdateTimerThread;
 import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.OutlineHelper;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
@@ -35,7 +36,8 @@ import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
 /**
  * Created by smcgi_000 on 7/20/2016.
  */
-public class PresentationPracticeDialog extends DialogFragment implements View.OnClickListener {
+public class PresentationPracticeDialog extends DialogFragment implements
+        View.OnClickListener, UpdateTimerThread.UpdateTimerInterface {
 
 
     public interface PresentationPracticeDialogInterface {
@@ -49,15 +51,13 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
     private OutlineHelper mOutlineHelper;
     private Dialog mDialog;
 
-    private int mDuration;
+    private int mDuration = 0;
 
     private boolean mIsPractice;
 
     private boolean mDelay;
     private boolean mDisplayTimer;
     private boolean mShowWarning;
-    private boolean mTrack;
-    private boolean mVibrate;
 
     private TextView mOutputMainView;
     private TextView mTimerView;
@@ -71,27 +71,13 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
     private TextView mBulletListHeader;
     private LinearLayout mBulletList;
 
-    private Handler mTimeHandler = new Handler();
+    //private Handler mTimeHandler = new Handler();
+    private UpdateTimerThread mTimeThread;
 
-    private long mOutlineDuration; // the duration of the whole presentation
-    private long mCurrentExpiration; // the timer time, in milliseconds
-    private long mStartTime = 0L;
-    private long mElapsed = 0l;
-    private long mCurrentItemDuration = 0l; // for tracking purposes, so that we can track how long each thing takes
-
-    private int mOutlineItemIndex;
+    //private int mOutlineItemIndex;
     private String mTopicText = "";
 
-    private boolean mStarted;
-    private boolean mPaused;
-    private boolean mFinished;
-
-    private final int PULSE = 500;
-    private final int PULSE_GAP = 200;
-    private final int BUMP = 200;
-
     // TODO: make animation times and durations constants
-    private final int DELAY_TIME = 5000;
     private final int INTERSTITIAL_DURATION = 1000;
     private final int ANIMATION_DURATION = 300;
 
@@ -106,8 +92,6 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
         mDelay = SettingsUtils.getTimerWait(getContext());
         mDisplayTimer = SettingsUtils.getTimerShow(getContext());
         mShowWarning = SettingsUtils.getTimerWarning(getContext());
-        mTrack = SettingsUtils.getTimerTrack(getContext());
-        mVibrate = SettingsUtils.getTimerVibrate(getContext());
 
         mOutlineHelper = new OutlineHelper();
     }
@@ -116,27 +100,34 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
         if (mInterface != null) {
-            mInterface.onDialogDismissed(mOutline, mFinished);
+            mInterface.onDialogDismissed(mOutline, mTimeThread.isFinished());
         }
 
-        mTimeHandler.removeCallbacks(updateTimerThread);
+        mTimeThread.stop();
     }
 
     public void setInterface(PresentationPracticeDialogInterface inter) {
         mInterface = inter;
     }
 
-    public void setup (Outline outline) {
+    public void setup (Outline outline, int duration) {
         if (outline != null) {
             mOutline = outline;
             mIsPractice = true;
         } else {
             mIsPractice = false;
+            mDuration = duration * 60 * 1000; // we'll be getting the duration in minutes
         }
     }
     public void setup (int duration) {
-        mIsPractice = false;
-        mDuration = duration * 60 * 1000; // we'll be getting the duration in minutes
+        setup(null, duration);
+    }
+    public void setup (Outline outline) {
+        setup(outline, 0);
+    }
+
+    public UpdateTimerThread getTimerThread() {
+        return mTimeThread;
     }
 
     @Override
@@ -163,6 +154,10 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
         mDialog.findViewById(R.id.button_next).setOnClickListener(this);
 
         hideAllTheThings();
+
+        Bundle args = getArguments();
+        mTimeThread = new UpdateTimerThread(getContext(), args);
+
         return mDialog;
     }
 
@@ -185,40 +180,20 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
     public void onStart() {
         super.onStart();
 
-        if (mDelay) {
-            startDelay();
-        } else {
-            start();
+        startTimer();
+    }
+
+    private void startTimer() {
+        if (mOutline != null || mDuration > 0) {
+            mTimeThread.setup(this, mOutline, mDuration);
+            mTimeThread.start(mDelay);
         }
-        mTimeHandler.postDelayed(updateTimerThread, ANIMATION_DURATION);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        mTimeHandler.removeCallbacks(updateTimerThread);
-    }
-
-    public void startDelay() {
-        mTimerTotalView.setVisibility(View.GONE);
-        mOutputSubView.setVisibility(View.GONE);
-
-        //mOutputMainView.setText(R.string.get_ready);
-        showText(mOutputMainView, R.string.get_ready);
-        mTimerView.setText("");
-
-        mCurrentExpiration = DELAY_TIME;
-
-        mStarted = false;
-    }
-
-    private void start() {
-        mStarted = true;
-        mStartTime = 0;
-        mElapsed = 0;
-        mOutlineItemIndex = -1;
-        mOutlineDuration = mIsPractice ? mOutline.getDurationMillis() : mDuration;
-        mCurrentExpiration = 0;
+        mTimeThread.stop();
     }
 
     private interface showViewInterface {
@@ -305,97 +280,104 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
         showView(view, false, "", null);
     }
 
+    public void prepareDelay() {
+        mTimerTotalView.setVisibility(View.GONE);
+        mOutputSubView.setVisibility(View.GONE);
 
-    public void nextItem() {
-        if (mIsPractice) {
-            if (!mStarted) {
-                start();
-            }
-            mOutlineItemIndex++;
-            if (mOutlineItemIndex < mOutline.getItemCount()) {
-                final OutlineItem item = mOutline.getItem(mOutlineItemIndex);
-                // skip items with 0 duration
-                if (item.getDuration() == 0) {
-                    nextItem();
-                    return;
-                }
-
-                if (item.getParentId().equals(OutlineItem.NO_PARENT)) {
-                    // this is a top level item, so we will show it for a second and then move on
-                    // to the first sub-item
-                    showText(mOutputMainView, "");
-                    hideView(mBulletList);
-                    showText(mBulletListHeader, "");
-                    showText(mOutputSubView, "");
-                    showText(mOutputMainView, item.getText());
-
-                    // save the text so that the next item can use it
-                    mTopicText = item.getText();
-
-                    // we'll only show top level items for a second
-                    //mCurrentExpiration = mElapsed + INTERSTITIAL_DURATION;
-
-                    vibrate(PULSE);
-                    hideButton(mButtonLeft);
-                    hideButton(mButtonRight);
-
-                    // move on to the next item to set up the duration
-                    nextItem();
-                } else {
-                    //this is a sub-item
-                    configureOutlineItemDuration(item);
-
-                    if (mTopicText.isEmpty()) {
-                        showOutlineItem(item);
-                    } else {
-                        // delay showing the next item for a second
-                        final Handler handler = new Handler();
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                showText(mOutputSubView, mTopicText);
-                                mTopicText = "";
-                                showOutlineItem(item);
-                            }
-                        }, INTERSTITIAL_DURATION);
-                    }
-                }
-            } else {
-                // we're done!
-                finish();
-            }
-
-        } else { // isPractice == false
-
-            // this is a timer, so just show a timer
-            showText(mOutputSubView, R.string.timer);
-            showText(mOutputMainView, "");
-            if (!mStarted) {
-                start();
-                mCurrentExpiration = mDuration;
-            } else if (mPaused) {
-                mPaused = false;
-            } else {
-                finish();
-            }
-
-        }
-
-        //mTimeHandler.postDelayed(updateTimerThread, 0);
+        showText(mOutputMainView, R.string.get_ready);
+        //mTimerView.setText("");
     }
 
-    private void configureOutlineItemDuration(OutlineItem item) {
-        long thisDuration = item.getDuration();
-        // collect any time left over from the last item
-        // (which will be > 0 if the user skipped to the next item)
-        long remainingTime = mCurrentExpiration - mElapsed;
+    @Override
+    public void finish() {
+        showText(mOutputSubView, "");
+        showText(mOutputMainView, R.string.done);
 
-        // set the timer value - this is what the timer is counting down to
-        mCurrentExpiration = mElapsed + (remainingTime + thisDuration);
+        hideButton(mButtonLeft);
+        hideButton(mButtonRight);
+        showButton(mButtonDone);
 
-        // store this item's duration, so we can know how long it takes
-        //  (if the user skips it early)
-        mCurrentItemDuration = remainingTime + thisDuration;
+        blink(mTimerTotalView);
+    }
+
+    @Override
+    public void updateTime(long currentRemaining, long totalRemaining, long elapsed) {
+        if (mTimeThread.isStarted() && mDisplayTimer && mIsPractice) {
+            // show the time for the whole presentation in smaller output
+            setTimer(mTimerTotalView, totalRemaining);
+        }
+        if (!mTimeThread.isFinished()) {
+            if (mDisplayTimer) { // && mTopicText.isEmpty()) {
+                if (mTimeThread.isStarted()) {
+                    // show the current remaining time in 0:00 format
+                    setTimer(mTimerView, currentRemaining);
+                } else {
+                    prepareDelay();
+                    // show the 5, 4, 3, 2, 1 countdown
+                    showText(mTimerView, Utils.secondsFromMillis(currentRemaining));
+                }
+            } else {
+                // if we don't want to show the timer, don't show the timer
+                // if mTopicText is not empty, we are showing the topic name for a second
+                mTimerView.setText("");
+            }
+        } else {
+            // we are totally done, so we can begin counting up!
+            mTimerView.setTextColor(ContextCompat.getColor(getActivity(), R.color.success));
+            setTimer(mTimerView, -elapsed);
+        }
+
+        if (mTimeThread.isStarted() && mShowWarning && !mTimeThread.isFinished()) {
+            if (totalRemaining <= WARNING_TIME && totalRemaining >= WARNING_TIME - 100) {
+                // five minute warning
+                if (showText(mWarningView, R.string.five_minutes_left)) {
+                    mTimeThread.vibrate(new long[] {Utils.VIBRATE_PULSE,
+                            Utils.VIBRATE_PULSE_GAP, Utils.VIBRATE_PULSE});
+                }
+            } else if (totalRemaining <= (WARNING_TIME - WARNING_DURATION)
+                    && totalRemaining >= (WARNING_TIME - WARNING_DURATION - 100)) {
+                // hide it after five seconds
+                showText(mWarningView, "");
+            }
+        }
+    }
+
+    @Override
+    public void outlineItem(final OutlineItem item, long remainingTime) {
+        if (item.getParentId().equals(OutlineItem.NO_PARENT)) {
+            if (remainingTime + item.getDuration() > INTERSTITIAL_DURATION) {
+                // this is a top level item, so we will show it for a second and then move on
+                // to the first sub-item
+                showText(mOutputMainView, "");
+                hideView(mBulletList);
+                showText(mBulletListHeader, "");
+                showText(mOutputSubView, "");
+                showText(mOutputMainView, item.getText());
+
+                hideButton(mButtonLeft);
+                hideButton(mButtonRight);
+            }
+
+            // save the text so that the next item can use it
+            mTopicText = item.getText();
+        } else {
+            //this is a sub-item
+
+            if (mTopicText.isEmpty()) {
+                showOutlineItem(item);
+            } else {
+                // delay showing the next item for a second
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        showText(mOutputSubView, mTopicText);
+                        mTopicText = "";
+                        showOutlineItem(item);
+                    }
+                }, INTERSTITIAL_DURATION);
+            }
+        }
     }
 
     private void showOutlineItem(OutlineItem item) {
@@ -446,24 +428,6 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
 
         //showButton(mButtonLeft);
         showButton(mButtonRight);
-    }
-
-    private void finish() {
-        mFinished = true;
-
-        vibrate(new long[]{PULSE, PULSE_GAP, PULSE, PULSE_GAP, PULSE});
-        mOutlineDuration = 0;
-        mCurrentExpiration = 0;
-        mStartTime = 0;
-
-        showText(mOutputSubView, "");
-        showText(mOutputMainView, R.string.done);
-
-        hideButton(mButtonLeft);
-        hideButton(mButtonRight);
-        showButton(mButtonDone);
-
-        blink(mTimerTotalView);
     }
 
     private void animateButton(final View button, boolean in) {
@@ -517,54 +481,25 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
         v.setAnimation(blink);
     }
 
-    private long now() {
-        return SystemClock.uptimeMillis();
-    }
-
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.practice_timer_current:
                 // tap the time to pause or resume the timer
-                if (!mPaused) {
-                    mPaused = true;
+                if (mTimeThread.togglePause()) {
                     showText(mOutputMainView, R.string.paused);
-                    mTimeHandler.removeCallbacks(updateTimerThread);
-
-                    // save the time remaining so we can pick up where we left off
-                    mOutlineDuration = mOutlineDuration - mElapsed;
-                    if (mStarted) {
-                        // if the presentation has started, save the current position there, too
-                        mCurrentExpiration = mCurrentExpiration - mElapsed;
-                    }
-
                     blink(mTimerView);
                 } else {
-                    mStartTime = 0;
                     mTimerView.clearAnimation();
-                    mOutlineItemIndex--;
-                    nextItem();
-
-                    mTimeHandler.postDelayed(updateTimerThread, 0);
+                    mTimeThread.togglePause();
                 }
                 break;
             case R.id.button_next:
                 // skip to next, but only if the presentation is running
-                if (mStartTime > 0) {
-                    vibrate(BUMP);
-                    if (!mFinished) {
-                        if (mTrack) {
-                            // store the duration this thing actually took
-                            OutlineItem currentItem = mOutline.getItem(mOutlineItemIndex);
-                            long currentRemaining = mCurrentExpiration - mElapsed;
-                            currentItem.setTimedDuration(mCurrentItemDuration - currentRemaining);
-                        }
-                        // fudge the time a little bit so that we are sure we are on the second
-                        // yes this will technically throw off the duration,
-                        // but by less than a second
-                        mStartTime = now() - mElapsed;
-
-                        nextItem();
+                if (mTimeThread.getStartTime() > 0) {
+                    mTimeThread.vibrate(Utils.VIBRATE_BUMP);
+                    if (!mTimeThread.isFinished()) {
+                        mTimeThread.skipAhead();
                     } else {
                         // we are done, so close the thing
                         dismiss();
@@ -574,82 +509,9 @@ public class PresentationPracticeDialog extends DialogFragment implements View.O
         }
     }
 
-    private void vibrate(long[] pattern) {
-        if (pattern.length == 0) {
-            return;
-        }
-        if (mVibrate) {
-            Vibrator v = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
-            v.vibrate(pattern, -1);
-        }
-    }
-    private void vibrate(int pattern) {
-        vibrate(new long[] {pattern});
-    }
-
     private void setTimer(TextView timer, long time) {
         timer.setVisibility(View.VISIBLE);
         timer.setText(Utils.getTimeStringFromMillis(time, getResources()));
     }
-
-    private Runnable updateTimerThread = new Runnable() {
-        @Override
-        public void run() {
-            if (mStartTime == 0) {
-                mStartTime = now();
-            }
-
-            long elapsed = now() - mStartTime;
-            mElapsed = Utils.roundDownToThousand(elapsed);
-            // totalRemaining is the duration of the entire presentation, which we want to stop at 0
-            long totalRemaining = Math.max(mOutlineDuration - mElapsed, 0);
-            // currentRemaining is the duration of the current section of the outline
-            long currentRemaining = mCurrentExpiration - mElapsed;
-
-            //LOGD(TAG, "elapsed time: " + mElapsed + " " + totalRemaining + " " + currentRemaining);
-
-            if (currentRemaining <= 0 && !mFinished) {
-                nextItem();
-            } else {
-                if (mStarted && mDisplayTimer && mIsPractice) {
-                    setTimer(mTimerTotalView, totalRemaining);
-                }
-                if (!mFinished) {
-                    if (mDisplayTimer) { // && mTopicText.isEmpty()) {
-                        if (mStarted) {
-                            // show the current remaining time in 0:00 format
-                            setTimer(mTimerView, currentRemaining);
-                        } else {
-                            // show the 5, 4, 3, 2, 1 countdown
-                            showText(mTimerView, Utils.secondsFromMillis(currentRemaining));
-                        }
-                    } else {
-                        // if we don't want to show the timer, don't show the timer
-                        // if mTopicText is not empty, we are showing the topic name for a second
-                        mTimerView.setText("");
-                    }
-                } else {
-                    // we are totally done, so we can begin counting up!
-                    mTimerView.setTextColor(ContextCompat.getColor(getActivity(), R.color.success));
-                    setTimer(mTimerView, -mElapsed);
-                }
-            }
-
-            mTimeHandler.postDelayed(this, 100);
-
-            if (mStarted && mShowWarning && !mFinished) {
-                if (totalRemaining <= WARNING_TIME && totalRemaining >= WARNING_TIME - 100) {
-                    // five minute warning
-                    if (showText(mWarningView, R.string.five_minutes_left)) {
-                        vibrate(new long[] {PULSE, PULSE_GAP, PULSE});
-                    }
-                } else if (totalRemaining <= (WARNING_TIME - WARNING_DURATION)
-                        && totalRemaining >= (WARNING_TIME - WARNING_DURATION - 100)) {
-                    // hide it after five seconds
-                    showText(mWarningView, "");
-                }
-            }
-        }
-    };
 
 }

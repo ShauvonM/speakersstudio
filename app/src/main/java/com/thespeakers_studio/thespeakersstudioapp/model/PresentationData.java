@@ -2,6 +2,8 @@ package com.thespeakers_studio.thespeakersstudioapp.model;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Bundle;
+import android.os.Parcelable;
 
 import com.thespeakers_studio.thespeakersstudioapp.data.PresentationDataContract;
 import com.thespeakers_studio.thespeakersstudioapp.R;
@@ -9,6 +11,7 @@ import com.thespeakers_studio.thespeakersstudioapp.utils.PresentationUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,6 +25,12 @@ public class PresentationData {
     private String mModifiedDate;
     private int mColor;
     private boolean mIsSelected;
+
+    public static final String BUNDLE_PRESENTATION_ID = "presentation_id";
+    public static final String BUNDLE_PROMPTS = "prompts";
+    public static final String BUNDLE_COLOR = "color";
+    public static final String BUNDLE_MODIFIED_DATE = "modified_date";
+    public static final String BUNDLE_IS_SELECTED = "is_selected";
 
     // TODO: Is this the best way to remember all these ids?
     public static final int PRESENTATION_TOPIC = 1; // the ID of the prompt that "names" the presentation
@@ -40,11 +49,7 @@ public class PresentationData {
     // TODO: make constants for answer keys, duh
 
     public PresentationData(Context context, String id, String modifiedDate, int color) {
-        this.mContext = context;
-        this.mPresentationId = id;
-        this.mColor = color;
-        mModifiedDate = modifiedDate;
-        mPrompts = new ArrayList<Prompt>();
+        setup(context, id, modifiedDate, color);
 
         // add a generic item to use for the Header and Next buttons on the list of cards
         // this might not be the best way to do this, but it makes sense to me
@@ -81,6 +86,39 @@ public class PresentationData {
         mPrompts.add(new Prompt(23, 4, 6, PARAGRAPH,  "How do you transition from %l to %n ?", 140,             17, ""));
 
         mIsSelected = false;
+    }
+    public PresentationData(Context context, Bundle presentationBundle) {
+        if (presentationBundle == null) {
+            // BIG PROBLEMO
+        }
+
+        String id = presentationBundle.getString(BUNDLE_PRESENTATION_ID);
+        String modifiedDate = presentationBundle.getString(BUNDLE_MODIFIED_DATE);
+        int color = presentationBundle.getInt(BUNDLE_COLOR);
+
+        setup(context, id, modifiedDate, color);
+
+        mPrompts = presentationBundle.getParcelableArrayList(BUNDLE_PROMPTS);
+    }
+
+    private void setup(Context context, String id, String modifiedDate, int color) {
+        this.mContext = context;
+        this.mPresentationId = id;
+        this.mColor = color;
+        mModifiedDate = modifiedDate;
+        mPrompts = new ArrayList<>();
+    }
+
+    public Bundle toBundle() {
+        Bundle presentationBundle = new Bundle();
+
+        presentationBundle.putString(BUNDLE_PRESENTATION_ID, mPresentationId);
+        presentationBundle.putParcelableArrayList(BUNDLE_PROMPTS, mPrompts);
+        presentationBundle.putInt(BUNDLE_COLOR, mColor);
+        presentationBundle.putString(BUNDLE_MODIFIED_DATE, mModifiedDate);
+        presentationBundle.putBoolean(BUNDLE_IS_SELECTED, mIsSelected);
+
+        return presentationBundle;
     }
 
     public void select() {

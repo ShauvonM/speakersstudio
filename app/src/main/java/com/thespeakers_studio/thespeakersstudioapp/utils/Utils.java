@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Paint;
 import android.os.Build;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.text.format.DateUtils;
@@ -40,6 +41,10 @@ public class Utils {
     public static final String INTENT_PRESENTATION_ID = "presentation_id";
     public static final String INTENT_THEME_ID = "theme_id";
 
+    public static final int VIBRATE_PULSE = 500;
+    public static final int VIBRATE_PULSE_GAP = 200;
+    public static final int VIBRATE_BUMP = 200;
+
     public static boolean versionGreaterThan(int version) {
         return Build.VERSION.SDK_INT >= version;
     }
@@ -65,6 +70,10 @@ public class Utils {
         String datetime = iso8601Format.format(Calendar.getInstance().getTime());
 
         return datetime;
+    }
+
+    public static long now() {
+        return SystemClock.uptimeMillis();
     }
 
     public static String formatDateTime(Context context, String timeToFormat) {

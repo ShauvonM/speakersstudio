@@ -95,6 +95,8 @@
                 android:value=".activity.PresentationMainActivity" />
         </activity>
 
+        <service android:name=".service.TimerService"
+            android:process=":timer" />
 
         <!-- desktop -->
         <!--

@@ -1,5 +1,8 @@
 package com.thespeakers_studio.thespeakersstudioapp.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 import java.util.ArrayList;
@@ -7,7 +10,7 @@ import java.util.ArrayList;
 /**
  * Created by smcgi_000 on 7/18/2016.
  */
-public class OutlineItem {
+public class OutlineItem implements Parcelable {
     /*
     private ArrayList<OutlineItem> mSubItems;
     private String mText;
@@ -130,4 +133,48 @@ public class OutlineItem {
     public String getPracticeId() {
         return mPracticeId;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mId);
+        dest.writeString(mParentId);
+        dest.writeInt(mOrder);
+        dest.writeString(mText);
+        dest.writeString(mAnswerId);
+        dest.writeByte((byte) (mFromDB ? 1 : 0));
+        dest.writeLong(mDuration);
+        dest.writeString(mPresentationId);
+        dest.writeLong(mTimedDuration);
+        dest.writeString(mPracticeId);
+    }
+
+    public OutlineItem(Parcel parcel) {
+        mId = parcel.readString();
+        mParentId = parcel.readString();
+        mOrder = parcel.readInt();
+        mText = parcel.readString();
+        mAnswerId = parcel.readString();
+        mFromDB = parcel.readByte() == 1;
+        mDuration = parcel.readLong();
+        mPresentationId = parcel.readString();
+        mTimedDuration = parcel.readLong();
+        mPracticeId = parcel.readString();
+    }
+
+    public static final Parcelable.Creator<OutlineItem> CREATOR = new Creator<OutlineItem>() {
+        @Override
+        public OutlineItem createFromParcel(Parcel source) {
+            return new OutlineItem(source);
+        }
+
+        @Override
+        public OutlineItem[] newArray(int size) {
+            return new OutlineItem[size];
+        }
+    };
 }

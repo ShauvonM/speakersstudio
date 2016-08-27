@@ -1,9 +1,12 @@
 package com.thespeakers_studio.thespeakersstudioapp.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by smcgi_000 on 6/16/2016.
  */
-public class PromptAnswer {
+public class PromptAnswer implements Parcelable {
 
     private String id;
     private String key;
@@ -98,4 +101,48 @@ public class PromptAnswer {
     public int getPromptType(){
         return this.promptType;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(key);
+        dest.writeString(value);
+        dest.writeInt(promptId);
+        dest.writeString(answerLinkId);
+        dest.writeInt(promptType);
+        dest.writeString(createdBy);
+        dest.writeString(modifiedBy);
+        dest.writeString(createdDate);
+        dest.writeString(modifiedDate);
+    }
+
+    public PromptAnswer(Parcel parcel) {
+        id = parcel.readString();
+        key = parcel.readString();
+        value = parcel.readString();
+        promptId = parcel.readInt();
+        answerLinkId = parcel.readString();
+        promptType = parcel.readInt();
+        createdBy = parcel.readString();
+        modifiedBy = parcel.readString();
+        createdDate = parcel.readString();
+        modifiedDate = parcel.readString();
+    }
+
+    public static final Parcelable.Creator<PromptAnswer> CREATOR = new Creator<PromptAnswer>() {
+        @Override
+        public PromptAnswer createFromParcel(Parcel source) {
+            return new PromptAnswer(source);
+        }
+
+        @Override
+        public PromptAnswer[] newArray(int size) {
+            return new PromptAnswer[size];
+        }
+    };
 }
