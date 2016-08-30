@@ -52,7 +52,7 @@ import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.makeLog
 public class PracticeSetupActivity extends BaseActivity implements
         View.OnClickListener, PresentationPracticeDialog.PresentationPracticeDialogInterface {
 
-    private static final String TAG = makeLogTag(OutlineActivity.class);
+    private static final String TAG = makeLogTag(PracticeSetupActivity.class);
     private static final String SCREEN_LABEL = "Presentation Outline";
 
     private PresentationData mPresentation;
@@ -129,7 +129,8 @@ public class PracticeSetupActivity extends BaseActivity implements
             }
         });
 
-        //mTimerServiceUtils = new TimerServiceUtils(this);
+        mTimerServiceUtils = new TimerServiceUtils(this);
+        LOGD(TAG, "Is service running? " + mTimerServiceUtils.isRunning());
 
         mDuration = SettingsUtils.getDefaultTimerDuration(this);
         String presentationId = getIntent().getStringExtra(Utils.INTENT_PRESENTATION_ID);
@@ -159,7 +160,6 @@ public class PracticeSetupActivity extends BaseActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //mTimerServiceUtils.doUnbindService();
     }
 
     private void setPresentationId(String id, Outline outline) {
@@ -267,8 +267,6 @@ public class PracticeSetupActivity extends BaseActivity implements
     protected void setLayoutPadding(int actionBarSize) {
         findViewById(R.id.no_results).setPadding(0, actionBarSize, 0, 0);
 
-        LOGD(TAG, "header height " + actionBarSize);
-
         if (mRecyclerView != null && mRecyclerView.getAdapter() != null) {
             ((PracticeListAdapter) mRecyclerView.getAdapter()).setTopMargin(actionBarSize);
         }
@@ -361,7 +359,9 @@ public class PracticeSetupActivity extends BaseActivity implements
 
     @Override
     protected void onPause() {
-        mRecyclerView.scrollBy(0, -mScrollPos);
+        if (isChangingConfigurations()) {
+            mRecyclerView.scrollBy(0, -mScrollPos);
+        }
 
         super.onPause();
     }
@@ -381,6 +381,17 @@ public class PracticeSetupActivity extends BaseActivity implements
         if (mIsDialogOpen) {
             UpdateTimerThread timer = mTimerDialog.getTimerThread();
             outState.putBundle(UpdateTimerThread.BUNDLE_TIMER, timer.toBundle());
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (!isChangingConfigurations()) {
+            LOGD(TAG, "Starting timer service");
+
+            mTimerServiceUtils.setOutlineBundle(mOutline.toBundle());
         }
     }
 

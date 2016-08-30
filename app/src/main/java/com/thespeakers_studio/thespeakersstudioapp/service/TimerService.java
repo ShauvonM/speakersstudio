@@ -29,11 +29,13 @@ public class TimerService extends Service {
     private static String TAG = "SS_timerService";
 
     // for showing and hiding notifications
-    NotificationManager mNM;
+    //NotificationManager mNM;
 
     ArrayList<Messenger> mClients = new ArrayList<>();
 
     private Outline mOutline;
+
+    private boolean mIsRunning;
 
     static final int ONGOING_NOTIFICATION_ID = 1;
 
@@ -41,6 +43,7 @@ public class TimerService extends Service {
     static final int MSG_UNREGISTER_CLIENT = 2;
     static final int MSG_OUTLINE_BUNDLE = 3;
     static final int MSG_TIME_STARTED = 4;
+    static final int MSG_IS_RUNNING = 5;
 
     class IncomingHandler extends Handler {
         @Override
@@ -48,6 +51,7 @@ public class TimerService extends Service {
             switch (msg.what) {
                 case MSG_REGISTER_CLIENT:
                     mClients.add(msg.replyTo);
+                    doSendMessage(MSG_IS_RUNNING, mIsRunning ? 1 : 0);
                     break;
                 case MSG_UNREGISTER_CLIENT:
                     mClients.remove(msg.replyTo);
@@ -56,6 +60,8 @@ public class TimerService extends Service {
                     Bundle outlineBundle = msg.getData();
                     setOutline(outlineBundle);
                     break;
+                case MSG_IS_RUNNING:
+                    doSendMessage(MSG_IS_RUNNING, mIsRunning ? 1 : 0);
                 default:
                     super.handleMessage(msg);
             }
@@ -84,16 +90,22 @@ public class TimerService extends Service {
         doSendMessage(MSG_TIME_STARTED, (int) mOutline.getDurationMillis());
     }
 
+    public void stop() {
+        stopForeground(true);
+        mIsRunning = true;
+    }
+
     @Override
     public void onCreate() {
-        mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        //mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         //showNotification();
     }
 
     @Override
     public void onDestroy() {
-        mNM.cancel(R.string.timer_service_started);
+        //mNM.cancel(R.string.timer_service_started);
+        stopForeground(true);
     }
 
     @Nullable
@@ -123,12 +135,8 @@ public class TimerService extends Service {
                 .getNotification();
 
         startForeground(ONGOING_NOTIFICATION_ID, notification);
+        mIsRunning = true;
         //mNM.notify(R.string.timer_service_started, notification);
     }
-
-    private int mStartTime;
-
-
-
 
 }

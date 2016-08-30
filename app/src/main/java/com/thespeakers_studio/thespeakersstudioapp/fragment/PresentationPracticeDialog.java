@@ -509,6 +509,9 @@ public class PresentationPracticeDialog extends DialogFragment implements
                 }
                 break;
             case R.id.button_next:
+                if (mTimeThread.isPaused()) {
+                    return;
+                }
                 // skip to next, but only if the presentation is running
                 if (mTimeThread.getStartTime() > 0) {
                     mTimeThread.vibrate(Utils.VIBRATE_BUMP);

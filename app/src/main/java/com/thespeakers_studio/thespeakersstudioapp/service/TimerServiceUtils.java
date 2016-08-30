@@ -32,6 +32,10 @@ public class TimerServiceUtils {
                 case TimerService.MSG_TIME_STARTED:
                     LOGD(TAG, "Time started! " + msg.arg1);
                     break;
+                case TimerService.MSG_IS_RUNNING:
+                    LOGD(TAG, "Is running result: " + msg.arg1);
+                    mIsRunning = msg.arg1 == 1;
+                    break;
                 default:
                     super.handleMessage(msg);
             }
@@ -41,6 +45,7 @@ public class TimerServiceUtils {
     private Context mContext;
 
     private boolean mIsBound;
+    private boolean mIsRunning;
     private Messenger mService; // mService is the service that we send messages to
     private Messenger mMessenger = new Messenger(new IncomingHandler()); // mMessenger receives messages
 
@@ -74,6 +79,10 @@ public class TimerServiceUtils {
         });
 
         doBindService();
+    }
+
+    public boolean isRunning() {
+        return mIsRunning;
     }
 
     private void processQueue() {

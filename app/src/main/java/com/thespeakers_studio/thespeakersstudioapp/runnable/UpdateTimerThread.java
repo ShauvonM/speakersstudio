@@ -54,6 +54,7 @@ public class UpdateTimerThread {
     private String BUNDLE_START_TIME = "start_time";
     private String BUNDLE_CURRENT_EXPIRATION = "current_expiration";
     private String BUNDLE_CURRENT_ITEM_DURATION = "current_item_duration";
+    private String BUNDLE_ELAPSED = "elapsed";
     private String BUNDLE_STARTED = "started";
     private String BUNDLE_PAUSED = "paused";
     private String BUNDLE_FINISHED = "finished";
@@ -79,6 +80,7 @@ public class UpdateTimerThread {
             mStartTime = timerBundle.getLong(BUNDLE_START_TIME);
             mCurrentExpiration = timerBundle.getLong(BUNDLE_CURRENT_EXPIRATION);
             mCurrentItemDuration = timerBundle.getLong(BUNDLE_CURRENT_ITEM_DURATION);
+            mElapsed = timerBundle.getLong(BUNDLE_ELAPSED);
 
             mStarted = timerBundle.getBoolean(BUNDLE_STARTED);
             mPaused = timerBundle.getBoolean(BUNDLE_PAUSED);
@@ -104,6 +106,7 @@ public class UpdateTimerThread {
         bundle.putLong(BUNDLE_START_TIME, mStartTime);
         bundle.putLong(BUNDLE_CURRENT_EXPIRATION, mCurrentExpiration);
         bundle.putLong(BUNDLE_CURRENT_ITEM_DURATION, mCurrentItemDuration);
+        bundle.putLong(BUNDLE_ELAPSED, mElapsed);
         bundle.putBoolean(BUNDLE_STARTED, mStarted);
         bundle.putBoolean(BUNDLE_PAUSED, mPaused);
         bundle.putBoolean(BUNDLE_FINISHED, mFinished);
@@ -274,6 +277,7 @@ public class UpdateTimerThread {
 
     public boolean togglePause() {
         if (mPaused) {
+            // resume
             mPaused = false;
             mStartTime = 0;
 
@@ -286,6 +290,7 @@ public class UpdateTimerThread {
 
             mTimeHandler.postDelayed(updateTimerThread, 0);
         } else {
+            // pause
             mPaused = true;
             mTimeHandler.removeCallbacks(updateTimerThread);
         }
