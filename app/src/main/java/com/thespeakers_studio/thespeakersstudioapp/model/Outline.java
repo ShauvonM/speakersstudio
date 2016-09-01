@@ -51,7 +51,6 @@ public class Outline {
 
         outlineBundle.setClassLoader(getClass().getClassLoader());
         mPresentation = new PresentationData(context, outlineBundle.getBundle(BUNDLE_PRESENTATION));
-
         mItems = outlineBundle.getParcelableArrayList(BUNDLE_ITEMS);
     }
 
@@ -150,7 +149,7 @@ public class Outline {
         return Utils.getDurationString(mPresentation.getDuration(), mContext.getResources());
     }
 
-    public long getDurationMillis() {
+    public int getDurationMillis() {
         int mins = mPresentation.getDuration();
         return (mins * 60) * 1000;
     }
@@ -163,56 +162,56 @@ public class Outline {
     // a class built to track the duration and leftover as we iterate through lists of items
     private class DurationTracker {
         // the remainder is extra default time to split between the sub-items
-        private long durationRemainder;
+        private int durationRemainder;
         // the leftover is time left over from the previous outline item, because it has a custom time
         // different from its default
-        private long durationLeftover;
-        private long durationTally;
-        private long defaultDuration;
+        private int durationLeftover;
+        private int durationTally;
+        private int defaultDuration;
 
-        public DurationTracker (long remainder, long defaultDuration, long leftover) {
+        public DurationTracker (int remainder, int defaultDuration, int leftover) {
             durationRemainder = remainder;
             durationLeftover = leftover;
             durationTally = 0;
             this.defaultDuration = defaultDuration;
         }
-        public void addDuration(long duration) {
+        public void addDuration(int duration) {
             durationTally += duration;
         }
-        public long getDurationRemainder() {
+        public int getDurationRemainder() {
             return durationRemainder;
         }
-        public long getDurationTally() {
+        public int getDurationTally() {
             return durationTally;
         }
-        public void incrementRemainder(long inc) {
+        public void incrementRemainder(int inc) {
             durationRemainder += inc;
         }
-        public long getDefaultDuration() {
+        public int getDefaultDuration() {
             return defaultDuration;
         }
         // once you get the leftover, it resets
-        public long getDurationLeftover() {
-            long value = durationLeftover;
+        public int getDurationLeftover() {
+            int value = durationLeftover;
             durationLeftover = 0;
             return value;
         }
-        public void incrementLeftover(long leftover) {
+        public void incrementLeftover(int leftover) {
             durationLeftover += leftover;
         }
     }
 
     // used for the Intro and Closing items to load all of the default sub-items for those things
     // takes a
-    private long loadSubItemsFromPrompts(int[] promptIDs, String parentId,
-                                         long duration, long durationLeftover) {
+    private int loadSubItemsFromPrompts(int[] promptIDs, String parentId,
+                                         int duration, int durationLeftover) {
 
         // get the default duration for each sub-item
-        long subItemDuration = Utils.roundToThousand(duration / promptIDs.length);
+        int subItemDuration = Utils.roundToThousand(duration / promptIDs.length);
         // collect the leftover amount, which could happen since we rounded the value above
         //      for example, if the time doesn't evenly split between the items, this will make sure
         //      the excess time will be distributed as evenly as possible, by the second
-        long subItemRemainder = (duration - (subItemDuration * promptIDs.length));
+        int subItemRemainder = (duration - (subItemDuration * promptIDs.length));
 
         // set up the tracker object, which will keep track of our duration figures as we iterate
         DurationTracker tracker = new DurationTracker(
@@ -234,11 +233,11 @@ public class Outline {
 
     // this is an expanded version of the loadSubItemsFromPrompts method, but since it uses
     // different kinds of things, it can't really be handled with one method
-    public long loadSubItemsFromTopics(
+    public int loadSubItemsFromTopics(
             ArrayList<PromptAnswer> topics, ArrayList<Prompt> topicSubItems,
-            long topicDuration, long durationLeftover) {
+            int topicDuration, int durationLeftover) {
 
-        long durationTally = 0;
+        int durationTally = 0;
         String presentationId = mPresentation.getId();
 
         // loop through the topics and add each one with its sub-items
@@ -264,9 +263,9 @@ public class Outline {
             }
 
             // calculate the default duration for each sub-item
-            long subItemDuration = Utils.roundToThousand(topicDuration / subItemList.size());
+            int subItemDuration = Utils.roundToThousand(topicDuration / subItemList.size());
             // this will account for any excess time that was created by rounding the calculation above
-            long subItemRemainder = topicDuration - (subItemDuration * subItemList.size());
+            int subItemRemainder = topicDuration - (subItemDuration * subItemList.size());
 
             // set up the tracker object, which will keep track of our duration figures as we iterate
             DurationTracker tracker = new DurationTracker(
@@ -279,7 +278,7 @@ public class Outline {
                 addItem(id, topicItemId, tracker, thisSubTopic);
             }
 
-            long thisTally = tracker.getDurationTally();
+            int thisTally = tracker.getDurationTally();
             topicItem.setDuration(thisTally);
             durationLeftover = (topicDuration + durationLeftover) - thisTally;
             durationTally += thisTally;
@@ -308,7 +307,7 @@ public class Outline {
         thisItem.setOrder(order);
 
         // set up the duration for this item
-        long thisDuration = 0;
+        int thisDuration = 0;
 
         /*
             the rules here are like this:
@@ -322,7 +321,7 @@ public class Outline {
           */
 
         // set up the default duration for this item, including its portion of the remainder
-        long thisDefaultDuration = tracker.getDefaultDuration();
+        int thisDefaultDuration = tracker.getDefaultDuration();
         if (tracker.getDurationRemainder() >= 1000) {
             thisDefaultDuration += 1000;
             tracker.incrementRemainder(-1000);
@@ -331,7 +330,7 @@ public class Outline {
         // if there are DB items for this thing, we should load up their durations
         if (dbItems.size() > 0) {
             // average the saved durations
-            long tally = 0;
+            int tally = 0;
             int dbItemCount = 0;
             for (OutlineItem item : dbItems) {
                 if (item.getDuration() > 0) {
@@ -406,7 +405,7 @@ public class Outline {
 
         // set up the presentation duration, which is stored in the DB in minutes
         int durationMinutes = pres.getDuration();
-        long durationMillis = (durationMinutes * 60) * 1000;
+        int durationMillis = (durationMinutes * 60) * 1000;
 
         // load the topics
         ArrayList<PromptAnswer> topics = pres.getAnswer(PresentationData.PRESENTATION_TOPICS);
@@ -414,9 +413,9 @@ public class Outline {
 
         // this is the default durations for these things, they might change depending on
         // items saved in the OutlineItem database
-        long topicDuration = Utils.roundToThousand(
-                (long) Math.floor((durationMillis * 0.75) / topicCount));
-        long introDuration = (long) Math.floor((durationMillis - (topicDuration * topicCount)) / 2);
+        int topicDuration = Utils.roundToThousand(
+                (int) Math.floor((durationMillis * 0.75) / topicCount));
+        int introDuration = (int) Math.floor((durationMillis - (topicDuration * topicCount)) / 2);
 
         // all of the items are in one big ol' list, so we will track the ordering throughout
 
@@ -430,7 +429,7 @@ public class Outline {
         outline.addItem(introItem);
         // we won't know the duration of the intro until we've gone through the items
         // because there could be some wackyland stuff in there
-        long totalIntroItemDuration = outline.loadSubItemsFromPrompts(OUTLINE_INTRO_ITEMS,
+        int totalIntroItemDuration = outline.loadSubItemsFromPrompts(OUTLINE_INTRO_ITEMS,
                         OutlineItem.INTRO, introDuration, 0);
 
         introItem.setDuration(totalIntroItemDuration);
@@ -443,10 +442,10 @@ public class Outline {
         }
 
         // figure out how far off we are already from putting the intro together
-        long durationLeftover = introDuration - totalIntroItemDuration;
+        int durationLeftover = introDuration - totalIntroItemDuration;
 
         // load up all the topics and their sub-items, which returns the total time for them
-        long totalTopicsDuration = outline.loadSubItemsFromTopics(topics, topicSubItems,
+        int totalTopicsDuration = outline.loadSubItemsFromTopics(topics, topicSubItems,
                 topicDuration, durationLeftover);
 
         // recalculate the left over time from where we would normally be right now by default
@@ -463,7 +462,7 @@ public class Outline {
         outline.addItem(concItem);
         // we won't know the duration of the conclusion until we've gone through the items
         // because there could be some wackyland stuff in there
-        long totalConclusionItemDuration = outline.loadSubItemsFromPrompts(OUTLINE_CONC_ITEMS,
+        int totalConclusionItemDuration = outline.loadSubItemsFromPrompts(OUTLINE_CONC_ITEMS,
                         OutlineItem.CONCLUSION, introDuration, durationLeftover);
 
         // figure out one last time what we have left over

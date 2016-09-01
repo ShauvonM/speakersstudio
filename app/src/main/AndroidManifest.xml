@@ -96,7 +96,7 @@
         </activity>
 
         <service android:name=".service.TimerService"
-            android:process=":timer" />
+            android:process=":timerprocess"/>
 
         <!-- desktop -->
         <!--

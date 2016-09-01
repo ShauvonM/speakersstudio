@@ -11,28 +11,24 @@ import java.util.ArrayList;
  * Created by smcgi_000 on 7/18/2016.
  */
 public class OutlineItem implements Parcelable {
-    /*
-    private ArrayList<OutlineItem> mSubItems;
-    private String mText;
-    private long mDuration;
-    private int mOrder;
-    */
+
     private String mId;
     private String mParentId;
     private int mOrder;
     private String mText;
     private String mAnswerId;
     private boolean mFromDB;
-    private long mDuration;
+    private int mDuration;
     private String mPresentationId;
-    private long mTimedDuration;
+    private int mTimedDuration;
     private String mPracticeId;
 
     public static final String INTRO = "intro";
     public static final String CONCLUSION = "conclusion";
     public static final String NO_PARENT = "no_parent";
 
-    public OutlineItem (String id, String parent, int order, String text, String answer, boolean fromDB, long duration, String presentation) {
+    public OutlineItem (String id, String parent, int order, String text, String answer,
+                        boolean fromDB, int duration, String presentation) {
         mId = id;
         mParentId = parent;
         mOrder = order;
@@ -74,10 +70,10 @@ public class OutlineItem implements Parcelable {
         mAnswerId = answer;
     }
 
-    public long getDuration() {
+    public int getDuration() {
         return mDuration;
     }
-    public void setDuration(long duration) {
+    public void setDuration(int duration) {
         mDuration = duration;
     }
 
@@ -109,10 +105,10 @@ public class OutlineItem implements Parcelable {
         mText = text;
     }
 
-    public long getTimedDuration() {
+    public int getTimedDuration() {
         return mTimedDuration;
     }
-    public void setTimedDuration(Long duration) {
+    public void setTimedDuration(int duration) {
         mTimedDuration = duration;
     }
 
@@ -147,9 +143,9 @@ public class OutlineItem implements Parcelable {
         dest.writeString(mText);
         dest.writeString(mAnswerId);
         dest.writeByte((byte) (mFromDB ? 1 : 0));
-        dest.writeLong(mDuration);
+        dest.writeInt(mDuration);
         dest.writeString(mPresentationId);
-        dest.writeLong(mTimedDuration);
+        dest.writeInt(mTimedDuration);
         dest.writeString(mPracticeId);
     }
 
@@ -160,9 +156,9 @@ public class OutlineItem implements Parcelable {
         mText = parcel.readString();
         mAnswerId = parcel.readString();
         mFromDB = parcel.readByte() == 1;
-        mDuration = parcel.readLong();
+        mDuration = parcel.readInt();
         mPresentationId = parcel.readString();
-        mTimedDuration = parcel.readLong();
+        mTimedDuration = parcel.readInt();
         mPracticeId = parcel.readString();
     }
 

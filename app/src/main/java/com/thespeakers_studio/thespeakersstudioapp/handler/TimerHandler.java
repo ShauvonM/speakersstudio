@@ -1,150 +1,153 @@
-package com.thespeakers_studio.thespeakersstudioapp.runnable;
+package com.thespeakers_studio.thespeakersstudioapp.handler;
 
-import android.content.Context;
-import android.os.Bundle;
 import android.os.Handler;
-import android.os.Vibrator;
+import android.os.Message;
 
-import com.thespeakers_studio.thespeakersstudioapp.R;
 import com.thespeakers_studio.thespeakersstudioapp.model.Outline;
 import com.thespeakers_studio.thespeakersstudioapp.model.OutlineItem;
+import com.thespeakers_studio.thespeakersstudioapp.service.TimerService;
 import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
+import com.thespeakers_studio.thespeakersstudioapp.service.MessageFriend;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
+
+import java.util.ArrayList;
 
 import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
 
 /**
- * Created by smcgi_000 on 8/25/2016.
+ * Created by smcgi_000 on 8/31/2016.
  */
-public class UpdateTimerThread {
+public class TimerHandler extends Handler {
+    private static final String TAG = TimerHandler.class.getSimpleName();
 
-    private String TAG = "SS_UpdateTimerThread";
-
-    private final int DELAY_TIME = 5000;
-
-    private Handler mTimeHandler = new Handler();
-
-    private Context mContext;
-
-    private Outline mOutline;
-
-    private boolean mFromBundle;
-
-    private long mStartTime;
-    private long mElapsed;
-    private long mOutlineDuration;
-    private long mCurrentExpiration;
-    private long mCurrentItemDuration;
-
-    private int mOutlineItemIndex;
-
-    private boolean mStarted;
-    private boolean mFinished;
-    private boolean mPaused;
-
+    // settings
     private boolean mVibrate;
     private boolean mTrack;
+    //
 
+    // global members
+    private TimerService mTimerService;
+    private Outline mOutline;
+    private int mOutlineItemIndex = -1;
+    //
+
+    // time values
+    private long mStartTime; // stores a unix epoch, so it has to be a long
+    private int mElapsed; // the rest are just intervals, so they can be ints
+    private int mOutlineDuration = 0;
+    private int mCurrentExpiration;
+    private int mCurrentItemDuration;
+    //
+
+    // states
     private boolean mIsPractice;
+    private boolean mFinished;
+    private boolean mPaused;
+    private boolean mStarted;
+    private boolean mFromBundle = false; // TODO: might not need this at all
+    //
 
-    private UpdateTimerInterface mInterface;
-
-    public static String BUNDLE_TIMER = "timer";
-
-    private String BUNDLE_START_TIME = "start_time";
-    private String BUNDLE_CURRENT_EXPIRATION = "current_expiration";
-    private String BUNDLE_CURRENT_ITEM_DURATION = "current_item_duration";
-    private String BUNDLE_ELAPSED = "elapsed";
-    private String BUNDLE_STARTED = "started";
-    private String BUNDLE_PAUSED = "paused";
-    private String BUNDLE_FINISHED = "finished";
-
-    private String BUNDLE_ITEM_INDEX = "outline_item_index";
-
-    public interface UpdateTimerInterface {
-        public void outlineItem(OutlineItem item, long remainingTime);
-        public void updateTime(long currentRemaining, long totalRemaining, long elapsed);
+    public interface TimerInterface {
+        public void outlineItem(OutlineItem item, int remainingTime);
+        public void updateTime(int currentRemaining, int totalRemaining, int elapsed);
+        public void pause();
+        public void resume();
         public void finish();
     }
 
-    public UpdateTimerThread(Context context, Bundle timerBundle) {
-        mContext = context;
+    private ArrayList<TimerInterface> mInterface;
+
+    public TimerHandler(TimerService service) {
+        super();
+        LOGD(TAG, "TimerHandler");
+
         mOutlineItemIndex = -1;
         mOutlineDuration = 0;
-        mVibrate = SettingsUtils.getTimerVibrate(mContext);
-        mTrack = SettingsUtils.getTimerTrack(mContext);
+        mIsPractice = false;
+        mInterface = new ArrayList<>();
 
-        if (timerBundle != null && timerBundle.getLong(BUNDLE_START_TIME, 0) > 0) {
-            mFromBundle = true;
-
-            mStartTime = timerBundle.getLong(BUNDLE_START_TIME);
-            mCurrentExpiration = timerBundle.getLong(BUNDLE_CURRENT_EXPIRATION);
-            mCurrentItemDuration = timerBundle.getLong(BUNDLE_CURRENT_ITEM_DURATION);
-            mElapsed = timerBundle.getLong(BUNDLE_ELAPSED);
-
-            mStarted = timerBundle.getBoolean(BUNDLE_STARTED);
-            mPaused = timerBundle.getBoolean(BUNDLE_PAUSED);
-            mFinished = timerBundle.getBoolean(BUNDLE_FINISHED);
-
-            mOutlineItemIndex = timerBundle.getInt(BUNDLE_ITEM_INDEX, -1);
-
-            LOGD(TAG, "Restarting from bundle, start time: " + mStartTime);
+        mTimerService = service;
+        if (service != null) {
+            addInterface(service);
         }
     }
 
-    public void setup(UpdateTimerInterface callback, Outline outline, int duration) {
-        mInterface = callback;
+    public void addInterface(TimerInterface face) {
+        mInterface.add(face);
+    }
 
+    public void setOutline(Outline outline) {
         mOutline = outline;
-        mIsPractice = mOutline != null;
-        mOutlineDuration = mIsPractice ? mOutline.getDurationMillis() : duration;
+        mOutlineDuration = mOutline.getDurationMillis();
+        mIsPractice = true;
+        LOGD(TAG, "Outline set! Duration: " + mOutlineDuration);
     }
 
-    public Bundle toBundle() {
-        Bundle bundle = new Bundle();
-
-        bundle.putLong(BUNDLE_START_TIME, mStartTime);
-        bundle.putLong(BUNDLE_CURRENT_EXPIRATION, mCurrentExpiration);
-        bundle.putLong(BUNDLE_CURRENT_ITEM_DURATION, mCurrentItemDuration);
-        bundle.putLong(BUNDLE_ELAPSED, mElapsed);
-        bundle.putBoolean(BUNDLE_STARTED, mStarted);
-        bundle.putBoolean(BUNDLE_PAUSED, mPaused);
-        bundle.putBoolean(BUNDLE_FINISHED, mFinished);
-        bundle.putInt(BUNDLE_ITEM_INDEX, mOutlineItemIndex);
-
-        return bundle;
+    public Outline getOutline() {
+        return mOutline;
     }
 
-    public void start(boolean delay) {
+    public void setDuration(int duration) {
+        mOutlineDuration = duration;
+        mIsPractice = false;
+    }
+
+    public int getDuration() {
+        return mOutlineDuration;
+    }
+
+    @Override
+    public void handleMessage(Message msg) {
+        LOGD(TAG, "Message received from client " + msg.what);
+        switch (msg.what) {
+            case MessageFriend.MSG_REGISTER:
+                mTimerService.addClient(msg.replyTo);
+                break;
+            case MessageFriend.MSG_START:
+                startTimer();
+                break;
+            case MessageFriend.MSG_PAUSE:
+                togglePause();
+                break;
+            case MessageFriend.MSG_NEXT:
+                skipAhead();
+                break;
+            case MessageFriend.MSG_STOP:
+                break;
+            case MessageFriend.MSG_KILL:
+                stop();
+                mTimerService.kill();
+            default:
+                super.handleMessage(msg);
+        }
+    }
+
+    public void startTimer(boolean delay) {
         if (mOutline == null && mOutlineDuration == 0) {
             return; // uh oh
         }
 
-        if (mFromBundle) {
-            if (!mPaused && mOutlineItemIndex >= 0 && mOutlineItemIndex < mOutline.getItemCount()) {
-                resume();
-            }
+        mTrack = SettingsUtils.getTimerTrack(mTimerService);
+
+        if (delay) {
+            mCurrentExpiration = SettingsUtils.TIMER_DELAY_TIME;
+            mStarted = false;
         } else {
-            if (delay) {
-                mCurrentExpiration = DELAY_TIME;
-                mStarted = false;
-            } else {
-                initStart();
-            }
+            initStart();
         }
 
         if (!mPaused) {
-            mTimeHandler.postDelayed(updateTimerThread, 500);
+            postDelayed(updateTimerRunnable, 500);
         } else {
-            if (mInterface != null) {
-                mInterface.updateTime(mCurrentExpiration - mElapsed,
+            for (TimerInterface face : mInterface) {
+                face.updateTime(mCurrentExpiration - mElapsed,
                         mOutlineDuration - mElapsed, mElapsed);
+                face.pause();
             }
         }
     }
-
-    public void start() {
-        start(false);
+    public void startTimer() {
+        startTimer(SettingsUtils.getTimerWait(mTimerService));
     }
 
     private void initStart() {
@@ -156,7 +159,7 @@ public class UpdateTimerThread {
     }
 
     public void stop() {
-        mTimeHandler.removeCallbacks(updateTimerThread);
+        removeCallbacks(updateTimerRunnable);
     }
 
     public boolean isStarted() {
@@ -171,6 +174,7 @@ public class UpdateTimerThread {
         return mPaused;
     }
 
+    /*
     public void vibrate(long[] pattern) {
         if (pattern.length == 0) {
             return;
@@ -183,12 +187,13 @@ public class UpdateTimerThread {
     public void vibrate(int pattern) {
         vibrate(new long[] {pattern});
     }
+    */
 
     public void skipAhead() {
         if (mTrack) {
             // store the duration this thing actually took
             OutlineItem currentItem = getCurrentItem();
-            long currentRemaining = mCurrentExpiration - mElapsed;
+            int currentRemaining = mCurrentExpiration - mElapsed;
             currentItem.setTimedDuration(mCurrentItemDuration - currentRemaining);
         }
         // fudge the time a little bit so that we are sure we are on the second
@@ -211,10 +216,10 @@ public class UpdateTimerThread {
             if (mOutlineItemIndex < mOutline.getItemCount()) {
                 final OutlineItem item = getCurrentItem();
 
-                long thisDuration = item.getDuration();
+                int thisDuration = item.getDuration();
                 // collect any time left over from the last item
                 // (which will be > 0 if the user skipped to the next item)
-                long remainingTime = mCurrentExpiration - mElapsed;
+                int remainingTime = mCurrentExpiration - mElapsed;
 
                 // skip items with 0 duration,
                 // or items that will have 0 duration with any left-over time
@@ -223,12 +228,12 @@ public class UpdateTimerThread {
                     return;
                 }
 
-                if (mInterface != null) {
-                    mInterface.outlineItem(item, remainingTime);
+                for (TimerInterface face : mInterface) {
+                    face.outlineItem(item, remainingTime);
                 }
 
                 if (item.getParentId().equals(OutlineItem.NO_PARENT)) {
-                    vibrate(Utils.VIBRATE_PULSE);
+                    //vibrate(Utils.VIBRATE_PULSE);
 
                     // move on to the next item to set up the duration
                     nextItem();
@@ -264,14 +269,16 @@ public class UpdateTimerThread {
     private void finish() {
         mFinished = true;
 
+        /*
         vibrate(new long[]{Utils.VIBRATE_PULSE, Utils.VIBRATE_PULSE_GAP, Utils.VIBRATE_PULSE,
                 Utils.VIBRATE_PULSE_GAP, Utils.VIBRATE_PULSE});
+                */
         mOutlineDuration = 0;
         mCurrentExpiration = 0;
         mStartTime = 0;
 
-        if (mInterface != null) {
-            mInterface.finish();
+        for (TimerInterface face : mInterface) {
+            face.finish();
         }
     }
 
@@ -286,18 +293,25 @@ public class UpdateTimerThread {
                 mCurrentExpiration = mCurrentExpiration - mElapsed;
             }
 
-            resume();
+            resumeTimer();
 
-            mTimeHandler.postDelayed(updateTimerThread, 0);
+            for (TimerInterface face : mInterface) {
+                face.resume();
+            }
+            postDelayed(updateTimerRunnable, 0);
         } else {
             // pause
             mPaused = true;
-            mTimeHandler.removeCallbacks(updateTimerThread);
+
+            for (TimerInterface face : mInterface) {
+                face.pause();
+            }
+            removeCallbacks(updateTimerRunnable);
         }
         return mPaused;
     }
 
-    private void resume() {
+    private void resumeTimer() {
         OutlineItem item = mOutline.getItem(mOutlineItemIndex);
         // we take a step back so that we can redo the last step
         // and trigger all the callbacks and whatnot
@@ -306,40 +320,31 @@ public class UpdateTimerThread {
         nextItem();
     }
 
-    public long getStartTime() {
-        return mStartTime;
-    }
-
-    public long getCurrentItemDuration() {
-        return mCurrentItemDuration;
-    }
-
-    private Runnable updateTimerThread = new Runnable() {
+    private Runnable updateTimerRunnable = new Runnable() {
         @Override
         public void run() {
             if (mStartTime == 0) {
                 mStartTime = Utils.now();
             }
 
-            long elapsed = Utils.now() - mStartTime;
+            int elapsed = (int) (Utils.now() - mStartTime);
             mElapsed = Utils.roundDownToThousand(elapsed);
             // totalRemaining is the duration of the entire presentation, which we want to stop at 0
-            long totalRemaining = Math.max(mOutlineDuration - mElapsed, 0);
+            int totalRemaining = Math.max(mOutlineDuration - mElapsed, 0);
             // currentRemaining is the duration of the current section of the outline
-            long currentRemaining = mCurrentExpiration - mElapsed;
+            int currentRemaining = mCurrentExpiration - mElapsed;
 
-            LOGD(TAG, "elapsed time: " + mElapsed + " " + totalRemaining + " " + currentRemaining);
+            //LOGD(TAG, "elapsed time: " + mElapsed + " " + totalRemaining + " " + currentRemaining);
 
-            mTimeHandler.postDelayed(this, 100);
+            TimerHandler.this.postDelayed(this, 100);
 
             if (currentRemaining <= 0 && !mFinished) {
                 nextItem();
             } else {
-                if (mInterface != null) {
-                    mInterface.updateTime(currentRemaining, totalRemaining, mElapsed);
+                for (TimerInterface face : mInterface) {
+                    face.updateTime(currentRemaining, totalRemaining, mElapsed);
                 }
             }
         }
     };
-
 }

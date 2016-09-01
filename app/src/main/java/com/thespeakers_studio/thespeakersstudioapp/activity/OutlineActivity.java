@@ -126,7 +126,7 @@ public class OutlineActivity extends BaseActivity implements
             // set the text for this thing
             ((TextView) itemLayout.findViewById(R.id.list_topic)).setText(item.getText());
             // set the duration for this thing
-            long duration = item.getDuration();
+            int duration = item.getDuration();
             TextView timeView = (TextView) itemLayout.findViewById(R.id.list_duration);
             if (duration > 0) {
                 timeView.setText(Utils.getTimeStringFromMillis(duration, getResources()));
@@ -252,10 +252,12 @@ public class OutlineActivity extends BaseActivity implements
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch(requestCode) {
-            case Utils.REQUEST_CODE_PRACTICE:
-                setPresentationId(data.getStringExtra(Utils.INTENT_PRESENTATION_ID));
-                break;
+        if (data != null) {
+            switch (requestCode) {
+                case Utils.REQUEST_CODE_PRACTICE:
+                    setPresentationId(data.getStringExtra(Utils.INTENT_PRESENTATION_ID));
+                    break;
+            }
         }
     }
 }

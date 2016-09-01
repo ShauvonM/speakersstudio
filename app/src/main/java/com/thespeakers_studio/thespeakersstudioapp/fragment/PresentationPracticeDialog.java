@@ -1,12 +1,11 @@
 package com.thespeakers_studio.thespeakersstudioapp.fragment;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
-import android.os.Vibrator;
+import android.os.IBinder;
+import android.os.Messenger;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
@@ -21,8 +20,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.thespeakers_studio.thespeakersstudioapp.R;
-import com.thespeakers_studio.thespeakersstudioapp.runnable.UpdateTimerThread;
+import com.thespeakers_studio.thespeakersstudioapp.handler.TimerWatchHandler;
 import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
+import com.thespeakers_studio.thespeakersstudioapp.service.MessageFriend;
 import com.thespeakers_studio.thespeakersstudioapp.utils.OutlineHelper;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
@@ -37,28 +37,35 @@ import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
  * Created by smcgi_000 on 7/20/2016.
  */
 public class PresentationPracticeDialog extends DialogFragment implements
-        View.OnClickListener, UpdateTimerThread.UpdateTimerInterface {
+        View.OnClickListener, TimerWatchHandler.TimerWatchInterface {
+
 
 
     public interface PresentationPracticeDialogInterface {
-        public void onDialogDismissed(Outline outline, boolean finished);
+        public void onDialogDismissed();
+        public void onServiceKilled(Outline outline, boolean isFinished);
     }
 
-    public static final String TAG = "timer";
+    public static final String TAG = PresentationPracticeDialog.class.getSimpleName();
 
     private PresentationPracticeDialogInterface mInterface;
     private Outline mOutline;
     private OutlineHelper mOutlineHelper;
-    private Dialog mDialog;
-
     private int mDuration = 0;
 
+    // states and settings
     private boolean mIsPractice;
-
-    private boolean mDelay;
     private boolean mDisplayTimer;
     private boolean mShowWarning;
 
+    private boolean mIsTimerStarted;
+    private boolean mIsTimerFinished;
+    private boolean mIsTimerPaused;
+    //
+
+    private Dialog mDialog;
+
+    // views!
     private TextView mOutputMainView;
     private TextView mTimerView;
     private TextView mTimerTotalView;
@@ -70,12 +77,13 @@ public class PresentationPracticeDialog extends DialogFragment implements
     private LinearLayout mBulletListWrapper;
     private TextView mBulletListHeader;
     private LinearLayout mBulletList;
+    //
 
-    //private Handler mTimeHandler = new Handler();
-    private UpdateTimerThread mTimeThread;
-
-    //private int mOutlineItemIndex;
     private String mTopicText = "";
+
+    // service stuff
+    private MessageFriend mMessageFriend;
+    //
 
     // TODO: make animation times and durations constants
     private final int INTERSTITIAL_DURATION = 1000;
@@ -89,45 +97,12 @@ public class PresentationPracticeDialog extends DialogFragment implements
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
 
-        mDelay = SettingsUtils.getTimerWait(getContext());
-        mDisplayTimer = SettingsUtils.getTimerShow(getContext());
-        mShowWarning = SettingsUtils.getTimerWarning(getContext());
-
         mOutlineHelper = new OutlineHelper();
-    }
-
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-        super.onDismiss(dialog);
-        if (mInterface != null) {
-            mInterface.onDialogDismissed(mOutline, mTimeThread.isFinished());
-        }
-
-        mTimeThread.stop();
+        mMessageFriend = new MessageFriend();
     }
 
     public void setInterface(PresentationPracticeDialogInterface inter) {
         mInterface = inter;
-    }
-
-    public void setup (Outline outline, int duration) {
-        if (outline != null) {
-            mOutline = outline;
-            mIsPractice = true;
-        } else {
-            mIsPractice = false;
-            mDuration = duration * 60 * 1000; // we'll be getting the duration in minutes
-        }
-    }
-    public void setup (int duration) {
-        setup(null, duration);
-    }
-    public void setup (Outline outline) {
-        setup(outline, 0);
-    }
-
-    public UpdateTimerThread getTimerThread() {
-        return mTimeThread;
     }
 
     @Override
@@ -155,9 +130,6 @@ public class PresentationPracticeDialog extends DialogFragment implements
 
         hideAllTheThings();
 
-        Bundle args = getArguments();
-        mTimeThread = new UpdateTimerThread(getContext(), args);
-
         return mDialog;
     }
 
@@ -176,36 +148,77 @@ public class PresentationPracticeDialog extends DialogFragment implements
         mBulletList.removeAllViews();
     }
 
+    public void setBinder(IBinder binder) {
+        Messenger serviceMessenger = new Messenger(binder);
+        Messenger thisMessenger = new Messenger(new TimerWatchHandler(this));
+
+        mMessageFriend.setMessengers(serviceMessenger, thisMessenger);
+
+        LOGD(TAG, "Binder set!");
+    }
+
     @Override
     public void onStart() {
         super.onStart();
-
-        startTimer();
+        // we will wait for setup to be called by the service
+        mMessageFriend.sendMessage(MessageFriend.MSG_REGISTER);
     }
 
-    private void startTimer() {
-        if (mOutline != null || mDuration > 0) {
-            mTimeThread.setup(this, mOutline, mDuration);
-            mTimeThread.start(mDelay);
-            // mTimeThread might be paused off the bat if the activity was paused while it was paused
-            // perhaps the user paused the timer and rotated the screen or checked another app
-            // TODO: or got a phone call?
-            if (mTimeThread.isPaused()) {
-                pause();
-            }
+    // setup is part of the TimerWatchInterface, and is called when the service is ready to go
+    @Override
+    public void setup (Bundle outlineBundle, int duration, boolean inProgress) {
+        if (outlineBundle != null) {
+            mOutline = new Outline(getContext(), outlineBundle);
+            mIsPractice = true;
+
+            LOGD(TAG, "setup fired " + mOutline.getTitle());
+        } else {
+            mIsPractice = false;
+            mDuration = duration;
+        }
+
+        mDisplayTimer = SettingsUtils.getTimerShow(getContext());
+        mShowWarning = SettingsUtils.getTimerWarning(getContext());
+
+        if (!inProgress) {
+            startTimer();
         }
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        mTimeThread.stop();
+    // we are ready to go, so send the signal to the service to begin
+    private void startTimer() {
+        LOGD(TAG, "Starting timer!");
+        mMessageFriend.sendMessage(MessageFriend.MSG_START);
     }
 
+    // overrides the onDismiss method on the DialogFragment class
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+
+        // when the dialog is dismissed, we should kill the service,
+        // which should respond with the outline and a boolean
+        mMessageFriend.sendMessage(MessageFriend.MSG_KILL);
+        if (mInterface != null) {
+            mInterface.onDialogDismissed();
+        }
+    }
+
+    // serviceKilled is part of the TimerWatchHandler.TimerWatchInterface
+    @Override
+    public void serviceKilled(Bundle outlineBundle, boolean isFinished) {
+        mOutline = new Outline(getContext(), outlineBundle);
+        if (mInterface != null) {
+            mInterface.onServiceKilled(mOutline, isFinished);
+        }
+    }
+
+    // an internal interface to handle what happens after the fade-in animation, if necessary
     private interface showViewInterface {
         public void onReadyToShow(View v);
     }
 
+    // a universal method to show or hide the various views on the dialog
     public boolean showView (final View view, final boolean show, final String text,
                              final showViewInterface callback) {
         boolean needToHide;
@@ -296,6 +309,8 @@ public class PresentationPracticeDialog extends DialogFragment implements
 
     @Override
     public void finish() {
+        mIsTimerFinished = true;
+
         showText(mOutputSubView, "");
         showText(mOutputMainView, R.string.done);
 
@@ -307,14 +322,14 @@ public class PresentationPracticeDialog extends DialogFragment implements
     }
 
     @Override
-    public void updateTime(long currentRemaining, long totalRemaining, long elapsed) {
-        if (mTimeThread.isStarted() && mDisplayTimer && mIsPractice) {
+    public void updateTime(int currentRemaining, int totalRemaining, int elapsed) {
+        if (mIsTimerStarted && mDisplayTimer && mIsPractice) {
             // show the time for the whole presentation in smaller output
             setTimer(mTimerTotalView, totalRemaining);
         }
-        if (!mTimeThread.isFinished()) {
+        if (!mIsTimerFinished) {
             if (mDisplayTimer) { // && mTopicText.isEmpty()) {
-                if (mTimeThread.isStarted()) {
+                if (mIsTimerStarted) {
                     // show the current remaining time in 0:00 format
                     setTimer(mTimerView, currentRemaining);
                 } else {
@@ -333,12 +348,14 @@ public class PresentationPracticeDialog extends DialogFragment implements
             setTimer(mTimerView, -elapsed);
         }
 
-        if (mTimeThread.isStarted() && mShowWarning && !mTimeThread.isFinished()) {
+        if (mIsTimerStarted && mShowWarning && !mIsTimerFinished) {
             if (totalRemaining <= WARNING_TIME && totalRemaining >= WARNING_TIME - 100) {
                 // five minute warning
                 if (showText(mWarningView, R.string.five_minutes_left)) {
-                    mTimeThread.vibrate(new long[] {Utils.VIBRATE_PULSE,
+                    /* TODO: vibration
+                    vibrate(new long[] {Utils.VIBRATE_PULSE,
                             Utils.VIBRATE_PULSE_GAP, Utils.VIBRATE_PULSE});
+                            */
                 }
             } else if (totalRemaining <= (WARNING_TIME - WARNING_DURATION)
                     && totalRemaining >= (WARNING_TIME - WARNING_DURATION - 100)) {
@@ -349,7 +366,10 @@ public class PresentationPracticeDialog extends DialogFragment implements
     }
 
     @Override
-    public void outlineItem(final OutlineItem item, long remainingTime) {
+    public void outlineItem(final OutlineItem item, int remainingTime) {
+        // when we get outline items, we know the timer has started;
+        mIsTimerStarted = true;
+
         if (item.getParentId().equals(OutlineItem.NO_PARENT)) {
             if (remainingTime + item.getDuration() > INTERSTITIAL_DURATION) {
                 // this is a top level item, so we will show it for a second and then move on
@@ -487,14 +507,23 @@ public class PresentationPracticeDialog extends DialogFragment implements
         v.setAnimation(blink);
     }
 
-    private void pause() {
+    @Override
+    public void pause() {
+        mIsTimerPaused = true;
         showText(mOutputMainView, R.string.paused);
         blink(mTimerView);
         hideView(mButtonRight);
         //hideView(mButtonLeft);
     }
-    private void resume() {
+    @Override
+    public void resume() {
+        mIsTimerPaused = false;
         mTimerView.clearAnimation();
+    }
+
+    private void setTimer(TextView timer, int time) {
+        timer.setVisibility(View.VISIBLE);
+        timer.setText(Utils.getTimeStringFromMillis(time, getResources()));
     }
 
     @Override
@@ -502,33 +531,16 @@ public class PresentationPracticeDialog extends DialogFragment implements
         switch (v.getId()) {
             case R.id.practice_timer_current:
                 // tap the time to pause or resume the timer
-                if (mTimeThread.togglePause()) {
-                    pause();
-                } else {
-                    resume();
-                }
+                mMessageFriend.sendMessage(MessageFriend.MSG_PAUSE);
                 break;
             case R.id.button_next:
-                if (mTimeThread.isPaused()) {
-                    return;
-                }
-                // skip to next, but only if the presentation is running
-                if (mTimeThread.getStartTime() > 0) {
-                    mTimeThread.vibrate(Utils.VIBRATE_BUMP);
-                    if (!mTimeThread.isFinished()) {
-                        mTimeThread.skipAhead();
-                    } else {
-                        // we are done, so close the thing
-                        dismiss();
-                    }
+                if (mIsTimerFinished) {
+                    dismiss();
+                } else if (mIsTimerStarted && !mIsTimerPaused) {
+                    mMessageFriend.sendMessage(MessageFriend.MSG_NEXT);
                 }
                 break;
         }
-    }
-
-    private void setTimer(TextView timer, long time) {
-        timer.setVisibility(View.VISIBLE);
-        timer.setText(Utils.getTimeStringFromMillis(time, getResources()));
     }
 
 }

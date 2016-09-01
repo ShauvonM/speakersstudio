@@ -40,6 +40,10 @@ public class Utils {
 
     public static final String INTENT_PRESENTATION_ID = "presentation_id";
     public static final String INTENT_THEME_ID = "theme_id";
+    public static final String INTENT_OUTLINE = "outline";
+    public static final String INTENT_DURATION = "duration";
+
+    public static final String BUNDLE_TIMER = "timer";
 
     public static final int VIBRATE_PULSE = 500;
     public static final int VIBRATE_PULSE_GAP = 200;
@@ -184,8 +188,8 @@ public class Utils {
         return text;
     }
 
-    public static String getTimeStringFromMillis (long millis, Resources r) {
-        long use = Math.abs(millis);
+    public static String getTimeStringFromMillis (int millis, Resources r) {
+        int use = Math.abs(millis);
         int secs = (int) (use / 1000);
         if (use % 1000 > 1) {
             secs += 1;
@@ -197,8 +201,8 @@ public class Utils {
         return String.format(r.getString(formatString), mins, secs);
     }
 
-    public static String getTimeStringFromMillisInText (long millis, Resources r) {
-        long use = Math.abs(millis);
+    public static String getTimeStringFromMillisInText (int millis, Resources r) {
+        int use = Math.abs(millis);
         int secs = (int) (use / 1000);
         if (use % 1000 > 1) {
             secs += 1;
@@ -216,20 +220,20 @@ public class Utils {
         }
     }
 
-    public static String secondsFromMillis (long millis) {
-        int secs = (int) (millis / 1000);
+    public static String secondsFromMillis (int millis) {
+        int secs = millis / 1000;
         if (millis % 1000 > 1) {
             secs += 1;
         }
         return "" + secs;
     }
 
-    public static long roundToThousand (long num) {
+    public static int roundToThousand (int num) {
         return Math.round((float)(num / 1000)) * 1000;
     }
 
-    public static long roundDownToThousand (long num) {
-        return (long) Math.floor((float)(num / 1000)) * 1000;
+    public static int roundDownToThousand (int num) {
+        return (int) Math.floor((float)(num / 1000)) * 1000;
     }
 
     public static int getScreenWidthInPx(@NonNull final Context context) {

@@ -161,7 +161,7 @@ public class OutlineDbHelper {
                 int order = itemCursor.getInt(
                         itemCursor.getColumnIndexOrThrow(
                                 OutlineDataContract.OutlineItemEntry.COLUMN_NAME_ORDER));
-                long duration = itemCursor.getLong(
+                int duration = itemCursor.getInt(
                         itemCursor.getColumnIndexOrThrow(
                                 OutlineDataContract.OutlineItemEntry.COLUMN_NAME_DURATION));
                 String text = itemCursor.getString(

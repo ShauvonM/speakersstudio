@@ -2,13 +2,16 @@ package com.thespeakers_studio.thespeakersstudioapp.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.FragmentTransaction;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.preference.PreferenceFragment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputEditText;
@@ -34,8 +37,7 @@ import com.thespeakers_studio.thespeakersstudioapp.model.Outline;
 import com.thespeakers_studio.thespeakersstudioapp.model.OutlineItem;
 import com.thespeakers_studio.thespeakersstudioapp.model.Practice;
 import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
-import com.thespeakers_studio.thespeakersstudioapp.runnable.UpdateTimerThread;
-import com.thespeakers_studio.thespeakersstudioapp.service.TimerServiceUtils;
+import com.thespeakers_studio.thespeakersstudioapp.service.TimerService;
 import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.AnalyticsHelper;
 import com.thespeakers_studio.thespeakersstudioapp.utils.OutlineHelper;
@@ -52,7 +54,7 @@ import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.makeLog
 public class PracticeSetupActivity extends BaseActivity implements
         View.OnClickListener, PresentationPracticeDialog.PresentationPracticeDialogInterface {
 
-    private static final String TAG = makeLogTag(PracticeSetupActivity.class);
+    private static final String TAG = PracticeSetupActivity.class.getSimpleName();
     private static final String SCREEN_LABEL = "Presentation Outline";
 
     private PresentationData mPresentation;
@@ -86,11 +88,14 @@ public class PracticeSetupActivity extends BaseActivity implements
 
     private boolean mIsDialogOpen;
 
-    private TimerServiceUtils mTimerServiceUtils;
-
     private static final String BUNDLE_DURATION = "duration";
     private static final String BUNDLE_OUTLINE = "outline";
     private static final String BUNDLE_SCROLL_POS = "scroll_pos";
+    private static final String BUNDLE_DIALOG_OPEN = "dialog_open";
+
+    // service stuff
+    private boolean mServiceBound = false;
+    //
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,32 +134,20 @@ public class PracticeSetupActivity extends BaseActivity implements
             }
         });
 
-        mTimerServiceUtils = new TimerServiceUtils(this);
-        LOGD(TAG, "Is service running? " + mTimerServiceUtils.isRunning());
-
         mDuration = SettingsUtils.getDefaultTimerDuration(this);
         String presentationId = getIntent().getStringExtra(Utils.INTENT_PRESENTATION_ID);
 
-        if (savedInstanceState != null) {
-            mScrollPos = savedInstanceState.getInt(BUNDLE_SCROLL_POS, 0);
+        setPresentationId(presentationId, null);
 
-            if (savedInstanceState.getInt(BUNDLE_DURATION, 0) != 0) {
-                mDuration = savedInstanceState.getInt(BUNDLE_DURATION, 0);
-            }
-            if (savedInstanceState.getBundle(BUNDLE_OUTLINE) != null) {
-                setPresentationId(presentationId,
-                        new Outline(this, savedInstanceState.getBundle(BUNDLE_OUTLINE)));
-            }
-
-            Bundle runningTimerProperties =
-                    savedInstanceState.getBundle(UpdateTimerThread.BUNDLE_TIMER);
-
-            if (runningTimerProperties != null) {
-                startPractice(runningTimerProperties);
-            }
-        } else {
-            setPresentationId(getIntent().getStringExtra(Utils.INTENT_PRESENTATION_ID), null);
+        if (savedInstanceState != null && savedInstanceState.getBoolean(BUNDLE_DIALOG_OPEN, false)) {
+            restartPractice();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LOGD(TAG, "On resume");
     }
 
     @Override
@@ -177,8 +170,6 @@ public class PracticeSetupActivity extends BaseActivity implements
                 mRecyclerView.setLayoutManager(new LinearLayoutManager(this,
                         LinearLayoutManager.VERTICAL, false));
                 mRecyclerView.setAdapter(adapter);
-
-                //mTimerServiceUtils.setOutlineBundle(mOutline.toBundle());
             }
         }
         isPractice = mOutline != null;
@@ -319,7 +310,15 @@ public class PracticeSetupActivity extends BaseActivity implements
                 timerDurationInput.requestFocus();
                 break;
             case R.id.fab_practice:
-                startPractice(null);
+                if (!isPractice) {
+                    mDuration = Integer.parseInt(((TextView) findViewById(R.id.timer_duration_input))
+                            .getText().toString());
+                    if (mDuration <= 0) {
+                        return;
+                    }
+                    SettingsUtils.setDefaultTimerDuration(this, mDuration);
+                }
+                startPractice();
                 break;
             case R.id.settings_expand:
                 if (isSettingsPanelOpen()) {
@@ -338,25 +337,6 @@ public class PracticeSetupActivity extends BaseActivity implements
         mRecyclerView.smoothScrollBy(0, mSettingsHeight - mScrollPos);
     }
 
-    private void startPractice(Bundle timerBundle) {
-        mTimerDialog = new PresentationPracticeDialog();
-        mTimerDialog.setArguments(timerBundle);
-        if (isPractice) {
-            mTimerDialog.setup(mOutline);
-        } else {
-            mDuration = Integer.parseInt(((TextView) findViewById(R.id.timer_duration_input))
-                    .getText().toString());
-            if (mDuration <= 0) {
-                return;
-            }
-            SettingsUtils.setDefaultTimerDuration(this, mDuration);
-            mTimerDialog.setup(mDuration);
-        }
-        mTimerDialog.setInterface(this);
-        mTimerDialog.show(getSupportFragmentManager(), PresentationPracticeDialog.TAG);
-        mIsDialogOpen = true;
-    }
-
     @Override
     protected void onPause() {
         if (isChangingConfigurations()) {
@@ -370,18 +350,7 @@ public class PracticeSetupActivity extends BaseActivity implements
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        if (isPractice) {
-            outState.putBundle(BUNDLE_OUTLINE, mOutline.toBundle());
-        } else {
-            mDuration = Integer.parseInt(((TextView) findViewById(R.id.timer_duration_input))
-                    .getText().toString());
-            outState.putInt(BUNDLE_DURATION, mDuration);
-        }
-
-        if (mIsDialogOpen) {
-            UpdateTimerThread timer = mTimerDialog.getTimerThread();
-            outState.putBundle(UpdateTimerThread.BUNDLE_TIMER, timer.toBundle());
-        }
+        outState.putBoolean(BUNDLE_DIALOG_OPEN, mIsDialogOpen);
     }
 
     @Override
@@ -389,15 +358,69 @@ public class PracticeSetupActivity extends BaseActivity implements
         super.onStop();
 
         if (!isChangingConfigurations()) {
-            LOGD(TAG, "Starting timer service");
-
-            mTimerServiceUtils.setOutlineBundle(mOutline.toBundle());
         }
     }
 
+    private void startPractice() {
+        startTimerService();
+        setupDialog();
+        bindTimerService();
+    }
+
+    private void restartPractice() {
+        setupDialog();
+        bindTimerService();
+    }
+
+    private void setupDialog() {
+        mTimerDialog = new PresentationPracticeDialog();
+        mTimerDialog.setInterface(this);
+        mTimerDialog.show(getSupportFragmentManager(), PresentationPracticeDialog.TAG);
+        mIsDialogOpen = true;
+    }
+
+    private void startTimerService() {
+        Intent intent = new Intent(this, TimerService.class);
+        if (isPractice) {
+            intent.putExtra(Utils.INTENT_OUTLINE, mOutline.toBundle());
+        } else {
+            intent.putExtra(Utils.INTENT_DURATION, mDuration * 60 * 1000);
+        }
+        startService(intent);
+    }
+
+    private void bindTimerService() {
+        Intent bindIntent = new Intent(this, TimerService.class);
+        bindService(bindIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    private ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder binder) {
+            mServiceBound = true;
+            LOGD(TAG, "Service bound!");
+            mTimerDialog.setBinder(binder);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
+
     @Override
-    public void onDialogDismissed(final Outline outline, boolean finished) {
+    public void onDialogDismissed() {
         mIsDialogOpen = false;
+        // TODO: show an indicator that we are waiting for the service to stop?
+    }
+
+    @Override
+    public void onServiceKilled(final Outline outline, boolean finished) {
+        if (mServiceBound) {
+            unbindService(mServiceConnection);
+            mServiceBound = false;
+        }
+
         if (finished) {
             // save user's thoughts on this practice
             AlertDialog.Builder thoughtsDialogBuilder = new AlertDialog.Builder(this);
