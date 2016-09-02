@@ -1,11 +1,15 @@
 package com.thespeakers_studio.thespeakersstudioapp.service;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
 
+import com.thespeakers_studio.thespeakersstudioapp.R;
+import com.thespeakers_studio.thespeakersstudioapp.activity.PracticeSetupActivity;
 import com.thespeakers_studio.thespeakersstudioapp.handler.TimerHandler;
 import com.thespeakers_studio.thespeakersstudioapp.model.Outline;
 import com.thespeakers_studio.thespeakersstudioapp.model.OutlineItem;
@@ -38,16 +42,38 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Intent restartIntent = new Intent(this, PracticeSetupActivity.class);
         Bundle outlineBundle = intent.getBundleExtra(Utils.INTENT_OUTLINE);
         mIsPractice = outlineBundle != null;
         int duration;
         if (mIsPractice) {
             Outline outline = new Outline(this, outlineBundle);
             mTimerHandler.setOutline(outline);
+            restartIntent.putExtra(Utils.INTENT_PRESENTATION_ID, outline.getPresentationId());
+            duration = outline.getDurationMillis();
         } else {
             duration = intent.getIntExtra(Utils.INTENT_DURATION, 0);
             mTimerHandler.setDuration(duration);
         }
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                        restartIntent, 0);
+
+        Notification.Builder notificationBuilder = new Notification.Builder(this);
+        notificationBuilder.setSmallIcon(R.drawable.ic_record_voice_over_white_24dp)
+                .setContentIntent(pendingIntent)
+                .setContentTitle(getString(R.string.timer_service_started))
+                .setContentText(String.format(getString(R.string.timer_service_description),
+                        Utils.getTimeStringFromMillisInText(duration, getResources())));
+
+        Notification notification;
+        if (Utils.versionGreaterThan(15)) {
+            notification = notificationBuilder.build();
+        } else {
+            notification = notificationBuilder.getNotification();
+        }
+
+        startForeground(R.id.timer_service_notification, notification);
 
         return Service.START_NOT_STICKY; // TODO: get the best value here
     }
@@ -89,6 +115,7 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
         mMessageFriend.sendMessage(MessageFriend.MSG_KILL, mTimerHandler.getOutline().toBundle(),
                 mTimerHandler.isFinished() ? 1 : 0);
         stopSelf();
+        stopForeground(true);
     }
 
     //
