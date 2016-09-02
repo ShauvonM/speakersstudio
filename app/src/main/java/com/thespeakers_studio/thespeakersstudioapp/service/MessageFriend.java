@@ -40,6 +40,7 @@ public class MessageFriend {
     public static final int MSG_FINISHED = 22;
 
     public static final int MSG_KILL = 25;
+    public static final int MSG_UNREGISTER = 26;
     //
 
     private ArrayList<Messenger> mTo;
@@ -47,7 +48,7 @@ public class MessageFriend {
     private Queue<Message> mMessageQueue;
 
     public MessageFriend() {
-        mTo = new ArrayList<>();
+        resetDestinationMessenger();
         mMessageQueue = new PriorityQueue<>(1, new Comparator<Message>() {
             @Override
             public int compare(Message lhs, Message rhs) {
@@ -67,7 +68,17 @@ public class MessageFriend {
     }
 
     public void addDestinationMessenger(Messenger service) {
-        mTo.add(service);
+        if (mTo.indexOf(service) < 0) {
+            mTo.add(service);
+        }
+    }
+
+    public void removeDestinationMessenger(Messenger service) {
+        mTo.remove(service);
+    }
+
+    public void resetDestinationMessenger() {
+        mTo = new ArrayList<>();
     }
 
     public void sendMessage(int what, Object obj, int arg, int arg2) {

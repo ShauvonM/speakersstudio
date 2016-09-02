@@ -148,8 +148,10 @@
     <string name="pref_completed_presentations_entry_off">Step List</string>
     <string name="pref_completed_presentations_entry_on">Outline</string>
 
-    <string name="timer_service_started">Timer Running</string>
-    <string name="timer_service_description">%1$s remaining</string>
+    <string name="timer_service_started">Timer</string>
+    <string name="timer_service_description">%1$s - %2$s remaining</string>
+    <string name="timer_service_finished">Finished!</string>
+    <string name="timer_service_finished_description">Touch here to return to the app.</string>
 
     <string name="lorem_ipsum_words">Lorem ipsum dolor sit</string>
     <string name="lorem_ipsum_sentence">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</string>

@@ -33,7 +33,7 @@ public class TimerWatchHandler extends Handler {
     @Override
     public void handleMessage(Message msg) {
         if (msg.what != 20) {
-            LOGD(TAG, "Received message from service: " + msg.what);
+            //LOGD(TAG, "Received message from service: " + msg.what);
         }
         switch(msg.what) {
             case MessageFriend.MSG_READY:

@@ -91,7 +91,7 @@ public class PracticeSetupActivity extends BaseActivity implements
     private static final String BUNDLE_DURATION = "duration";
     private static final String BUNDLE_OUTLINE = "outline";
     private static final String BUNDLE_SCROLL_POS = "scroll_pos";
-    private static final String BUNDLE_DIALOG_OPEN = "dialog_open";
+    public static final String BUNDLE_DIALOG_OPEN = "dialog_open";
 
     // service stuff
     private boolean mServiceBound = false;
@@ -139,20 +139,18 @@ public class PracticeSetupActivity extends BaseActivity implements
 
         setPresentationId(presentationId, null);
 
-        if (savedInstanceState != null && savedInstanceState.getBoolean(BUNDLE_DIALOG_OPEN, false)) {
-            restartPractice();
-        }
+        mTimerDialog = new PresentationPracticeDialog();
+        mTimerDialog.setInterface(this);
+
+        // see if there's anything to bind to yet
+        // if there is, the dialog will automagically show, otherwise nothing will happen
+        bindTimerService();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         LOGD(TAG, "On resume");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
     }
 
     private void setPresentationId(String id, Outline outline) {
@@ -342,6 +340,7 @@ public class PracticeSetupActivity extends BaseActivity implements
         if (isChangingConfigurations()) {
             mRecyclerView.scrollBy(0, -mScrollPos);
         }
+        unbindTimerService();
 
         super.onPause();
     }
@@ -349,32 +348,29 @@ public class PracticeSetupActivity extends BaseActivity implements
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
-        outState.putBoolean(BUNDLE_DIALOG_OPEN, mIsDialogOpen);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        unbindTimerService();
 
         if (!isChangingConfigurations()) {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindTimerService();
+    }
+
     private void startPractice() {
         startTimerService();
-        setupDialog();
         bindTimerService();
     }
 
-    private void restartPractice() {
-        setupDialog();
-        bindTimerService();
-    }
-
-    private void setupDialog() {
-        mTimerDialog = new PresentationPracticeDialog();
-        mTimerDialog.setInterface(this);
+    private void showDialog() {
         mTimerDialog.show(getSupportFragmentManager(), PresentationPracticeDialog.TAG);
         mIsDialogOpen = true;
     }
@@ -391,15 +387,25 @@ public class PracticeSetupActivity extends BaseActivity implements
 
     private void bindTimerService() {
         Intent bindIntent = new Intent(this, TimerService.class);
-        bindService(bindIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        bindService(bindIntent, mServiceConnection, 0);
+    }
+
+    private void unbindTimerService() {
+        if (mServiceBound) {
+            unbindService(mServiceConnection);
+            mServiceBound = false;
+            mTimerDialog.unregister();
+        }
     }
 
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
             mServiceBound = true;
-            LOGD(TAG, "Service bound!");
             mTimerDialog.setBinder(binder);
+            LOGD(TAG, "Service bound!");
+
+            showDialog();
         }
 
         @Override
@@ -416,10 +422,7 @@ public class PracticeSetupActivity extends BaseActivity implements
 
     @Override
     public void onServiceKilled(final Outline outline, boolean finished) {
-        if (mServiceBound) {
-            unbindService(mServiceConnection);
-            mServiceBound = false;
-        }
+        unbindTimerService();
 
         if (finished) {
             // save user's thoughts on this practice

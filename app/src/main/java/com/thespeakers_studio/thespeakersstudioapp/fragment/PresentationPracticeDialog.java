@@ -50,7 +50,7 @@ public class PresentationPracticeDialog extends DialogFragment implements
 
     private PresentationPracticeDialogInterface mInterface;
     private Outline mOutline;
-    private OutlineHelper mOutlineHelper;
+    private OutlineHelper mOutlineHelper = new OutlineHelper();
     private int mDuration = 0;
 
     // states and settings
@@ -82,7 +82,7 @@ public class PresentationPracticeDialog extends DialogFragment implements
     private String mTopicText = "";
 
     // service stuff
-    private MessageFriend mMessageFriend;
+    private MessageFriend mMessageFriend = new MessageFriend();
     //
 
     // TODO: make animation times and durations constants
@@ -95,10 +95,7 @@ public class PresentationPracticeDialog extends DialogFragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
-
-        mOutlineHelper = new OutlineHelper();
-        mMessageFriend = new MessageFriend();
+        //setRetainInstance(true);
     }
 
     public void setInterface(PresentationPracticeDialogInterface inter) {
@@ -157,6 +154,10 @@ public class PresentationPracticeDialog extends DialogFragment implements
         LOGD(TAG, "Binder set!");
     }
 
+    public void unregister() {
+        mMessageFriend.sendMessage(MessageFriend.MSG_UNREGISTER);
+    }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -170,8 +171,6 @@ public class PresentationPracticeDialog extends DialogFragment implements
         if (outlineBundle != null) {
             mOutline = new Outline(getContext(), outlineBundle);
             mIsPractice = true;
-
-            LOGD(TAG, "setup fired " + mOutline.getTitle());
         } else {
             mIsPractice = false;
             mDuration = duration;
@@ -187,7 +186,6 @@ public class PresentationPracticeDialog extends DialogFragment implements
 
     // we are ready to go, so send the signal to the service to begin
     private void startTimer() {
-        LOGD(TAG, "Starting timer!");
         mMessageFriend.sendMessage(MessageFriend.MSG_START);
     }
 
@@ -211,6 +209,11 @@ public class PresentationPracticeDialog extends DialogFragment implements
         if (mInterface != null) {
             mInterface.onServiceKilled(mOutline, isFinished);
         }
+        // reset everything
+        mMessageFriend.resetDestinationMessenger();
+        mIsTimerPaused = false;
+        mIsTimerStarted = false;
+        mIsTimerFinished = false;
     }
 
     // an internal interface to handle what happens after the fade-in animation, if necessary
@@ -371,7 +374,8 @@ public class PresentationPracticeDialog extends DialogFragment implements
         mIsTimerStarted = true;
 
         if (item.getParentId().equals(OutlineItem.NO_PARENT)) {
-            if (remainingTime + item.getDuration() > INTERSTITIAL_DURATION) {
+            // FIXME: only show the topic name if there's enough time left to so
+            //if (remainingTime + item.getDuration() > INTERSTITIAL_DURATION) {
                 // this is a top level item, so we will show it for a second and then move on
                 // to the first sub-item
                 showText(mOutputMainView, "");
@@ -382,7 +386,7 @@ public class PresentationPracticeDialog extends DialogFragment implements
 
                 hideButton(mButtonLeft);
                 hideButton(mButtonRight);
-            }
+            //}
 
             // save the text so that the next item can use it
             mTopicText = item.getText();

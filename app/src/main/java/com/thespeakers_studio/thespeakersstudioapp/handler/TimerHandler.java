@@ -59,17 +59,21 @@ public class TimerHandler extends Handler {
 
     public TimerHandler(TimerService service) {
         super();
-        LOGD(TAG, "TimerHandler");
-
-        mOutlineItemIndex = -1;
-        mOutlineDuration = 0;
-        mIsPractice = false;
-        mInterface = new ArrayList<>();
+        reset();
 
         mTimerService = service;
         if (service != null) {
             addInterface(service);
         }
+    }
+
+    public void reset() {
+        LOGD(TAG, "Resetting");
+
+        mOutlineItemIndex = -1;
+        mOutlineDuration = 0;
+        mIsPractice = false;
+        mInterface = new ArrayList<>();
     }
 
     public void addInterface(TimerInterface face) {
@@ -98,10 +102,13 @@ public class TimerHandler extends Handler {
 
     @Override
     public void handleMessage(Message msg) {
-        LOGD(TAG, "Message received from client " + msg.what);
+        //LOGD(TAG, "Message received from client " + msg.what);
         switch (msg.what) {
             case MessageFriend.MSG_REGISTER:
                 mTimerService.addClient(msg.replyTo);
+                break;
+            case MessageFriend.MSG_UNREGISTER:
+                mTimerService.removeClient(msg.replyTo);
                 break;
             case MessageFriend.MSG_START:
                 startTimer();
@@ -228,8 +235,8 @@ public class TimerHandler extends Handler {
                     return;
                 }
 
-                for (TimerInterface face : mInterface) {
-                    face.outlineItem(item, remainingTime);
+                for (TimerInterface callback : mInterface) {
+                    callback.outlineItem(item, remainingTime);
                 }
 
                 if (item.getParentId().equals(OutlineItem.NO_PARENT)) {
@@ -264,6 +271,10 @@ public class TimerHandler extends Handler {
             }
 
         }
+    }
+
+    private void broadcastItem() {
+
     }
 
     private void finish() {
