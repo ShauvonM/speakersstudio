@@ -30,10 +30,18 @@ public class TimerWatchHandler extends Handler {
         mInterface = callback;
     }
 
+    public void disableInterface() {
+        mInterface = null;
+        alive = false;
+    }
+
     @Override
     public void handleMessage(Message msg) {
         if (msg.what != 20) {
             //LOGD(TAG, "Received message from service: " + msg.what);
+        }
+        if (mInterface == null) {
+            return;
         }
         switch(msg.what) {
             case MessageFriend.MSG_READY:
@@ -49,7 +57,7 @@ public class TimerWatchHandler extends Handler {
                 // every time the time updates, the service broadcasts the update to us
                 msg.getData().setClassLoader(TimerStatus.class.getClassLoader());
                 TimerStatus status = msg.getData().getParcelable("data");
-                if (status != null) {
+                if (status != null && mInterface != null) {
                     mInterface.updateTime(status.currentRemaining, status.totalRemaining,
                             status.elapsedTime);
                 }

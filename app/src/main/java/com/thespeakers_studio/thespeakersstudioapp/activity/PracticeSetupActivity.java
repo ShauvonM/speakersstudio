@@ -15,6 +15,9 @@ import android.os.IBinder;
 import android.preference.PreferenceFragment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputEditText;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.AppCompatRatingBar;
 import android.support.v7.widget.LinearLayoutManager;
@@ -87,14 +90,16 @@ public class PracticeSetupActivity extends BaseActivity implements
     private ArrayList<Practice> mPractices;
 
     private boolean mIsDialogOpen;
+    private boolean mResultsDialogOpen;
 
     private static final String BUNDLE_DURATION = "duration";
     private static final String BUNDLE_OUTLINE = "outline";
     private static final String BUNDLE_SCROLL_POS = "scroll_pos";
     public static final String BUNDLE_DIALOG_OPEN = "dialog_open";
+    private static final String BUNDLE_PRACTICE_RESULTS_DIALOG_OPEN = "results_open";
 
     // service stuff
-    private boolean mServiceBound = false;
+    private boolean mShouldUnbind;
     //
 
     @Override
@@ -145,12 +150,16 @@ public class PracticeSetupActivity extends BaseActivity implements
         // see if there's anything to bind to yet
         // if there is, the dialog will automagically show, otherwise nothing will happen
         bindTimerService();
+
+        if (savedInstanceState != null &&
+                savedInstanceState.getBoolean(BUNDLE_PRACTICE_RESULTS_DIALOG_OPEN, false)) {
+            showResultsDialog();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        LOGD(TAG, "On resume");
     }
 
     private void setPresentationId(String id, Outline outline) {
@@ -340,7 +349,9 @@ public class PracticeSetupActivity extends BaseActivity implements
         if (isChangingConfigurations()) {
             mRecyclerView.scrollBy(0, -mScrollPos);
         }
-        unbindTimerService();
+        if (mTimerDialog != null) {
+            mTimerDialog.dismiss();
+        }
 
         super.onPause();
     }
@@ -348,11 +359,16 @@ public class PracticeSetupActivity extends BaseActivity implements
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+
+        if (mResultsDialogOpen) {
+            outState.putBoolean(BUNDLE_PRACTICE_RESULTS_DIALOG_OPEN, mResultsDialogOpen);
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        LOGD(TAG, "onStop");
         unbindTimerService();
 
         if (!isChangingConfigurations()) {
@@ -362,7 +378,6 @@ public class PracticeSetupActivity extends BaseActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbindTimerService();
     }
 
     private void startPractice() {
@@ -388,94 +403,94 @@ public class PracticeSetupActivity extends BaseActivity implements
     private void bindTimerService() {
         Intent bindIntent = new Intent(this, TimerService.class);
         bindService(bindIntent, mServiceConnection, 0);
+        mShouldUnbind = true;
     }
 
     private void unbindTimerService() {
-        if (mServiceBound) {
+        if (mShouldUnbind) {
             unbindService(mServiceConnection);
-            mServiceBound = false;
             mTimerDialog.unregister();
+            mShouldUnbind = false;
         }
     }
 
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
-            mServiceBound = true;
             mTimerDialog.setBinder(binder);
-            LOGD(TAG, "Service bound!");
 
             showDialog();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-
         }
     };
 
     @Override
-    public void onDialogDismissed() {
-        mIsDialogOpen = false;
-        // TODO: show an indicator that we are waiting for the service to stop?
-    }
-
-    @Override
     public void onServiceKilled(final Outline outline, boolean finished) {
+        LOGD(TAG, "onServiceKilled");
+        mIsDialogOpen = false;
         unbindTimerService();
 
         if (finished) {
-            // save user's thoughts on this practice
-            AlertDialog.Builder thoughtsDialogBuilder = new AlertDialog.Builder(this);
-
-            View practiceResponseDialogContents =
-                    getLayoutInflater().inflate(R.layout.dialog_practice_response, null);
-
-            thoughtsDialogBuilder.setView(practiceResponseDialogContents);
-
-            final TextInputEditText messageView = (TextInputEditText) practiceResponseDialogContents
-                    .findViewById(R.id.practice_response);
-            final AppCompatRatingBar ratingBar = (AppCompatRatingBar) practiceResponseDialogContents
-                    .findViewById(R.id.practice_rating);
-
-            thoughtsDialogBuilder
-                .setCancelable(true)
-                .setIcon(R.drawable.ic_record_voice_over_white_24dp)
-                .setTitle(R.string.practice_response_title)
-                .setPositiveButton(R.string.save,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                String message = messageView.getText().toString();
-                                float rating = ratingBar.getRating();
-                                String practiceId = Utils.getUUID();
-
-                                mOutlineDbHelper.savePractice(
-                                        mPresentation.getId(), rating, message, practiceId);
-
-                                ArrayList<OutlineItem> savedItems =
-                                        savePracticeTrackedInfo(outline, practiceId);
-
-                                mPractices.add(0, new Practice(practiceId, mPresentation.getId(),
-                                        rating, message, Utils.getDateTimeStamp(), savedItems));
-                                mRecyclerView.getAdapter().notifyDataSetChanged();
-
-                                showMessageIfEmpty();
-                            }
-                        }
-                )
-                .setNegativeButton(R.string.practice_response_cancel,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                savePracticeTrackedInfo(outline, "");
-                            }
-                        }
-                );
-
-            AlertDialog dialog = thoughtsDialogBuilder.create();
-            dialog.show();
+            mOutline = outline;
+            showResultsDialog();
         }
+    }
+
+    private void showResultsDialog() {
+        // save user's thoughts on this practice
+        AlertDialog.Builder thoughtsDialogBuilder = new AlertDialog.Builder(this);
+
+        View practiceResponseDialogContents =
+                getLayoutInflater().inflate(R.layout.dialog_practice_response, null);
+
+        thoughtsDialogBuilder.setView(practiceResponseDialogContents);
+
+        final TextInputEditText messageView = (TextInputEditText) practiceResponseDialogContents
+                .findViewById(R.id.practice_response);
+        final AppCompatRatingBar ratingBar = (AppCompatRatingBar) practiceResponseDialogContents
+                .findViewById(R.id.practice_rating);
+
+        thoughtsDialogBuilder
+            .setCancelable(true)
+            .setIcon(R.drawable.ic_record_voice_over_white_24dp)
+            .setTitle(R.string.practice_response_title)
+            .setPositiveButton(R.string.save,
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String message = messageView.getText().toString();
+                            float rating = ratingBar.getRating();
+                            String practiceId = Utils.getUUID();
+
+                            mOutlineDbHelper.savePractice(
+                                    mPresentation.getId(), rating, message, practiceId);
+
+                            ArrayList<OutlineItem> savedItems =
+                                    savePracticeTrackedInfo(mOutline, practiceId);
+
+                            mPractices.add(0, new Practice(practiceId, mPresentation.getId(),
+                                    rating, message, Utils.getDateTimeStamp(), savedItems));
+                            mRecyclerView.getAdapter().notifyDataSetChanged();
+
+                            showMessageIfEmpty();
+                        }
+                    }
+            )
+            .setNegativeButton(R.string.practice_response_cancel,
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            savePracticeTrackedInfo(mOutline, "");
+                        }
+                    }
+            );
+
+        AlertDialog dialog = thoughtsDialogBuilder.create();
+        dialog.show();
+        mResultsDialogOpen = true;
     }
 
     private ArrayList<OutlineItem> savePracticeTrackedInfo(Outline outline, String practiceId) {

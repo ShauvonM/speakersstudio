@@ -42,7 +42,6 @@ public class PresentationPracticeDialog extends DialogFragment implements
 
 
     public interface PresentationPracticeDialogInterface {
-        public void onDialogDismissed();
         public void onServiceKilled(Outline outline, boolean isFinished);
     }
 
@@ -54,6 +53,8 @@ public class PresentationPracticeDialog extends DialogFragment implements
     private int mDuration = 0;
 
     // states and settings
+    private boolean mTimerInProgress;
+
     private boolean mIsPractice;
     private boolean mDisplayTimer;
     private boolean mShowWarning;
@@ -82,6 +83,7 @@ public class PresentationPracticeDialog extends DialogFragment implements
     private String mTopicText = "";
 
     // service stuff
+    private TimerWatchHandler mTimerWatchHandler;
     private MessageFriend mMessageFriend = new MessageFriend();
     //
 
@@ -147,22 +149,28 @@ public class PresentationPracticeDialog extends DialogFragment implements
 
     public void setBinder(IBinder binder) {
         Messenger serviceMessenger = new Messenger(binder);
-        Messenger thisMessenger = new Messenger(new TimerWatchHandler(this));
+        mTimerWatchHandler = new TimerWatchHandler(this);
+        Messenger thisMessenger = new Messenger(mTimerWatchHandler);
 
         mMessageFriend.setMessengers(serviceMessenger, thisMessenger);
 
         LOGD(TAG, "Binder set!");
     }
 
-    public void unregister() {
-        mMessageFriend.sendMessage(MessageFriend.MSG_UNREGISTER);
-    }
-
+    // called when the dialog is shown
     @Override
     public void onStart() {
         super.onStart();
         // we will wait for setup to be called by the service
         mMessageFriend.sendMessage(MessageFriend.MSG_REGISTER);
+    }
+
+    // removes this item from the service, so it won't be getting messages anymore
+    // also kills the interface on our handler so the dialog won't keep trying to update
+    public void unregister() {
+        LOGD(TAG, "Unregistering");
+        mMessageFriend.sendMessage(MessageFriend.MSG_UNREGISTER);
+        mTimerWatchHandler.disableInterface();
     }
 
     // setup is part of the TimerWatchInterface, and is called when the service is ready to go
@@ -175,11 +183,12 @@ public class PresentationPracticeDialog extends DialogFragment implements
             mIsPractice = false;
             mDuration = duration;
         }
-
         mDisplayTimer = SettingsUtils.getTimerShow(getContext());
         mShowWarning = SettingsUtils.getTimerWarning(getContext());
 
-        if (!inProgress) {
+        if (inProgress) {
+            mIsTimerStarted = true;
+        } else {
             startTimer();
         }
     }
@@ -189,20 +198,34 @@ public class PresentationPracticeDialog extends DialogFragment implements
         mMessageFriend.sendMessage(MessageFriend.MSG_START);
     }
 
-    // overrides the onDismiss method on the DialogFragment class
+    // called when the dialog is sent away
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
+    }
 
-        // when the dialog is dismissed, we should kill the service,
-        // which should respond with the outline and a boolean
+    @Override
+    public void onCancel(DialogInterface dialog) {
+        super.onCancel(dialog);
+        LOGD(TAG, "onCancel");
+        killService();
+    }
+
+    // kills the service and then dismisses the dialog
+    public void dismissKill() {
+        killService();
+        dismiss();
+    }
+
+    // send a message to the service that it should go away
+    // They should all be destroyed.
+    public void killService() {
+        LOGD(TAG, "killing Service");
         mMessageFriend.sendMessage(MessageFriend.MSG_KILL);
-        if (mInterface != null) {
-            mInterface.onDialogDismissed();
-        }
     }
 
     // serviceKilled is part of the TimerWatchHandler.TimerWatchInterface
+    // called when the handler receives a message that the service is dead
     @Override
     public void serviceKilled(Bundle outlineBundle, boolean isFinished) {
         mOutline = new Outline(getContext(), outlineBundle);
@@ -312,6 +335,10 @@ public class PresentationPracticeDialog extends DialogFragment implements
 
     @Override
     public void finish() {
+        if (!isAdded()) {
+            return;
+        }
+
         mIsTimerFinished = true;
 
         showText(mOutputSubView, "");
@@ -326,6 +353,10 @@ public class PresentationPracticeDialog extends DialogFragment implements
 
     @Override
     public void updateTime(int currentRemaining, int totalRemaining, int elapsed) {
+        if (!isAdded()) {
+            return;
+        }
+
         if (mIsTimerStarted && mDisplayTimer && mIsPractice) {
             // show the time for the whole presentation in smaller output
             setTimer(mTimerTotalView, totalRemaining);
@@ -370,6 +401,10 @@ public class PresentationPracticeDialog extends DialogFragment implements
 
     @Override
     public void outlineItem(final OutlineItem item, int remainingTime) {
+        if (!isAdded()) {
+            return;
+        }
+
         // when we get outline items, we know the timer has started;
         mIsTimerStarted = true;
 
@@ -539,7 +574,7 @@ public class PresentationPracticeDialog extends DialogFragment implements
                 break;
             case R.id.button_next:
                 if (mIsTimerFinished) {
-                    dismiss();
+                    dismissKill();
                 } else if (mIsTimerStarted && !mIsTimerPaused) {
                     mMessageFriend.sendMessage(MessageFriend.MSG_NEXT);
                 }

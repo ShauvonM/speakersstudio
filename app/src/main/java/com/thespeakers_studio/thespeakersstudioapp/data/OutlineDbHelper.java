@@ -46,7 +46,7 @@ public class OutlineDbHelper {
 
     public OutlineDbHelper(Context context) {
         mContext = context;
-        mDbHelper = new SpeakersStudioDbHelper(context);
+        mDbHelper = SpeakersStudioDbHelper.getInstance(context); //new SpeakersStudioDbHelper(context);
     }
 
     public ArrayList<Practice> getPractices(String presentationId) {

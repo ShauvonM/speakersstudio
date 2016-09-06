@@ -58,7 +58,7 @@ public class PresentationDbHelper {
 
     public PresentationDbHelper(Context context) {
         mContext = context;
-        mDbHelper = new SpeakersStudioDbHelper(context);
+        mDbHelper = SpeakersStudioDbHelper.getInstance(context); //new SpeakersStudioDbHelper(context);
     }
 
     public String[] getIdSelectionClause (String presentationId) {
