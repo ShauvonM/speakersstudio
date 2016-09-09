@@ -362,19 +362,17 @@ public class PresentationPracticeDialog extends DialogFragment implements
             setTimer(mTimerTotalView, totalRemaining);
         }
         if (!mIsTimerFinished) {
-            if (mDisplayTimer) { // && mTopicText.isEmpty()) {
-                if (mIsTimerStarted) {
-                    // show the current remaining time in 0:00 format
-                    setTimer(mTimerView, currentRemaining);
-                } else {
-                    prepareDelay();
-                    // show the 5, 4, 3, 2, 1 countdown
-                    showText(mTimerView, Utils.secondsFromMillis(currentRemaining));
-                }
-            } else {
+            if (mIsTimerStarted && mDisplayTimer) {
+                // show the current remaining time in 0:00 format
+                setTimer(mTimerView, currentRemaining);
+            } else if (mIsTimerStarted) {
                 // if we don't want to show the timer, don't show the timer
                 // if mTopicText is not empty, we are showing the topic name for a second
                 mTimerView.setText("");
+            } else {
+                prepareDelay();
+                // show the 5, 4, 3, 2, 1 countdown
+                showText(mTimerView, Utils.secondsFromMillis(currentRemaining));
             }
         } else {
             // we are totally done, so we can begin counting up!
@@ -545,15 +543,21 @@ public class PresentationPracticeDialog extends DialogFragment implements
     @Override
     public void pause() {
         mIsTimerPaused = true;
+
         showText(mOutputMainView, R.string.paused);
+
+        hideView(mBulletListHeader);
+        hideView(mBulletList);
+
         blink(mTimerView);
         hideView(mButtonRight);
         //hideView(mButtonLeft);
     }
     @Override
-    public void resume() {
+    public void resume(OutlineItem item) {
         mIsTimerPaused = false;
         mTimerView.clearAnimation();
+        outlineItem(item, 0);
     }
 
     private void setTimer(TextView timer, int time) {

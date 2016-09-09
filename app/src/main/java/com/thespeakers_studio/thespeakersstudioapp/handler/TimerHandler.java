@@ -51,7 +51,7 @@ public class TimerHandler extends Handler {
         public void outlineItem(OutlineItem item, int remainingTime);
         public void updateTime(int currentRemaining, int totalRemaining, int elapsed);
         public void pause();
-        public void resume();
+        public void resume(OutlineItem item);
         public void finish();
     }
 
@@ -224,6 +224,7 @@ public class TimerHandler extends Handler {
                 final OutlineItem item = getCurrentItem();
 
                 int thisDuration = item.getDuration();
+
                 // collect any time left over from the last item
                 // (which will be > 0 if the user skipped to the next item)
                 int remainingTime = mCurrentExpiration - mElapsed;
@@ -299,15 +300,16 @@ public class TimerHandler extends Handler {
             mPaused = false;
             mStartTime = 0;
 
+            // update the durations
             mOutlineDuration = mOutlineDuration - mElapsed;
             if (mStarted) {
                 mCurrentExpiration = mCurrentExpiration - mElapsed;
             }
 
-            resumeTimer();
+            //resumeTimer();
 
             for (TimerInterface face : mInterface) {
-                face.resume();
+                face.resume(getCurrentItem());
             }
             postDelayed(updateTimerRunnable, 0);
         } else {
@@ -322,14 +324,16 @@ public class TimerHandler extends Handler {
         return mPaused;
     }
 
+    /*
     private void resumeTimer() {
-        OutlineItem item = mOutline.getItem(mOutlineItemIndex);
+        OutlineItem item = getCurrentItem(); //mOutline.getItem(mOutlineItemIndex);
         // we take a step back so that we can redo the last step
         // and trigger all the callbacks and whatnot
         mCurrentExpiration -= item.getDuration();
         mOutlineItemIndex--;
         nextItem();
     }
+    */
 
     private Runnable updateTimerRunnable = new Runnable() {
         @Override

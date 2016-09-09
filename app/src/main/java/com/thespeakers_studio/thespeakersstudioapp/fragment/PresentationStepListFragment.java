@@ -91,16 +91,15 @@ public class PresentationStepListFragment extends Fragment implements View.OnCli
         float completion = mPresentation.getCompletionPercentage();
         View button = findViewById(R.id.button_outline);
         TransitionDrawable transition = (TransitionDrawable) button.getBackground();
-        if (button != null) {
-            if (completion == 1) {
-                button.setEnabled(true);
-                //button.setBackgroundColor(ContextCompat.getColor(this, R.color.outlineBG));
-                transition.startTransition(SettingsUtils.OUTLINE_BUTTON_TRANSITION_DURATION);
-            } else {
-                button.setEnabled(false);
-                //button.setBackgroundColor(ContextCompat.getColor(this, R.color.common_google_signin_btn_text_dark_disabled));
-                //transition.reverseTransition(SettingsUtils.OUTLINE_BUTTON_TRANSITION_DURATION);
-            }
+
+        if (completion == 1) {
+            button.setEnabled(true);
+            //button.setBackgroundColor(ContextCompat.getColor(this, R.color.outlineBG));
+            transition.startTransition(SettingsUtils.OUTLINE_BUTTON_TRANSITION_DURATION);
+        } else {
+            button.setEnabled(false);
+            //button.setBackgroundColor(ContextCompat.getColor(this, R.color.common_google_signin_btn_text_dark_disabled));
+            //transition.reverseTransition(SettingsUtils.OUTLINE_BUTTON_TRANSITION_DURATION);
         }
     }
 

@@ -81,7 +81,9 @@ public class TimerWatchHandler extends Handler {
 
             case MessageFriend.MSG_RESUME:
                 // and etcetera
-                mInterface.resume();
+                msg.getData().setClassLoader(OutlineItem.class.getClassLoader());
+                OutlineItem resumeItem = msg.getData().getParcelable("data");
+                mInterface.resume(resumeItem);
                 break;
 
             case MessageFriend.MSG_FINISHED:

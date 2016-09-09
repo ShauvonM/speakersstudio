@@ -64,7 +64,7 @@ public class PresentationData {
         mPrompts.add(new Prompt(25, 5, 0, NONE, "Please complete %s\nto continue."));
 
         // Prompt(int id, int step, int order, String type, String text, int charLimit)
-        mPrompts.add(new Prompt(1, 1, 1, TEXT,        "Presentation Topic", 50));
+        mPrompts.add(new Prompt(1, 1, 1, TEXT,        "What are you talking about?", 50));
         mPrompts.add(new Prompt(2, 1, 2, TEXT,        "What is the Event?", 50));
         mPrompts.add(new Prompt(3, 1, 3, TEXT,        "Describe the tone of the event (celebratory, solemn, informal, formal, etc)", 50));
         mPrompts.add(new Prompt(4, 1, 4, DATETIME,    "When is the\nevent?"));

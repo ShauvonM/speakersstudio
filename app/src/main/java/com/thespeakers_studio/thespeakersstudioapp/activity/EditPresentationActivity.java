@@ -68,6 +68,8 @@ public class EditPresentationActivity extends BaseActivity implements
 
     private ArrayList<LocationSelectedListener> mLocationListeners = new ArrayList<>();
 
+    private boolean mDisableInteraction;
+
     public interface LocationSelectedListener {
         public void onLocationSelected(Place p);
     }
@@ -179,6 +181,10 @@ public class EditPresentationActivity extends BaseActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (mDisableInteraction) {
+            return false;
+        }
+
         int id = item.getItemId();
         switch(id) {
             case R.id.menu_action_color:
@@ -247,6 +253,10 @@ public class EditPresentationActivity extends BaseActivity implements
 
     @Override
     public void onBackPressed() {
+        if (mDisableInteraction) {
+            return;
+        }
+
         FragmentManager fm = getSupportFragmentManager();
         if (fm.getBackStackEntryCount() > 0) {
             fm.popBackStack();
@@ -321,6 +331,10 @@ public class EditPresentationActivity extends BaseActivity implements
 
     @Override
     public void onStepSelected(int step) {
+        if (mDisableInteraction) {
+            return;
+        }
+
         mCurrentStep = step;
         if (step == 0) {
             showStepList();
@@ -348,9 +362,11 @@ public class EditPresentationActivity extends BaseActivity implements
     @Override
     public void onNextStep(int step) {
         final int nextStep = step + 1;
+        mDisableInteraction = true;
         mStepListFragment.setOnProgressAnimationListener(new StepListView.OnProgressAnimationListener() {
             @Override
             public void onProgressAnimationFinished() {
+                mDisableInteraction = false;
                 onStepSelected(nextStep);
                 mStepListFragment.clearOnProgressAnimationListener();
             }

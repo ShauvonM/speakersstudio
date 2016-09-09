@@ -232,9 +232,9 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
     }
 
     @Override
-    public void resume() {
+    public void resume(OutlineItem item) {
         LOGD(TAG, "RESUME");
-        mMessageFriend.sendMessage(MessageFriend.MSG_RESUME);
+        mMessageFriend.sendMessage(MessageFriend.MSG_RESUME, item);
     }
 
     @Override
