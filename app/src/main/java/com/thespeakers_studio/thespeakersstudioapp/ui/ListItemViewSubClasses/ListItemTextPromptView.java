@@ -56,7 +56,7 @@ public class ListItemTextPromptView extends ListItemPromptView implements TextWa
             input.addTextChangedListener(this);
 
             TextInputLayout layout = (TextInputLayout) findViewById(R.id.prompt_input_layout);
-            layout.setHint(mPrompt.getText());
+            layout.setHint(mPrompt.getProcessedText());
 
             // impose the character limit
             if (mPrompt.getCharLimit() > 0) {

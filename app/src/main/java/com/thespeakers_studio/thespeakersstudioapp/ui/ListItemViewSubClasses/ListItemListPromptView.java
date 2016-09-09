@@ -23,6 +23,8 @@ import com.thespeakers_studio.thespeakersstudioapp.model.PromptAnswer;
 public class ListItemListPromptView extends ListItemPromptView implements View.OnFocusChangeListener {
 
     private LinearLayout mListWrapper;
+    // default to three list items
+    private final int DEFAULT_LIST_COUNT = 3;
 
     public ListItemListPromptView(Context context, Prompt prompt) {
         super(context, prompt);
@@ -50,10 +52,9 @@ public class ListItemListPromptView extends ListItemPromptView implements View.O
                 }
             }
         } else {
-            // default to three list items
-            inflateListItem();
-            inflateListItem();
-            inflateListItem();
+            for(int startingCount = 0; startingCount < DEFAULT_LIST_COUNT; startingCount++) {
+                inflateListItem();
+            }
         }
 
         findViewById(R.id.list_prompt_add).setOnClickListener(this);

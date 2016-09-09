@@ -15,16 +15,22 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
+
 /**
  * Created by smcgi_000 on 4/21/2016.
  */
 public class PresentationData {
+    private final String TAG = PresentationData.class.getSimpleName();
+
     private Context mContext;
     private ArrayList<Prompt> mPrompts;
     private String mPresentationId;
     private String mModifiedDate;
     private int mColor;
     private boolean mIsSelected;
+
+    private boolean mSelectionHasListErrorAlready;
 
     public static final String BUNDLE_PRESENTATION_ID = "presentation_id";
     public static final String BUNDLE_PROMPTS = "prompts";
@@ -252,58 +258,22 @@ public class PresentationData {
 
     public ArrayList<Prompt> getPromptsForStep (int step) {
         ArrayList<Prompt> selection = new ArrayList<>();
+        int listCount = 1;
+
+        mSelectionHasListErrorAlready = false;
 
         // add the header
         selection.add(getPromptById(PRESENTATION_HEADER));
 
-        int orderPadding = 0;
-        boolean skipRedundant = false;
-        for (Prompt p : mPrompts) {
-            if (p.getStep() == step && p.getId() != PRESENTATION_HEADER) {
-                if (p.getReferenceId() > 0 && getPromptById(p.getReferenceId()).getType() == LIST) {
-                    Prompt ref = getPromptById(p.getReferenceId());
-                    // add a prompt to the list for each answer in the referenced prompt
-                    for (PromptAnswer a : ref.getAnswer()) {
-                        int index = Integer.parseInt(a.getKey().replace("list_", ""));
-                        Prompt np = p.clone(a.getId());
-                        np.setText(np.getText().replace("%l", "%l" + index));
-                        np.setOrder(np.getOrder() + orderPadding);
-                        orderPadding++;
-
-                        // add the prompt if it includes a "%n" in it, but not for the last one,
-                        // because there isn't a next answer to include
-                        if (np.getText().indexOf("%n") > -1 && index < ref.getAnswer().size() - 1) {
-                            np.setText(np.getText().replace("%n", "%n" + (index + 1)));
-                            selection.add(np.getOrder(), processPrompt(np));
-                        } else if (np.getText().indexOf("%n") == -1) {
-                            // if there is no "%n" we can insert it no matter what
-                            selection.add(np.getOrder(), processPrompt(np));
-                        }
-                    }
-                    // decrement the order padding because the next item will be one larger anyway
-                    orderPadding--;
-
-                    // if no answers have been added to the referenced prompt,
-                    //  just show a "complete step x" message instead
-                    //  but we only need to do this once per step, so we don't have a bunch of
-                    //  "complete step x" messages in a row
-                    if (ref.getAnswer().size() == 0 && !skipRedundant) {
-                        Prompt np = getPromptById(PRESENTATION_LIST_ERROR).clone();
-                        int stepId = ref.getStep();
-                        String stepName = PresentationUtils.getStepNameFromId(mContext, stepId);
-                        String stepLabel = PresentationUtils.getStepLabelFromId(mContext, stepId);
-
-                        np.setProcessedText(np.getText().replace("%s",
-                                stepLabel + ", \"" + stepName + "\""));
-                        np.setOrder(p.getOrder());
-                        selection.add(np.getOrder(), np);
-                        skipRedundant = true;
-                    }
-                } else {
-                    selection.add(p.getOrder() + orderPadding, processPrompt(p));
+        for (int listIndex = 0; listIndex < listCount; listIndex++) {
+            for (Prompt prompt : mPrompts) {
+                if (prompt.getStep() == step && prompt.getId() != PRESENTATION_HEADER) {
+                    int thisRefCount = preparePrompt(prompt, selection, listIndex);
+                    listCount = Math.max(listCount, thisRefCount);
                 }
             }
         }
+
         // add the next button
         selection.add(getPromptById(PRESENTATION_NEXT));
         // set the step on the header, so it knows what's up
@@ -311,6 +281,72 @@ public class PresentationData {
         // set the order of the next item, so it knows where to be
         selection.get(selection.size() - 1).setOrder(selection.size());
         return selection;
+    }
+
+    private int preparePrompt(Prompt prompt, ArrayList<Prompt> selection, int listIndex) {
+        if (prompt.getReferenceId() > 0 && getPromptById(prompt.getReferenceId()).getType() == LIST) {
+
+            // TODO: store these refAnswers on the Prompts so we don't have to do all this every time?
+            Prompt ref = getPromptById(prompt.getReferenceId());
+            ArrayList<PromptAnswer> refAnswers = new ArrayList<>();
+            // weed out empty items, which could happen if the user removed an item from the list
+            for (PromptAnswer a : ref.getAnswer()) {
+                if (!a.getValue().isEmpty()) {
+                    refAnswers.add(a);
+                }
+            }
+
+            // if no answers have been added to the referenced prompt,
+            //  just show a "complete step x" message instead
+            //  but we only need to do this once per step, so we don't have a bunch of
+            //  "complete step x" messages in a row
+            if (ref.getAnswer().size() == 0) {
+
+                addListErrorIfNotAlreadyAdded(selection, ref.getStep());
+
+            } else {
+
+                // add a prompt to the list for each answer in the referenced prompt
+                PromptAnswer thisRefAnswer = refAnswers.get(listIndex);
+
+                Prompt newPrompt = prompt.clone(thisRefAnswer.getId());
+
+                newPrompt.setText(newPrompt.getText().replace("%l", "%l" + listIndex));
+                newPrompt.setOrder(selection.size());
+
+                // add the prompt if it includes a "%n" in it, but not for the last one,
+                // because there isn't a next answer to include
+                if (newPrompt.getText().contains("%n") && listIndex < refAnswers.size() - 1) {
+                    newPrompt.setText(newPrompt.getText().replace("%n", "%n" + (listIndex + 1)));
+                    selection.add(processPrompt(newPrompt));
+                } else if (!newPrompt.getText().contains("%n")) {
+                    // if there is no "%n" we can insert it no matter what
+                    selection.add(processPrompt(newPrompt));
+                }
+
+            }
+
+            return refAnswers.size();
+        } else if (listIndex == 0) {
+            selection.add(processPrompt(prompt));
+            return 0;
+        }
+        return 0;
+    }
+
+    private void addListErrorIfNotAlreadyAdded(ArrayList<Prompt> selection, int stepId) {
+        if (!mSelectionHasListErrorAlready) {
+            Prompt np = getPromptById(PRESENTATION_LIST_ERROR).clone();
+            String stepName = PresentationUtils.getStepNameFromId(mContext, stepId);
+            String stepLabel = PresentationUtils.getStepLabelFromId(mContext, stepId);
+
+            np.setProcessedText(np.getText().replace("%s",
+                    stepLabel + ", \"" + stepName + "\""));
+            np.setOrder(selection.size());
+            selection.add(np.getOrder(), np);
+
+            mSelectionHasListErrorAlready = true;
+        }
     }
 
     public void resetAnswers() {

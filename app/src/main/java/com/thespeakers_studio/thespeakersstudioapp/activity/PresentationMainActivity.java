@@ -3,8 +3,10 @@ package com.thespeakers_studio.thespeakersstudioapp.activity;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.ActivityOptions;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Vibrator;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
@@ -365,12 +367,13 @@ public class PresentationMainActivity extends BaseActivity
 
     private void setMenuViewIcon() {
         if (mMenu != null) {
-            if (mIsTwoColumn) {
-                mMenu.findItem(R.id.menu_action_view).setIcon(
-                        ContextCompat.getDrawable(this, R.drawable.ic_view_agenda_white_24dp));
-            } else {
-                mMenu.findItem(R.id.menu_action_view).setIcon(
-                        ContextCompat.getDrawable(this, R.drawable.ic_view_quilt_white_24dp));
+            MenuItem item = mMenu.findItem(R.id.menu_action_view);
+            if (item != null) {
+                if (mIsTwoColumn) {
+                    item.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_view_agenda_white_24dp));
+                } else {
+                    item.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_view_quilt_white_24dp));
+                }
             }
         }
     }

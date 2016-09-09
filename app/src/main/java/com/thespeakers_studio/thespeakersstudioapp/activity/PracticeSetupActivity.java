@@ -349,7 +349,7 @@ public class PracticeSetupActivity extends BaseActivity implements
         if (isChangingConfigurations()) {
             mRecyclerView.scrollBy(0, -mScrollPos);
         }
-        if (mTimerDialog != null) {
+        if (mIsDialogOpen) {
             mTimerDialog.dismiss();
         }
 
@@ -381,6 +381,8 @@ public class PracticeSetupActivity extends BaseActivity implements
     }
 
     private void startPractice() {
+        LOGD(TAG, "Wait? " + SettingsUtils.getTimerWait(getApplicationContext()));
+
         startTimerService();
         bindTimerService();
     }
@@ -397,6 +399,12 @@ public class PracticeSetupActivity extends BaseActivity implements
         } else {
             intent.putExtra(Utils.INTENT_DURATION, mDuration * 60 * 1000);
         }
+
+        intent.putExtra(SettingsUtils.PREF_TIMER_WAIT, SettingsUtils.getTimerWait(this));
+        intent.putExtra(SettingsUtils.PREF_TIMER_VIBRATE, SettingsUtils.getTimerVibrate(this));
+        intent.putExtra(SettingsUtils.PREF_TIMER_TRACK, SettingsUtils.getTimerTrack(this));
+        intent.putExtra(SettingsUtils.PREF_TIMER_WARNING, SettingsUtils.getTimerWarning(this));
+
         startService(intent);
     }
 

@@ -30,6 +30,7 @@ import com.thespeakers_studio.thespeakersstudioapp.model.Outline;
 import com.thespeakers_studio.thespeakersstudioapp.model.OutlineItem;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
 
@@ -90,9 +91,6 @@ public class PresentationPracticeDialog extends DialogFragment implements
     // TODO: make animation times and durations constants
     private final int INTERSTITIAL_DURATION = 1000;
     private final int ANIMATION_DURATION = 300;
-
-    private final int WARNING_TIME = 300000;
-    private final int WARNING_DURATION = 5000;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -170,7 +168,9 @@ public class PresentationPracticeDialog extends DialogFragment implements
     public void unregister() {
         LOGD(TAG, "Unregistering");
         mMessageFriend.sendMessage(MessageFriend.MSG_UNREGISTER);
-        mTimerWatchHandler.disableInterface();
+        if (mTimerWatchHandler != null) {
+            mTimerWatchHandler.disableInterface();
+        }
     }
 
     // setup is part of the TimerWatchInterface, and is called when the service is ready to go
@@ -381,22 +381,18 @@ public class PresentationPracticeDialog extends DialogFragment implements
             mTimerView.setTextColor(ContextCompat.getColor(getActivity(), R.color.success));
             setTimer(mTimerView, -elapsed);
         }
+    }
 
-        if (mIsTimerStarted && mShowWarning && !mIsTimerFinished) {
-            if (totalRemaining <= WARNING_TIME && totalRemaining >= WARNING_TIME - 100) {
-                // five minute warning
-                if (showText(mWarningView, R.string.five_minutes_left)) {
-                    /* TODO: vibration
-                    vibrate(new long[] {Utils.VIBRATE_PULSE,
-                            Utils.VIBRATE_PULSE_GAP, Utils.VIBRATE_PULSE});
-                            */
-                }
-            } else if (totalRemaining <= (WARNING_TIME - WARNING_DURATION)
-                    && totalRemaining >= (WARNING_TIME - WARNING_DURATION - 100)) {
-                // hide it after five seconds
+    @Override
+    public void timeWarning() {
+        showText(mWarningView, R.string.two_minutes_left);
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
                 showText(mWarningView, "");
             }
-        }
+        }, SettingsUtils.TIMER_WARNING_DURATION);
     }
 
     @Override

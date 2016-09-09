@@ -21,7 +21,7 @@ public class TimerHandler extends Handler {
     private static final String TAG = TimerHandler.class.getSimpleName();
 
     // settings
-    private boolean mVibrate;
+    private boolean mWait;
     private boolean mTrack;
     //
 
@@ -74,6 +74,11 @@ public class TimerHandler extends Handler {
         mOutlineDuration = 0;
         mIsPractice = false;
         mInterface = new ArrayList<>();
+    }
+
+    public void setPrefs(boolean wait, boolean track) {
+        mWait = wait;
+        mTrack = track;
     }
 
     public void addInterface(TimerInterface face) {
@@ -129,14 +134,12 @@ public class TimerHandler extends Handler {
         }
     }
 
-    public void startTimer(boolean delay) {
+    public void startTimer() {
         if (mOutline == null && mOutlineDuration == 0) {
             return; // uh oh
         }
 
-        mTrack = SettingsUtils.getTimerTrack(mTimerService);
-
-        if (delay) {
+        if (mWait) {
             mCurrentExpiration = SettingsUtils.TIMER_DELAY_TIME;
             mStarted = false;
         } else {
@@ -152,9 +155,6 @@ public class TimerHandler extends Handler {
                 face.pause();
             }
         }
-    }
-    public void startTimer() {
-        startTimer(SettingsUtils.getTimerWait(mTimerService));
     }
 
     private void initStart() {

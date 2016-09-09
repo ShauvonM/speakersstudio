@@ -38,6 +38,7 @@ public class MessageFriend {
     public static final int MSG_TIME = 20;
     public static final int MSG_OUTLINE_ITEM = 21;
     public static final int MSG_FINISHED = 22;
+    public static final int MSG_WARNING = 23;
 
     public static final int MSG_KILL = 25;
     public static final int MSG_UNREGISTER = 26;

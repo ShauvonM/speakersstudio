@@ -1,7 +1,9 @@
 package com.thespeakers_studio.thespeakersstudioapp.ui;
 
 import android.content.Context;
+import android.os.Handler;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.LinearLayout;
 
 import java.util.ArrayList;
@@ -169,26 +171,44 @@ public class PromptListView extends LinearLayout implements ListItemView.ListIte
     @Override
     public void onSaveItem(Prompt prompt) {
         int thisOrder = prompt.getOrder();
-        ListItemView view = (ListItemView) getChildAt(thisOrder - 1);
 
-        if (thisOrder == 1) {
-            // the first item should just show progress
-            view.animateLineTop();
-        } else if (thisOrder > 1) {
-            if (((ListItemView) getChildAt(thisOrder - 2)).isFinishShown()) {
-                view.animateLineTop();
-                if (thisOrder == mPromptData.size() - 2) {
-                    // if it's the last one, we can animate it AND the next button!
-                    // thisOrder is not 0 based, so thisOrder would point to the next view
-                    ((ListItemView) getChildAt(thisOrder)).animateLineTop(SettingsUtils.PROMPT_PROGRESS_ANIMATION_DURATION);
-                }
-            }
-        }
-
+        animateProgressLine(thisOrder, 0);
         //mHeader.animateFillFactor(getCompletionPercentage());
 
         if (mListener != null) {
             mListener.onSaveItem(prompt);
+        }
+    }
+
+    private void animateProgressLine (final int thisOrder, int delay) {
+        if (thisOrder >= mPromptData.size()) {
+            return;
+        }
+
+        Prompt thisPrompt = mPromptData.get(thisOrder);
+        ListItemView lastView = thisOrder > 1 ? (ListItemView) getChildAt(thisOrder - 2) : null;
+        boolean contiguous = thisOrder <= 1 || lastView.isFinishShown();
+        boolean thisIsAnswered = thisPrompt.getAnswerIgnoreEmpty().size() > 0
+                || !thisPrompt.getIsPrompt();
+
+        if (contiguous && thisIsAnswered) {
+            ListItemView view = (ListItemView) getChildAt(thisOrder - 1);
+            view.animateLineTop(delay);
+
+            /*else if (thisOrder > 1) {
+                if (((ListItemView) getChildAt(thisOrder - 2)).isFinishShown()) {
+                    view.animateLineTop(delay);
+                    if (thisOrder == mPromptData.size() - 2) {
+                        // if it's the last one, we can animate it AND the next button!
+                        // thisOrder is not 0 based, so thisOrder would point to the next view
+                        ((ListItemView) getChildAt(thisOrder)).animateLineTop(SettingsUtils.PROMPT_PROGRESS_ANIMATION_DURATION);
+                        return;
+                    }
+                }
+            }*/
+            // check to see if we can animate the next one too
+            delay += SettingsUtils.PROMPT_PROGRESS_ANIMATION_DURATION;
+            animateProgressLine(thisOrder + 1, delay);
         }
     }
 

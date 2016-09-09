@@ -21,6 +21,7 @@ public class TimerWatchHandler extends Handler {
     public interface TimerWatchInterface extends TimerHandler.TimerInterface {
         public void setup(Bundle outlineBundle, int duration, boolean inProgress);
         public void serviceKilled(Bundle outlineBundle, boolean isFinished);
+        public void timeWarning();
     }
 
     TimerWatchInterface mInterface;
@@ -93,6 +94,10 @@ public class TimerWatchHandler extends Handler {
                 mInterface.serviceKilled(msg.getData(), msg.arg1 == 1);
                 alive = false;
                 break;
+
+            case MessageFriend.MSG_WARNING:
+                mInterface.timeWarning();
+
             default:
                 super.handleMessage(msg);
         }

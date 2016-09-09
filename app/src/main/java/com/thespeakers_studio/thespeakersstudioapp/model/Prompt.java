@@ -99,6 +99,16 @@ public class Prompt implements Parcelable {
         return this.answer;
     }
 
+    public ArrayList<PromptAnswer> getAnswerIgnoreEmpty() {
+        ArrayList<PromptAnswer> actualAnswers = new ArrayList<>();
+        for (PromptAnswer answer : this.answer) {
+            if (!answer.getValue().isEmpty()) {
+                actualAnswers.add(answer);
+            }
+        }
+        return actualAnswers;
+    }
+
     public Prompt clone(String answerId) {
         Prompt p = new Prompt(this.id, this.step, this.order, this.type, this.text, this.required, this.charLimit, this.referenceId, this.referenceDefault);
         if (answerId.isEmpty()) {

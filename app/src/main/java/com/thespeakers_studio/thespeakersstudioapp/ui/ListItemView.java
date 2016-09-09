@@ -159,7 +159,7 @@ public abstract class ListItemView extends RelativeLayout implements View.OnClic
     }
 
     public boolean isFinishShown() {
-        return mFinishShown;
+        return mFinishShown || mAnimateFinish;
     }
 
     protected abstract void inflateView();

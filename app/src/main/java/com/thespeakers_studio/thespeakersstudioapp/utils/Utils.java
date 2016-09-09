@@ -6,6 +6,7 @@ import android.content.res.TypedArray;
 import android.graphics.Paint;
 import android.os.Build;
 import android.os.SystemClock;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.text.format.DateUtils;
@@ -45,9 +46,38 @@ public class Utils {
 
     public static final String BUNDLE_TIMER = "timer";
 
-    public static final int VIBRATE_PULSE = 500;
-    public static final int VIBRATE_PULSE_GAP = 200;
-    public static final int VIBRATE_BUMP = 200;
+    public static final int VIBRATE_PULSE = 200;
+    public static final int VIBRATE_LONG = 500;
+    public static final int VIBRATE_PULSE_GAP = 60;
+    public static final int VIBRATE_BUMP =40;
+
+    public static final long[] VIBRATE_PATTERN_DOUBLE =
+            new long[] {0, VIBRATE_PULSE, VIBRATE_PULSE_GAP, VIBRATE_PULSE};
+    public static final long[] VIBRATE_PATTERN_TRIPLE =
+            new long[] {0, VIBRATE_PULSE, VIBRATE_PULSE_GAP, VIBRATE_PULSE,
+                    VIBRATE_PULSE_GAP, VIBRATE_LONG};
+
+    public static void vibrate(Context context, long[] pattern) {
+        Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(pattern, -1);
+    }
+    public static void vibrate(Context context) {
+        Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(VIBRATE_BUMP);
+    }
+    public static void vibratePulse(Context context) {
+        Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(VIBRATE_PULSE);
+    }
+    public static void vibrateLongRepeat(Context context) {
+        Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(new long[] {0, VIBRATE_LONG, VIBRATE_LONG}, 0);
+    }
+
+    public static void vibrateCancel(Context context) {
+        Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.cancel();
+    }
 
     public static boolean versionGreaterThan(int version) {
         return Build.VERSION.SDK_INT >= version;
@@ -176,7 +206,7 @@ public class Utils {
             PromptAnswer answer = answers.get(cnt);
 
             if (!answer.getValue().isEmpty()) {
-                if (cnt > 0) {
+                if (cnt > 0 && text.length() > 0) {
                     text += ", ";
                     if (cnt == answers.size() - 1) {
                         text += r.getString(R.string.list_and) + " ";

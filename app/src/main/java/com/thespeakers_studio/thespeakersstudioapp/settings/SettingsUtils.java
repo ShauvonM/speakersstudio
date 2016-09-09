@@ -35,6 +35,9 @@ public class SettingsUtils {
 
     public static final int TIMER_DELAY_TIME = 5000;
 
+    public static final int TIMER_WARNING_TIME = 120000; // two minutes, five would be 300000
+    public static final int TIMER_WARNING_DURATION = 5000;
+
     public static void putBoolean(final Context context, final String key, boolean newValue) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.edit().putBoolean(key, newValue).apply();

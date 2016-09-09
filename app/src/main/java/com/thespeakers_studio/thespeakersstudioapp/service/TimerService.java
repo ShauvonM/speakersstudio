@@ -14,6 +14,7 @@ import com.thespeakers_studio.thespeakersstudioapp.handler.TimerHandler;
 import com.thespeakers_studio.thespeakersstudioapp.model.Outline;
 import com.thespeakers_studio.thespeakersstudioapp.model.OutlineItem;
 import com.thespeakers_studio.thespeakersstudioapp.model.TimerStatus;
+import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
@@ -27,8 +28,8 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
 
     private MessageFriend mMessageFriend;
 
-    private TimerHandler mTimerHandler = new TimerHandler(this);
-    private Messenger mMessenger = new Messenger(mTimerHandler);
+    private TimerHandler mTimerHandler;
+    private Messenger mMessenger;
 
     private boolean mIsPractice;
 
@@ -41,8 +42,17 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
     private OutlineItem mCurrentTopic;
     private OutlineItem mCurrentItem;
 
+    private boolean mVibrate;
+    private boolean mShowWarning;
+
+    private boolean mIsTopicVibrating;
+    private boolean mFinished;
+
     @Override
     public void onCreate() {
+        mTimerHandler = new TimerHandler(this);
+        mMessenger = new Messenger(mTimerHandler);
+
         mMessageFriend = new MessageFriend();
         mMessageFriend.setReplyToMessenger(mMessenger);
 
@@ -68,44 +78,47 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
         }
         mTimeRemaining = duration;
 
+        boolean wait = intent.getBooleanExtra(SettingsUtils.PREF_TIMER_WAIT, true);
+        boolean track = intent.getBooleanExtra(SettingsUtils.PREF_TIMER_TRACK, true);
+        mTimerHandler.setPrefs(wait, track);
+
+        mVibrate = intent.getBooleanExtra(SettingsUtils.PREF_TIMER_VIBRATE, true);
+        mShowWarning = intent.getBooleanExtra(SettingsUtils.PREF_TIMER_WARNING, true);
+
         return Service.START_NOT_STICKY; // TODO: get the best value here
     }
 
     private void showNotification(OutlineItem item) {
-        // only show the top level items in the notification, so we don't create a ton of these
-        // or when the timer is done
-        if (item == null || item.getParentId().equals(OutlineItem.NO_PARENT)) {
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-                    mReopenAppIntent, 0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                mReopenAppIntent, 0);
 
-            String title = getString(R.string.app_name);
-            String text;
-            if (item != null) {
-                String itemText = item.getText();
-                title += " " + getString(R.string.timer_service_started);
-                text = String.format(getString(R.string.timer_service_description),
-                            itemText,
-                            Utils.getTimeStringFromMillisInText(mTimeRemaining, getResources()));
-            } else {
-                title += " " + getString(R.string.timer_service_finished);
-                text = getString(R.string.timer_service_finished_description);
-            }
-
-            Notification.Builder notificationBuilder = new Notification.Builder(this);
-            notificationBuilder.setSmallIcon(R.drawable.ic_record_voice_over_white_24dp)
-                    .setContentIntent(pendingIntent)
-                    .setContentTitle(title)
-                    .setContentText(text);
-
-            Notification notification;
-            if (Utils.versionGreaterThan(15)) {
-                notification = notificationBuilder.build();
-            } else {
-                notification = notificationBuilder.getNotification();
-            }
-
-            startForeground(R.id.timer_service_notification, notification);
+        String title = getString(R.string.app_name);
+        String text;
+        if (item != null) {
+            String itemText = item.getText();
+            title += " " + getString(R.string.timer_service_started);
+            text = String.format(getString(R.string.timer_service_description),
+                        itemText,
+                        Utils.getTimeStringFromMillisInText(mTimeRemaining, getResources()));
+        } else {
+            title += " " + getString(R.string.timer_service_finished);
+            text = getString(R.string.timer_service_finished_description);
         }
+
+        Notification.Builder notificationBuilder = new Notification.Builder(this);
+        notificationBuilder.setSmallIcon(R.drawable.ic_record_voice_over_white_24dp)
+                .setContentIntent(pendingIntent)
+                .setContentTitle(title)
+                .setContentText(text);
+
+        Notification notification;
+        if (Utils.versionGreaterThan(15)) {
+            notification = notificationBuilder.build();
+        } else {
+            notification = notificationBuilder.getNotification();
+        }
+
+        startForeground(R.id.timer_service_notification, notification);
     }
 
     @Override
@@ -140,7 +153,7 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
         mMessageFriend.sendMessage(MessageFriend.MSG_READY, mTimerHandler.getOutline().toBundle(),
                 mTimerHandler.getDuration(), mTimerHandler.isStarted() ? 1 : 0);
 
-        if (mCurrentItem != null) {
+        if (mCurrentItem != null && !mFinished) {
             mMessageFriend.sendMessage(MessageFriend.MSG_OUTLINE_ITEM,
                     mCurrentItem, mCurrentRemaining - mElapsed);
         }
@@ -152,6 +165,10 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
     }
 
     public void kill() {
+        if (mVibrate) {
+            Utils.vibrateCancel(this);
+        }
+
         mMessageFriend.sendMessage(MessageFriend.MSG_KILL, mTimerHandler.getOutline().toBundle(),
                 mTimerHandler.isFinished() ? 1 : 0);
         stopForeground(true);
@@ -170,6 +187,18 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
         mTimeRemaining = totalRemaining;
         mCurrentRemaining = currentRemaining;
         mElapsed = elapsed;
+
+        // mCurrentItem will not be null once the timer has started, so we can use that to check
+        if (mShowWarning && mVibrate && mCurrentItem != null) {
+            if (totalRemaining <= SettingsUtils.TIMER_WARNING_TIME) {
+                // two minute warning will pulse three times
+                Utils.vibrate(this, Utils.VIBRATE_PATTERN_TRIPLE);
+                // we did the thing, which means we don't need to do it again
+                mShowWarning = false;
+
+                mMessageFriend.sendMessage(MessageFriend.MSG_WARNING);
+            }
+        }
     }
 
     @Override
@@ -178,8 +207,22 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
         mMessageFriend.sendMessage(MessageFriend.MSG_OUTLINE_ITEM, item, remainingTime);
         showNotification(item);
 
-        // cache the current item to broadcast when clients connect
-        mCurrentItem = item;
+        if (item.getParentId().equals(OutlineItem.NO_PARENT)) {
+            if (mVibrate) {
+                // for parent items, pulse two times
+                Utils.vibrate(this, Utils.VIBRATE_PATTERN_DOUBLE);
+                mIsTopicVibrating = true;
+            }
+            mCurrentTopic = item;
+        } else {
+            if (mVibrate && !mIsTopicVibrating) {
+                // for normal items, pulse once
+                Utils.vibratePulse(this);
+            }
+            mIsTopicVibrating = false;
+            // cache the current item to broadcast when clients connect
+            mCurrentItem = item;
+        }
     }
 
     @Override
@@ -197,8 +240,13 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
     @Override
     public void finish() {
         LOGD(TAG, "FINISHED!!!");
+        mFinished = true;
         mMessageFriend.sendMessage(MessageFriend.MSG_FINISHED);
 
         showNotification(null);
+
+        if (mVibrate) {
+            Utils.vibrateLongRepeat(this);
+        }
     }
 }
