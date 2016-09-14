@@ -151,6 +151,7 @@
 
     <string name="timer_service_started">Timer</string>
     <string name="timer_service_description">%1$s - %2$s remaining</string>
+    <string name="timer_service_description_time_only">%1$s remaining</string>
     <string name="timer_service_finished">Finished!</string>
     <string name="timer_service_finished_description">Touch here to return to the app.</string>
 

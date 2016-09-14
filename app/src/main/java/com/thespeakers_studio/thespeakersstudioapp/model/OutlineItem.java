@@ -23,6 +23,8 @@ public class OutlineItem implements Parcelable {
     private int mTimedDuration;
     private String mPracticeId;
 
+    private String mTopicText = "";
+
     public static final String INTRO = "intro";
     public static final String CONCLUSION = "conclusion";
     public static final String NO_PARENT = "no_parent";
@@ -130,6 +132,13 @@ public class OutlineItem implements Parcelable {
         return mPracticeId;
     }
 
+    public String getTopicText() {
+        return mTopicText;
+    }
+    public void setTopicText(String text) {
+        mTopicText = text;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -147,6 +156,7 @@ public class OutlineItem implements Parcelable {
         dest.writeString(mPresentationId);
         dest.writeInt(mTimedDuration);
         dest.writeString(mPracticeId);
+        dest.writeString(mTopicText);
     }
 
     public OutlineItem(Parcel parcel) {
@@ -160,6 +170,7 @@ public class OutlineItem implements Parcelable {
         mPresentationId = parcel.readString();
         mTimedDuration = parcel.readInt();
         mPracticeId = parcel.readString();
+        mTopicText = parcel.readString();
     }
 
     public static final Parcelable.Creator<OutlineItem> CREATOR = new Creator<OutlineItem>() {

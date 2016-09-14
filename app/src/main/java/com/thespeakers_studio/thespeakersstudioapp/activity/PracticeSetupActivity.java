@@ -106,6 +106,8 @@ public class PracticeSetupActivity extends BaseActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        LOGD(TAG, "onCreate");
+
         setContentView(R.layout.activity_practice_setup);
 
         AnalyticsHelper.sendScreenView(SCREEN_LABEL);
@@ -160,6 +162,9 @@ public class PracticeSetupActivity extends BaseActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+
+        LOGD(TAG, "onResume");
+        mSettingsHeight = -1;
     }
 
     private void setPresentationId(String id, Outline outline) {
@@ -346,9 +351,9 @@ public class PracticeSetupActivity extends BaseActivity implements
 
     @Override
     protected void onPause() {
-        if (isChangingConfigurations()) {
-            mRecyclerView.scrollBy(0, -mScrollPos);
-        }
+        LOGD(TAG, "onPause");
+
+        mRecyclerView.scrollBy(0, -mScrollPos);
         if (mIsDialogOpen) {
             mTimerDialog.dismiss();
         }

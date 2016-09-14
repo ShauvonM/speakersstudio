@@ -388,14 +388,14 @@ public abstract class BaseActivity extends AppCompatActivity
             if (mHeaderBar != null) {
                 ViewTreeObserver vto = mHeaderBar.getViewTreeObserver();
                 if (vto.isAlive()) {
-                    vto.addOnGlobalLayoutListener(mGlobalLayoutListener);
+                    vto.addOnGlobalLayoutListener(mHeaderBarLayoutListener);
                 }
             }
         }
         return mActionBarToolbar;
     }
 
-    private ViewTreeObserver.OnGlobalLayoutListener mGlobalLayoutListener
+    private ViewTreeObserver.OnGlobalLayoutListener mHeaderBarLayoutListener
             = new ViewTreeObserver.OnGlobalLayoutListener() {
         @Override
         public void onGlobalLayout() {
@@ -523,6 +523,11 @@ public abstract class BaseActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         invalidateOptionsMenu();
+
+        // reset these values (we might be waking up, so onCreate isn't called)
+        mHeaderDetailsHeightPixels = -1;
+        mHeaderHeightPixels = -1;
+
         int actionBarSize = Utils.calculateActionBarSize(this);
         ToolbarShadowFrameLayout layout = (ToolbarShadowFrameLayout) findViewById(R.id.main_content);
         if (layout != null) {

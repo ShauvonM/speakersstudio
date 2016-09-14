@@ -63,6 +63,8 @@ public class PresentationPracticeDialog extends DialogFragment implements
     private boolean mIsTimerStarted;
     private boolean mIsTimerFinished;
     private boolean mIsTimerPaused;
+
+    private boolean mShowingTopic;
     //
 
     private Dialog mDialog;
@@ -80,8 +82,6 @@ public class PresentationPracticeDialog extends DialogFragment implements
     private TextView mBulletListHeader;
     private LinearLayout mBulletList;
     //
-
-    private String mTopicText = "";
 
     // service stuff
     private TimerWatchHandler mTimerWatchHandler;
@@ -415,14 +415,13 @@ public class PresentationPracticeDialog extends DialogFragment implements
 
                 hideButton(mButtonLeft);
                 hideButton(mButtonRight);
-            //}
 
-            // save the text so that the next item can use it
-            mTopicText = item.getText();
+                mShowingTopic = true;
+            //}
         } else {
             //this is a sub-item
 
-            if (mTopicText.isEmpty()) {
+            if (!mShowingTopic) {
                 showOutlineItem(item);
             } else {
                 // delay showing the next item for a second
@@ -430,8 +429,7 @@ public class PresentationPracticeDialog extends DialogFragment implements
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        showText(mOutputSubView, mTopicText);
-                        mTopicText = "";
+                        mShowingTopic = false;
                         showOutlineItem(item);
                     }
                 }, INTERSTITIAL_DURATION);
@@ -448,7 +446,6 @@ public class PresentationPracticeDialog extends DialogFragment implements
 
             showText(mOutputMainView, "");
             mBulletListWrapper.setVisibility(View.VISIBLE);
-
             showText(mBulletListHeader, item.getText());
 
             showView(mBulletList, true, "", new showViewInterface() {
@@ -484,6 +481,8 @@ public class PresentationPracticeDialog extends DialogFragment implements
             hideView(mBulletList);
 
         }
+
+        showText(mOutputSubView, item.getTopicText());
 
         //showButton(mButtonLeft);
         showButton(mButtonRight);

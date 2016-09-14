@@ -29,6 +29,7 @@ public class TimerHandler extends Handler {
     private TimerService mTimerService;
     private Outline mOutline;
     private int mOutlineItemIndex = -1;
+    private String mCurrentTopicText = "";
     //
 
     // time values
@@ -211,7 +212,14 @@ public class TimerHandler extends Handler {
     }
 
     public OutlineItem getCurrentItem() {
-        return mOutline.getItem(mOutlineItemIndex);
+        OutlineItem item = mOutline.getItem(mOutlineItemIndex);
+        // include the topic text so we can refer to it in the UI if necessary
+        item.setTopicText(mCurrentTopicText);
+        return item;
+    }
+
+    public String getCurrentTopicText() {
+        return mCurrentTopicText;
     }
 
     private void nextItem() {
@@ -241,7 +249,7 @@ public class TimerHandler extends Handler {
                 }
 
                 if (item.getParentId().equals(OutlineItem.NO_PARENT)) {
-                    //vibrate(Utils.VIBRATE_PULSE);
+                    mCurrentTopicText = item.getText();
 
                     // move on to the next item to set up the duration
                     nextItem();

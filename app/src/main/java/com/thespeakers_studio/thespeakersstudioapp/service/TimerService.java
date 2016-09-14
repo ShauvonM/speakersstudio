@@ -39,14 +39,10 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
     private int mCurrentRemaining;
     private int mElapsed;
 
-    private OutlineItem mCurrentTopic;
-    private OutlineItem mCurrentItem;
-
     private boolean mVibrate;
     private boolean mShowWarning;
 
     private boolean mIsTopicVibrating;
-    private boolean mFinished;
 
     @Override
     public void onCreate() {
@@ -94,12 +90,16 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
 
         String title = getString(R.string.app_name);
         String text;
-        if (item != null) {
+        if (mTimerHandler.isPaused()) {
+            title += " " + getString(R.string.paused);
+            text = String.format(getString(R.string.timer_service_description_time_only),
+                    Utils.getTimeStringFromMillisInText(mTimeRemaining, getResources()));
+        } else if (item != null) {
             String itemText = item.getText();
             title += " " + getString(R.string.timer_service_started);
             text = String.format(getString(R.string.timer_service_description),
-                        itemText,
-                        Utils.getTimeStringFromMillisInText(mTimeRemaining, getResources()));
+                    itemText,
+                    Utils.getTimeStringFromMillisInText(mTimeRemaining, getResources()));
         } else {
             title += " " + getString(R.string.timer_service_finished);
             text = getString(R.string.timer_service_finished_description);
@@ -143,7 +143,6 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
     // handle things and send messages:
     //
     public void start() {
-        // TODO: show the notification here?
     }
 
     public void addClient(Messenger messenger) {
@@ -153,9 +152,12 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
         mMessageFriend.sendMessage(MessageFriend.MSG_READY, mTimerHandler.getOutline().toBundle(),
                 mTimerHandler.getDuration(), mTimerHandler.isStarted() ? 1 : 0);
 
-        if (mCurrentItem != null && !mFinished) {
+        if (mTimerHandler.isPaused()) {
+            updateTime();
+            pause();
+        } else if (mTimerHandler.isStarted() && !mTimerHandler.isFinished()) {
             mMessageFriend.sendMessage(MessageFriend.MSG_OUTLINE_ITEM,
-                    mCurrentItem, mCurrentRemaining - mElapsed);
+                    mTimerHandler.getCurrentItem(), mCurrentRemaining - mElapsed);
         }
     }
 
@@ -188,8 +190,7 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
         mCurrentRemaining = currentRemaining;
         mElapsed = elapsed;
 
-        // mCurrentItem will not be null once the timer has started, so we can use that to check
-        if (mShowWarning && mVibrate && mCurrentItem != null) {
+        if (mShowWarning && mVibrate && mTimerHandler.isStarted()) {
             if (totalRemaining <= SettingsUtils.TIMER_WARNING_TIME) {
                 // two minute warning will pulse three times
                 Utils.vibrate(this, Utils.VIBRATE_PATTERN_TRIPLE);
@@ -199,6 +200,9 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
                 mMessageFriend.sendMessage(MessageFriend.MSG_WARNING);
             }
         }
+    }
+    public void updateTime() {
+        updateTime(mCurrentRemaining, mTimeRemaining, mElapsed);
     }
 
     @Override
@@ -213,15 +217,12 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
                 Utils.vibrate(this, Utils.VIBRATE_PATTERN_DOUBLE);
                 mIsTopicVibrating = true;
             }
-            mCurrentTopic = item;
         } else {
             if (mVibrate && !mIsTopicVibrating) {
                 // for normal items, pulse once
                 Utils.vibratePulse(this);
             }
             mIsTopicVibrating = false;
-            // cache the current item to broadcast when clients connect
-            mCurrentItem = item;
         }
     }
 
@@ -229,6 +230,7 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
     public void pause() {
         LOGD(TAG, "PAUSE");
         mMessageFriend.sendMessage(MessageFriend.MSG_PAUSE);
+        showNotification(null);
     }
 
     @Override
@@ -240,7 +242,6 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
     @Override
     public void finish() {
         LOGD(TAG, "FINISHED!!!");
-        mFinished = true;
         mMessageFriend.sendMessage(MessageFriend.MSG_FINISHED);
 
         showNotification(null);
