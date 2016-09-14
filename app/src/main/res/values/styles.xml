@@ -32,6 +32,7 @@
         <item name="android:textColorPrimaryInverse">@color/textColorInverse</item>
         <item name="android:colorBackground">@color/windowBackground</item>
         <item name="colorButtonNormal">@color/colorAccent</item>
+        <item name="android:textColorHint">@color/textColorPrimary</item>
     </style>
 
     <style name="AppTheme.StepList">
@@ -41,6 +42,8 @@
         <item name="colorPrimary">@color/colorAccent</item>
         <item name="colorPrimaryDark">@color/colorAccentDark</item>
         <item name="colorAccent">@color/colorPrimary</item>
+        <item name="android:textCursorDrawable">@null</item>
+        <item name="colorControlActivated">?colorPrimary</item>
     </style>
 
     <style name="AppTheme.Outline">
@@ -438,6 +441,8 @@
     <style name="AppTheme.Inverted.presentation3">
         <item name="colorPrimary">@color/presentationColor3</item>
         <item name="colorPrimaryDark">@color/presentationColor3_dark</item>
+
+
     </style>
     <style name="AppTheme.Inverted.presentation4">
         <item name="colorPrimary">@color/presentationColor4</item>
@@ -478,14 +483,20 @@
     <style name="AppTheme.Inverted.presentation13">
         <item name="colorPrimary">@color/presentationColor13</item>
         <item name="colorPrimaryDark">@color/presentationColor13_dark</item>
+
+        <item name="colorControlActivated">@color/colorAccent</item>
     </style>
     <style name="AppTheme.Inverted.presentation14">
         <item name="colorPrimary">@color/presentationColor14</item>
         <item name="colorPrimaryDark">@color/presentationColor14_dark</item>
+
+        <item name="colorControlActivated">@color/colorAccent</item>
     </style>
     <style name="AppTheme.Inverted.presentation15">
         <item name="colorPrimary">@color/presentationColor15</item>
         <item name="colorPrimaryDark">@color/presentationColor15_dark</item>
+
+        <item name="colorControlActivated">@color/colorAccent</item>
     </style>
     <style name="AppTheme.Inverted.presentation16">
         <item name="colorPrimary">@color/presentationColor16</item>

@@ -81,8 +81,12 @@ public class OutlineActivity extends BaseActivity implements
     private void setPresentationId(String id) {
         if (id != null) {
             mPresentation = mDbHelper.loadPresentationById(id);
-            mOutline = Outline.fromPresentation(this, mPresentation);
-            render();
+            if (mPresentation.getCompletionPercentage() == 1) {
+                mOutline = Outline.fromPresentation(this, mPresentation);
+                render();
+            } else {
+                returnActivityResult();
+            }
         }
     }
 
@@ -254,6 +258,7 @@ public class OutlineActivity extends BaseActivity implements
         super.onActivityResult(requestCode, resultCode, data);
         if (data != null) {
             switch (requestCode) {
+                case Utils.REQUEST_CODE_EDIT_PRESENTATION:
                 case Utils.REQUEST_CODE_PRACTICE:
                     setPresentationId(data.getStringExtra(Utils.INTENT_PRESENTATION_ID));
                     break;

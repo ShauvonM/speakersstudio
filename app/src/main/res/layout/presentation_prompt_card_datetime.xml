@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
+        android:id="@+id/card_label"
+        android:text="What is the Topic?"
+        style="@style/PromptLabel"
+        />
+
     <TextView
         android:id="@+id/prompt_datepicker_button"
         android:layout_width="wrap_content"
@@ -15,4 +22,5 @@
     android:text="@string/datepicker_button_default"
     style="@style/PromptDateTimeFields"
     />
+
 </merge>

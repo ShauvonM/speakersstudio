@@ -23,12 +23,6 @@
                 android:visibility="gone"
                 >
 
-                <TextView
-                    android:id="@+id/card_label"
-                    android:text="What is the Topic?"
-                    style="@style/PromptLabel"
-                    />
-
             </LinearLayout>
 
         </RelativeLayout>

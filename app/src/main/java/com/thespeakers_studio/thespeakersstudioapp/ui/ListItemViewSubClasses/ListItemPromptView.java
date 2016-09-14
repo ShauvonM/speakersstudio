@@ -67,7 +67,7 @@ public class ListItemPromptView extends ListItemView {
 
         // this fills in the actual card details
 
-        // the main label is what shows first
+        // the main label is what shows when editing
         if (findViewById(R.id.card_label) != null) {
             ((TextView) findViewById(R.id.card_label)).setText(text.replace("\n", " "));
         }
