@@ -6,6 +6,8 @@ import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.CheckBox;
 
 import com.thebluealliance.spectrum.SpectrumDialog;
 import com.thespeakers_studio.thespeakersstudioapp.R;
@@ -27,15 +29,22 @@ public class PresentationUtils {
         dialog.show(context.getSupportFragmentManager(), "color_picker");
     }
 
-    public static void resetPresentation(Context context, PresentationData presentation,
-                                   DialogInterface.OnClickListener callback) {
+    public static void resetPresentation(Context context,
+                                         PresentationData presentation,
+                                             View view,
+                                         DialogInterface.OnClickListener callback) {
         if (presentation == null) {
             return;
         }
 
-        new AlertDialog.Builder(context)
-                .setMessage(context.getString(R.string.confirm_reset_message))
-                .setPositiveButton(context.getString(R.string.yes), callback)
+        AlertDialog.Builder dialog = new AlertDialog.Builder(context);
+        dialog.setMessage(context.getString(R.string.confirm_reset_message));
+
+        if (view != null) {
+            dialog.setView(view);
+        }
+
+        dialog.setPositiveButton(context.getString(R.string.yes), callback)
                 .setNegativeButton(context.getString(R.string.no), null)
                 .show();
     }

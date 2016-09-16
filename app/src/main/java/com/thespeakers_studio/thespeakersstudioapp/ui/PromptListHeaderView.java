@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.thespeakers_studio.thespeakersstudioapp.R;
 import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.PaintUtils;
+import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
 
@@ -75,23 +76,27 @@ public class PromptListHeaderView extends LinearLayout{
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-
-
         if (mFillFactor != mCurrentFillFactor) {
             // animate the fill to the given amount
             int duration = mDuration; //Utils.PROMPT_PROGRESS_ANIMATION_DURATION;
 
-            int elapsedTime = (int) (System.currentTimeMillis() - mStartTime);
+            if (mStartTime == 0) {
+                mStartTime = Utils.now();
+            }
+
+            int elapsedTime = (int) (Utils.now() - mStartTime);
             if (elapsedTime > duration) {
                 elapsedTime = duration;
             }
             float interval = (float) elapsedTime / (float) duration;
+            LOGD(TAG, "interval " + interval + " " + elapsedTime + " " + duration);
             drawFill(canvas, mCurrentFillFactor, mFillFactor, interval);
 
             if (elapsedTime < duration) {
                 this.postInvalidateDelayed(1000 / PaintUtils.FRAMES_PER_SECOND);
             } else {
                 mCurrentFillFactor = mFillFactor;
+                mStartTime = 0;
             }
         } else {
             drawFill(canvas, 0, mCurrentFillFactor, 0);
@@ -149,9 +154,9 @@ public class PromptListHeaderView extends LinearLayout{
         fillFactor = Math.max(0, fillFactor);
         if (fillFactor != mFillFactor) {
             float diff = Math.abs(fillFactor - mFillFactor);
-            mDuration = SettingsUtils.PROMPT_PROGRESS_ANIMATION_DURATION * (int)(diff / 0.25);
+            mDuration = (int) (SettingsUtils.PROMPT_PROGRESS_ANIMATION_DURATION * (diff * 10));
             mFillFactor = fillFactor;
-            mStartTime = System.currentTimeMillis();
+            mStartTime = 0;
             postInvalidate();
         }
     }

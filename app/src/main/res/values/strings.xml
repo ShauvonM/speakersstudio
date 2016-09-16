@@ -80,6 +80,7 @@
     <string name="delete_selected">Delete Selected</string>
 
     <string name="confirm_reset_message">Are you sure you want to clear everything saved for this presentation? There is no turning back.</string>
+    <string name="confirm_reset_step_only">Only clear this step, and leave the others alone.</string>
     <string name="confirm_reset_outline">Are you sure you want to clear all modifications to this outline? It will return to the default timing and layout.</string>
     <plurals name="confirm_delete_message">
         <item quantity="one">Are you sure you want to delete this presentation? You won\'t get it back.</item>

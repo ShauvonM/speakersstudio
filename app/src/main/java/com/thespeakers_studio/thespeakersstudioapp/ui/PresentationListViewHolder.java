@@ -146,7 +146,9 @@ public class PresentationListViewHolder extends RecyclerView.ViewHolder implemen
                 return true;
             case R.id.menu_action_reset:
                 PresentationUtils.resetPresentation(mCard.getContext(),
-                        mPresentation, new DialogInterface.OnClickListener() {
+                        mPresentation,
+                        null,
+                        new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 if (mListener != null) {
