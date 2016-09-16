@@ -24,7 +24,7 @@
         </activity>
         <activity
             android:name=".activity.EditPresentationActivity"
-            android:theme="@style/AppTheme.Inverted"
+            android:theme="@style/AppTheme.Inverted.EditPresentation"
             android:parentActivityName=".activity.PresentationMainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

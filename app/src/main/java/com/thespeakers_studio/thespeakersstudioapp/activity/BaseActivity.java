@@ -524,7 +524,7 @@ public abstract class BaseActivity extends AppCompatActivity
         super.onResume();
         invalidateOptionsMenu();
 
-        // reset these values (we might be waking up, so onCreate isn't called)
+        // reset the
         mHeaderDetailsHeightPixels = -1;
         mHeaderHeightPixels = -1;
 

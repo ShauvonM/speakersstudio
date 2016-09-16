@@ -446,7 +446,7 @@ public class PracticeSetupActivity extends BaseActivity implements
         mIsDialogOpen = false;
         unbindTimerService();
 
-        if (finished) {
+        if (finished && outline != null) {
             mOutline = outline;
             showResultsDialog();
         }

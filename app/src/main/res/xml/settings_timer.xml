@@ -13,7 +13,7 @@
          />
     <CheckBoxPreference
         android:key="pref_timer_warning"
-        android:summary="Show a warning when you have five minutes left?"
+        android:summary="Show a warning when you have two minutes left?"
         android:defaultValue="true"
          />
     <CheckBoxPreference

@@ -228,7 +228,10 @@ public class PresentationPracticeDialog extends DialogFragment implements
     // called when the handler receives a message that the service is dead
     @Override
     public void serviceKilled(Bundle outlineBundle, boolean isFinished) {
-        mOutline = new Outline(getContext(), outlineBundle);
+        if (outlineBundle != null) {
+            mOutline = new Outline(getContext(), outlineBundle);
+        }
+
         if (mInterface != null) {
             mInterface.onServiceKilled(mOutline, isFinished);
         }
@@ -401,6 +404,11 @@ public class PresentationPracticeDialog extends DialogFragment implements
 
         // when we get outline items, we know the timer has started;
         mIsTimerStarted = true;
+
+        if (item == null) {
+            showText(mOutputMainView, "");
+            return;
+        }
 
         if (item.getParentId().equals(OutlineItem.NO_PARENT)) {
             // FIXME: only show the topic name if there's enough time left to so

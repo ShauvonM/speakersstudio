@@ -6,6 +6,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.os.SystemClock;
 import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -19,10 +20,14 @@ import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
 import com.thespeakers_studio.thespeakersstudioapp.model.Prompt;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
+import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
+
 /**
  * Created by smcgi_000 on 6/8/2016.
  */
 public abstract class ListItemView extends RelativeLayout implements View.OnClickListener {
+    private static final String TAG = ListItemView.class.getSimpleName();
+
     protected Prompt mPrompt;
     protected ListItemListener mOpenListener;
 
@@ -34,6 +39,7 @@ public abstract class ListItemView extends RelativeLayout implements View.OnClic
     private int mFinishLineBottom;
 
     protected boolean mAnimateFinish;
+    private boolean mAnimateRemoveFinish;
     protected boolean mFinishShown;
 
     private long mStartTime;
@@ -102,29 +108,46 @@ public abstract class ListItemView extends RelativeLayout implements View.OnClic
             canvas.drawPath(mLine, mFinishShown ? mFinishPaint : mLinePaint);
 
             // we can delay starting the animation by setting a startTime in the future
-            long currentTime = System.currentTimeMillis();
+            long currentTime = Utils.now();
             if (mStartTime > currentTime) {
                 postInvalidateDelayed(mStartTime - currentTime);
                 return;
             }
 
-            if (mAnimateFinish) {
+            if (mAnimateFinish || mAnimateRemoveFinish) {
+                if (mStartTime == 0) {
+                    mStartTime = Utils.now();
+                }
+
                 long elapsedTime = currentTime - mStartTime;
                 if (elapsedTime > SettingsUtils.PROMPT_PROGRESS_ANIMATION_DURATION) {
                     elapsedTime = SettingsUtils.PROMPT_PROGRESS_ANIMATION_DURATION;
                 }
 
                 float interval = ((float) elapsedTime) / ((float) SettingsUtils.PROMPT_PROGRESS_ANIMATION_DURATION);
+
+                int lineTop;
+                int lineBottom;
+                if (mAnimateFinish) {
+                    lineTop = top;
+                    lineBottom = (int) (bottom * interval);
+                } else {
+                    lineTop = bottom - (int) (bottom * interval);
+                    lineBottom = bottom;
+                }
+
                 mFinishLine.reset();
-                mFinishLine.moveTo(x, top);
-                mFinishLine.lineTo(x, bottom * interval);
-                canvas.drawPath(mFinishLine, mFinishPaint);
+                mFinishLine.moveTo(x, lineTop);
+                mFinishLine.lineTo(x, lineBottom);
+                canvas.drawPath(mFinishLine, mAnimateFinish ? mFinishPaint : mLinePaint);
 
                 if (elapsedTime < SettingsUtils.PROMPT_PROGRESS_ANIMATION_DURATION) {
                     this.postInvalidateDelayed(1000 / PaintUtils.FRAMES_PER_SECOND);
                 } else {
+                    mFinishShown = mAnimateFinish;
+
                     mAnimateFinish = false;
-                    mFinishShown = true;
+                    mAnimateRemoveFinish = false;
                 }
             }
         }
@@ -141,7 +164,7 @@ public abstract class ListItemView extends RelativeLayout implements View.OnClic
     public void setContiguous() {
         if (!mFinishShown) {
             mAnimateFinish = true;
-            mStartTime = System.currentTimeMillis() + (SettingsUtils.PROMPT_PROGRESS_ANIMATION_DURATION * (mPrompt.getOrder() - 1));
+            mStartTime = Utils.now() + (SettingsUtils.PROMPT_PROGRESS_ANIMATION_DURATION * (mPrompt.getOrder() - 1));
         }
         enable();
     }
@@ -149,8 +172,8 @@ public abstract class ListItemView extends RelativeLayout implements View.OnClic
     protected void animateLineTop (int delay) {
         if (!mFinishShown) {
             mAnimateFinish = true;
-            mStartTime = System.currentTimeMillis() + delay;
-            postInvalidate();
+            mStartTime = 0;
+            postInvalidateDelayed(delay);
         }
         enable();
     }
@@ -158,8 +181,16 @@ public abstract class ListItemView extends RelativeLayout implements View.OnClic
         animateLineTop(0);
     }
 
+    protected void animateRemoveLine(int delay) {
+        if (mFinishShown) {
+            mAnimateRemoveFinish = true;
+            mStartTime = 0;
+            postInvalidateDelayed(delay);
+        }
+    }
+
     public boolean isFinishShown() {
-        return mFinishShown || mAnimateFinish;
+        return (mFinishShown || mAnimateFinish) && !mAnimateRemoveFinish;
     }
 
     protected abstract void inflateView();

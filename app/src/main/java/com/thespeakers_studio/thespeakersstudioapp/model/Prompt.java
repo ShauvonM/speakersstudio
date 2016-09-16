@@ -18,7 +18,9 @@ public class Prompt implements Parcelable {
     private int type;
     private String text;
     private String processedText;
+
     private ArrayList<PromptAnswer> answer;
+
     private boolean isOpen;
     private boolean required;
     private String referenceDefault;
@@ -96,17 +98,21 @@ public class Prompt implements Parcelable {
     }
 
     public ArrayList<PromptAnswer> getAnswer() {
+        ArrayList<PromptAnswer> nonBlankAnswers = new ArrayList<>();
+        for (PromptAnswer answer : this.answer) {
+            if (!answer.getValue().isEmpty()) {
+                nonBlankAnswers.add(answer);
+            }
+        }
+        return nonBlankAnswers;
+    }
+
+    public ArrayList<PromptAnswer> getAllAnswers() {
         return this.answer;
     }
 
-    public ArrayList<PromptAnswer> getAnswerIgnoreEmpty() {
-        ArrayList<PromptAnswer> actualAnswers = new ArrayList<>();
-        for (PromptAnswer answer : this.answer) {
-            if (!answer.getValue().isEmpty()) {
-                actualAnswers.add(answer);
-            }
-        }
-        return actualAnswers;
+    public void clearEmptyAnswers() {
+        this.answer = getAnswer();
     }
 
     public Prompt clone(String answerId) {

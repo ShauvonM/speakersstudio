@@ -32,16 +32,17 @@
     <color name="nav_drawer_row_selected">@color/grey_200</color>
     <color name="nav_drawer_row_pressed">@color/grey_400</color>
 
-    <color name="divider_black">@color/black_12</color>
+    <color name="divider_black">@color/black_alpha_12</color>
 
     <color name="grey_200">#EEE</color>
     <color name="grey_400">#8A000000</color>
     <color name="black_alpha_40">#66000000</color>
     <color name="black_alpha_60">#99000000</color>
-    <color name="black_12">#1f000000</color>
+    <color name="black_alpha_12">#1f000000</color>
 
     <!-- prompt list colors -->
-    <color name="stepListBG">@color/colorAccent</color>
+    <color name="prompt_default_background">#bdbdbd</color>
+
     <color name="promptLine">#FFFFFF</color>
     <color name="promptBG">#ffa70f</color>
     <color name="completedPromptBG">#0097a7</color>

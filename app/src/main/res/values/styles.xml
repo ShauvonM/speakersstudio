@@ -43,12 +43,16 @@
         <item name="colorPrimaryDark">@color/colorAccentDark</item>
         <item name="colorAccent">@color/colorPrimary</item>
         <item name="android:textCursorDrawable">@null</item>
-        <item name="colorControlActivated">?colorPrimary</item>
+        <item name="colorControlActivated">@color/textColorPrimary</item>
+    </style>
+
+    <style name="AppTheme.Inverted.EditPresentation">
+        <item name="colorAccent">@color/prompt_default_background</item>
     </style>
 
     <style name="AppTheme.Outline">
         <item name="colorPrimary">@color/outlineBG</item>
-        <item name="colorPrimaryDark">@color/black_12</item>
+        <item name="colorPrimaryDark">@color/black_alpha_12</item>
         <item name="android:textColorPrimary">@color/outlineText</item>
         <item name="android:textColorPrimaryInverse">@android:color/white</item>
     </style>
@@ -257,7 +261,7 @@
         <item name="android:layout_margin">0dp</item>
         <item name="android:layout_alignParentTop">true</item>
         <item name="android:layout_above">@id/button_outline</item>
-        <item name="android:background">?colorPrimary</item>
+        <item name="android:background">@color/prompt_default_background</item>
     </style>
     <style name="StepListItem">
         <item name="android:orientation">vertical</item>
@@ -283,6 +287,15 @@
         <item name="android:paddingLeft">@dimen/step_list_item_padding_horizontal</item>
     </style>
 
+    <style name="StepListLabel.Inverted">
+        <item name="android:textColor">?colorPrimary</item>
+
+        <item name="android:shadowColor">@color/shadow</item>
+        <item name="android:shadowRadius">2</item>
+        <item name="android:shadowDx">0</item>
+        <item name="android:shadowDy">4</item>
+    </style>
+
     <style name="StepListText">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -298,6 +311,10 @@
         <item name="android:layout_marginBottom">@dimen/step_list_item_padding_vertical</item>
         <item name="android:paddingRight">@dimen/step_list_item_padding_horizontal</item>
         <item name="android:paddingLeft">@dimen/step_list_item_padding_horizontal</item>
+    </style>
+
+    <style name="StepListText.Inverted">
+        <item name="android:textColor">?colorPrimary</item>
     </style>
 
     <style name="StepListButton" parent="StepListItem">
@@ -338,7 +355,7 @@
         <item name="android:layout_marginBottom">@dimen/prompt_spacing_bottom</item>
         <item name="android:layout_marginLeft">@dimen/activity_vertical_margin</item>
         <item name="android:layout_marginRight">@dimen/activity_vertical_margin</item>
-        <item name="cardBackgroundColor">@color/promptBG</item>
+        <item name="cardBackgroundColor">@color/prompt_default_background</item>
         <item name="contentPadding">0dp</item>
     </style>
 
@@ -348,11 +365,6 @@
         <item name="android:background">@drawable/prompt_complete_bg_transition</item>
         <item name="android:padding">@dimen/default_padding</item>
         <item name="cardCornerRadius">@dimen/prompt_corner_radius</item>
-    </style>
-
-    <style name="PromptCard.Header" parent="PromptCard">
-        <item name="cardBackgroundColor">@color/stepListBG</item>
-        <item name="android:layout_marginTop">@dimen/prompt_header_margin_top</item>
     </style>
 
     <style name="PromptCard.Next" parent="PromptCard">
@@ -430,79 +442,71 @@
 
     <!-- a bunch of themes for the presentation activity -->
     <!-- it seems like all this could just be replaced by a simple line a code, Google -->
-    <style name="AppTheme.Inverted.presentation1">
+    <style name="AppTheme.Inverted.EditPresentation.presentation1">
         <item name="colorPrimary">@color/presentationColor1</item>
         <item name="colorPrimaryDark">@color/presentationColor1_dark</item>
     </style>
-    <style name="AppTheme.Inverted.presentation2">
+    <style name="AppTheme.Inverted.EditPresentation.presentation2">
         <item name="colorPrimary">@color/presentationColor2</item>
         <item name="colorPrimaryDark">@color/presentationColor2_dark</item>
     </style>
-    <style name="AppTheme.Inverted.presentation3">
+    <style name="AppTheme.Inverted.EditPresentation.presentation3">
         <item name="colorPrimary">@color/presentationColor3</item>
         <item name="colorPrimaryDark">@color/presentationColor3_dark</item>
-
-
     </style>
-    <style name="AppTheme.Inverted.presentation4">
+    <style name="AppTheme.Inverted.EditPresentation.presentation4">
         <item name="colorPrimary">@color/presentationColor4</item>
         <item name="colorPrimaryDark">@color/presentationColor4_dark</item>
     </style>
-    <style name="AppTheme.Inverted.presentation5">
+    <style name="AppTheme.Inverted.EditPresentation.presentation5">
         <item name="colorPrimary">@color/presentationColor5</item>
         <item name="colorPrimaryDark">@color/presentationColor5_dark</item>
     </style>
-    <style name="AppTheme.Inverted.presentation6">
+    <style name="AppTheme.Inverted.EditPresentation.presentation6">
         <item name="colorPrimary">@color/presentationColor6</item>
         <item name="colorPrimaryDark">@color/presentationColor6_dark</item>
     </style>
-    <style name="AppTheme.Inverted.presentation7">
+    <style name="AppTheme.Inverted.EditPresentation.presentation7">
         <item name="colorPrimary">@color/presentationColor7</item>
         <item name="colorPrimaryDark">@color/presentationColor7_dark</item>
     </style>
-    <style name="AppTheme.Inverted.presentation8">
+    <style name="AppTheme.Inverted.EditPresentation.presentation8">
         <item name="colorPrimary">@color/presentationColor8</item>
         <item name="colorPrimaryDark">@color/presentationColor8_dark</item>
     </style>
-    <style name="AppTheme.Inverted.presentation9">
+    <style name="AppTheme.Inverted.EditPresentation.presentation9">
         <item name="colorPrimary">@color/presentationColor9</item>
         <item name="colorPrimaryDark">@color/presentationColor9_dark</item>
     </style>
-    <style name="AppTheme.Inverted.presentation10">
+    <style name="AppTheme.Inverted.EditPresentation.presentation10">
         <item name="colorPrimary">@color/presentationColor10</item>
         <item name="colorPrimaryDark">@color/presentationColor10_dark</item>
     </style>
-    <style name="AppTheme.Inverted.presentation11">
+    <style name="AppTheme.Inverted.EditPresentation.presentation11">
         <item name="colorPrimary">@color/presentationColor11</item>
         <item name="colorPrimaryDark">@color/presentationColor11_dark</item>
     </style>
-    <style name="AppTheme.Inverted.presentation12">
+    <style name="AppTheme.Inverted.EditPresentation.presentation12">
         <item name="colorPrimary">@color/presentationColor12</item>
         <item name="colorPrimaryDark">@color/presentationColor12_dark</item>
     </style>
-    <style name="AppTheme.Inverted.presentation13">
+    <style name="AppTheme.Inverted.EditPresentation.presentation13">
         <item name="colorPrimary">@color/presentationColor13</item>
         <item name="colorPrimaryDark">@color/presentationColor13_dark</item>
-
-        <item name="colorControlActivated">@color/colorAccent</item>
     </style>
-    <style name="AppTheme.Inverted.presentation14">
+    <style name="AppTheme.Inverted.EditPresentation.presentation14">
         <item name="colorPrimary">@color/presentationColor14</item>
         <item name="colorPrimaryDark">@color/presentationColor14_dark</item>
-
-        <item name="colorControlActivated">@color/colorAccent</item>
     </style>
-    <style name="AppTheme.Inverted.presentation15">
+    <style name="AppTheme.Inverted.EditPresentation.presentation15">
         <item name="colorPrimary">@color/presentationColor15</item>
         <item name="colorPrimaryDark">@color/presentationColor15_dark</item>
-
-        <item name="colorControlActivated">@color/colorAccent</item>
     </style>
-    <style name="AppTheme.Inverted.presentation16">
+    <style name="AppTheme.Inverted.EditPresentation.presentation16">
         <item name="colorPrimary">@color/presentationColor16</item>
         <item name="colorPrimaryDark">@color/presentationColor16_dark</item>
     </style>
-    <style name="AppTheme.Inverted.presentation17">
+    <style name="AppTheme.Inverted.EditPresentation.presentation17">
         <item name="colorPrimary">@color/presentationColor17</item>
         <item name="colorPrimaryDark">@color/presentationColor17_dark</item>
     </style>

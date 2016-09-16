@@ -7,21 +7,28 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
+import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.thespeakers_studio.thespeakersstudioapp.R;
 import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.PaintUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
+import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
+
 /**
  * Created by smcgi_000 on 5/9/2016.
  */
 public class StepListView extends LinearLayout {
+    private static final String TAG = StepListView.class.getSimpleName();
+
     private Paint mBGPaint;
     private Paint mStepLinePaint;
     private Paint mStepProgressPaint;
@@ -48,6 +55,9 @@ public class StepListView extends LinearLayout {
 
     private long mStartTime;
 
+    private TextView[] mLabels;
+    private int[] mLabelPositions;
+
     private OnProgressAnimationListener mProgressAnimationListener;
 
     public interface OnProgressAnimationListener {
@@ -64,6 +74,9 @@ public class StepListView extends LinearLayout {
         setWillNotDraw(false);
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
+        final TypedArray a = context.obtainStyledAttributes(attrs,
+                R.styleable.PromptList, 0, 0);
+
         mShadowWidth = PaintUtils.getShadowBlur(2, context);
         mShadowY = PaintUtils.getShadowY(2, context);
 
@@ -74,7 +87,7 @@ public class StepListView extends LinearLayout {
 
         setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent));
 
-        mBGPaint.setColor(colorValue); // TODO: custom colors
+        mBGPaint.setColor(colorValue);
         mBGPaint.setStyle(Paint.Style.FILL);
         PaintUtils.setShadowLayer(mBGPaint, 2, context); // TODO: base shadow layers off elevation values?
 
@@ -88,7 +101,8 @@ public class StepListView extends LinearLayout {
         PaintUtils.setShadowLayer(mStepLinePaint, 0, context);
 
         mStepProgressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mStepProgressPaint.setColor(ContextCompat.getColor(context, R.color.progressBG));
+        mStepProgressPaint.setColor(a.getColor(R.styleable.PromptList_progressColor,
+                ContextCompat.getColor(context, R.color.progressBG)));
         mStepProgressPaint.setStyle(Paint.Style.FILL);
 
         mProgressPath = new Path();
@@ -154,6 +168,24 @@ public class StepListView extends LinearLayout {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        if (mLabels == null || mLabelPositions == null) {
+            mLabels = new TextView[] {
+                    (TextView) findViewById(R.id.step_1_label),
+                    (TextView) findViewById(R.id.step_1_text),
+                    (TextView) findViewById(R.id.step_2_label),
+                    (TextView) findViewById(R.id.step_2_text),
+                    (TextView) findViewById(R.id.step_3_label),
+                    (TextView) findViewById(R.id.step_3_text),
+                    (TextView) findViewById(R.id.step_4_label),
+                    (TextView) findViewById(R.id.step_4_text)
+            };
+
+            mLabelPositions = new int[8];
+            for(int x = 0; x < mLabels.length; x++) {
+                mLabelPositions[x] = mLabels[x].getTop() +
+                        ((LinearLayout) mLabels[x].getParent()).getTop();
+            }
+        }
         if (mWidth == 0) {
             mWidth = canvas.getWidth();
         }
@@ -187,9 +219,10 @@ public class StepListView extends LinearLayout {
 
         if (mProgressInvalid) {
             int prevStepBottom = mProgressStep > 1 ? getStepBottom(mProgressStep - 1) : 0;
-            int progY = prevStepBottom + (int) ((getStepBottom(mProgressStep) - prevStepBottom) * mProgressFactor);
 
-            mGoToProgressHeight = progY;
+            mGoToProgressHeight = prevStepBottom +
+                    (int) ((getStepBottom(mProgressStep) - prevStepBottom) * mProgressFactor);
+
             mProgressHeightDelta = mGoToProgressHeight - mCurrentDisplayedProgressHeight;
 
             mStartTime = System.currentTimeMillis();
@@ -281,6 +314,21 @@ public class StepListView extends LinearLayout {
         mProgressPath.close();
 
         canvas.drawPath(mProgressPath, mStepProgressPaint);
+
+        // change the color of the text labels
+        for (int x = 0; x < mLabelPositions.length; x++) {
+            int resId;
+            if (progY > mLabelPositions[x]) {
+                resId = (x & 1) == 0 ? R.style.StepListLabel : R.style.StepListText;
+            } else {
+                resId = (x & 1) == 0 ? R.style.StepListLabel_Inverted : R.style.StepListText_Inverted;
+            }
+            if (Utils.versionGreaterThan(Build.VERSION_CODES.M)) {
+                mLabels[x].setTextAppearance(resId);
+            } else {
+                mLabels[x].setTextAppearance(getContext(), resId);
+            }
+        }
     }
 
     public void setProgressHeight(int step, float progress) {

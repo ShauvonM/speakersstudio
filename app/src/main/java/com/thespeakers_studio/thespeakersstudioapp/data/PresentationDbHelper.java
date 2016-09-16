@@ -209,7 +209,7 @@ public class PresentationDbHelper {
 
         String datetime = Utils.getDateTimeStamp();
 
-        ArrayList<PromptAnswer> answers = prompt.getAnswer();
+        ArrayList<PromptAnswer> answers = prompt.getAllAnswers();
 
         for (PromptAnswer answer : answers) {
             //
@@ -252,6 +252,7 @@ public class PresentationDbHelper {
                 }
             }
         }
+        prompt.clearEmptyAnswers();
 
         db.close();
 

@@ -143,8 +143,6 @@ public class TimerHandler extends Handler {
         if (mWait) {
             mCurrentExpiration = SettingsUtils.TIMER_DELAY_TIME;
             mStarted = false;
-        } else {
-            initStart();
         }
 
         if (!mPaused) {
@@ -268,7 +266,11 @@ public class TimerHandler extends Handler {
                 finish();
             }
 
-        } else { // isPractice == false
+        } else { // isPractice == false (it's a generic timer)
+
+            for (TimerInterface callback: mInterface) {
+                callback.outlineItem(null, 0);
+            }
 
             if (!mStarted) {
                 initStart();

@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.media.audiofx.BassBoost;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
@@ -79,9 +80,13 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
         mTimerHandler.setPrefs(wait, track);
 
         mVibrate = intent.getBooleanExtra(SettingsUtils.PREF_TIMER_VIBRATE, true);
-        mShowWarning = intent.getBooleanExtra(SettingsUtils.PREF_TIMER_WARNING, true);
 
-        return Service.START_NOT_STICKY; // TODO: get the best value here
+        mShowWarning = intent.getBooleanExtra(SettingsUtils.PREF_TIMER_WARNING, true);
+        if (duration <= SettingsUtils.TIMER_WARNING_TIME) {
+            mShowWarning = false;
+        }
+
+        return Service.START_NOT_STICKY;
     }
 
     private void showNotification(OutlineItem item) {
@@ -101,8 +106,13 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
                     itemText,
                     Utils.getTimeStringFromMillisInText(mTimeRemaining, getResources()));
         } else {
-            title += " " + getString(R.string.timer_service_finished);
-            text = getString(R.string.timer_service_finished_description);
+            if (mTimerHandler.isFinished()) {
+                title += " " + getString(R.string.timer_service_finished);
+                text = getString(R.string.timer_service_finished_description);
+            } else {
+                text = String.format(getString(R.string.timer_service_description_time_only),
+                    Utils.getTimeStringFromMillisInText(mTimeRemaining, getResources()));
+            }
         }
 
         Notification.Builder notificationBuilder = new Notification.Builder(this);
@@ -149,15 +159,19 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
         LOGD(TAG, "Adding client!");
         mMessageFriend.addDestinationMessenger(messenger);
 
-        mMessageFriend.sendMessage(MessageFriend.MSG_READY, mTimerHandler.getOutline().toBundle(),
+        Bundle outlineBundle = mTimerHandler.getOutline() == null ? null :
+                mTimerHandler.getOutline().toBundle();
+
+        mMessageFriend.sendMessage(MessageFriend.MSG_READY, outlineBundle,
                 mTimerHandler.getDuration(), mTimerHandler.isStarted() ? 1 : 0);
 
         if (mTimerHandler.isPaused()) {
             updateTime();
             pause();
         } else if (mTimerHandler.isStarted() && !mTimerHandler.isFinished()) {
+            OutlineItem currentItem = mIsPractice ? mTimerHandler.getCurrentItem() : null;
             mMessageFriend.sendMessage(MessageFriend.MSG_OUTLINE_ITEM,
-                    mTimerHandler.getCurrentItem(), mCurrentRemaining - mElapsed);
+                    currentItem, mCurrentRemaining - mElapsed);
         }
     }
 
@@ -171,8 +185,12 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
             Utils.vibrateCancel(this);
         }
 
-        mMessageFriend.sendMessage(MessageFriend.MSG_KILL, mTimerHandler.getOutline().toBundle(),
+        Bundle outlineBundle = mTimerHandler.getOutline() == null ? null :
+                mTimerHandler.getOutline().toBundle();
+
+        mMessageFriend.sendMessage(MessageFriend.MSG_KILL, outlineBundle,
                 mTimerHandler.isFinished() ? 1 : 0);
+
         stopForeground(true);
         stopSelf();
     }
@@ -207,22 +225,36 @@ public class TimerService extends Service implements TimerHandler.TimerInterface
 
     @Override
     public void outlineItem(OutlineItem item, int remainingTime) {
-        LOGD(TAG, "New Outline Item: " + item.getText());
-        mMessageFriend.sendMessage(MessageFriend.MSG_OUTLINE_ITEM, item, remainingTime);
-        showNotification(item);
+        if (item == null) {
 
-        if (item.getParentId().equals(OutlineItem.NO_PARENT)) {
+            LOGD(TAG, "Timer starting!");
+            mMessageFriend.sendMessage(MessageFriend.MSG_OUTLINE_ITEM);
+            showNotification(null);
             if (mVibrate) {
-                // for parent items, pulse two times
-                Utils.vibrate(this, Utils.VIBRATE_PATTERN_DOUBLE);
-                mIsTopicVibrating = true;
-            }
-        } else {
-            if (mVibrate && !mIsTopicVibrating) {
                 // for normal items, pulse once
                 Utils.vibratePulse(this);
             }
-            mIsTopicVibrating = false;
+
+        } else {
+
+            LOGD(TAG, "New Outline Item: " + item.getText());
+            mMessageFriend.sendMessage(MessageFriend.MSG_OUTLINE_ITEM, item, remainingTime);
+            showNotification(item);
+
+            if (item.getParentId().equals(OutlineItem.NO_PARENT)) {
+                if (mVibrate) {
+                    // for parent items, pulse two times
+                    Utils.vibrate(this, Utils.VIBRATE_PATTERN_DOUBLE);
+                    mIsTopicVibrating = true;
+                }
+            } else {
+                if (mVibrate && !mIsTopicVibrating) {
+                    // for normal items, pulse once
+                    Utils.vibratePulse(this);
+                }
+                mIsTopicVibrating = false;
+            }
+
         }
     }
 
