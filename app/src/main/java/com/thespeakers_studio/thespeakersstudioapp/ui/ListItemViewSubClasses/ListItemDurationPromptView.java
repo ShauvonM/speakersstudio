@@ -45,7 +45,8 @@ public class ListItemDurationPromptView extends ListItemPromptView implements Ad
 
         // the dropdown to specify duration
         Spinner durationInput = (Spinner) findViewById(R.id.duration_input);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(), R.array.presentation_duration_array, android.R.layout.simple_spinner_item);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
+                R.array.presentation_duration_array, R.layout.spinner_item_duration);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         durationInput.setAdapter(adapter);
 

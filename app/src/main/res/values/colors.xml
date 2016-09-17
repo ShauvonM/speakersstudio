@@ -6,7 +6,7 @@
     <color name="colorPrimary">#ffa70f</color>
     <color name="colorPrimaryDark">#c77700</color>
     <color name="textColorPrimary">#ffffff</color>
-    <color name="textColorInverse">#000000</color>
+    <color name="textColorInverse">#212121</color>
     <color name="windowBackground">#757575</color>
     <color name="navigationBarColor">#424242</color>
     <color name="colorAccent">#0097a7</color>
@@ -16,7 +16,7 @@
     <color name="toolbar_text_primary_subtitle">#deffffff</color>
     <color name="toolbar_selection_bg">#ff9e9e9e</color>
 
-    <color name="shadow">#88444444</color>
+    <color name="shadow">#68000000</color>
     <color name="error">#FF0000</color>
     <color name="success">#47A447</color>
 
@@ -39,15 +39,11 @@
     <color name="black_alpha_40">#66000000</color>
     <color name="black_alpha_60">#99000000</color>
     <color name="black_alpha_12">#1f000000</color>
+    <color name="black_alpha_200">#C8000000</color>
 
     <!-- prompt list colors -->
-    <color name="prompt_default_background">#bdbdbd</color>
-
-    <color name="promptLine">#FFFFFF</color>
-    <color name="promptBG">#ffa70f</color>
-    <color name="completedPromptBG">#0097a7</color>
-    <color name="completedPromptBGRipple">#0aacbd</color>
-    <color name="progressBG">#47A447</color>
+    <color name="prompt_default_background">#fafafa</color>
+    <color name="promptLine">#f5f5f5</color>
 
     <!-- outline colors -->
     <color name="outlineBG">#FFFFFF</color>

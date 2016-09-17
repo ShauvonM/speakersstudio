@@ -103,6 +103,14 @@ public class ListItemPromptView extends ListItemView {
         String text = answer.isEmpty() ? mPrompt.getProcessedText() : answer;
         textView.setText(text);
 
+        if (answer.isEmpty()) {
+            text = mPrompt.getProcessedText();
+            Utils.setTextAppearance(getContext(), textView, R.style.PromptText_Inverted);
+        } else {
+            text = answer;
+            Utils.setTextAppearance(getContext(), textView, R.style.PromptText);
+        }
+
         if (text.length() > 125) {
             textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.prompt_small_font_size));
         } else {

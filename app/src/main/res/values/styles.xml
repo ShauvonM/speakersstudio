@@ -47,7 +47,10 @@
     </style>
 
     <style name="AppTheme.Inverted.EditPresentation">
-        <item name="colorAccent">@color/prompt_default_background</item>
+        <item name="colorAccent">?colorPrimary</item>
+        <item name="colorControlActivated">?colorPrimary</item>
+        <item name="colorControlNormal">?colorPrimary</item>
+        <item name="android:textColorHint">?colorPrimary</item>
     </style>
 
     <style name="AppTheme.Outline">
@@ -289,11 +292,6 @@
 
     <style name="StepListLabel.Inverted">
         <item name="android:textColor">?colorPrimary</item>
-
-        <item name="android:shadowColor">@color/shadow</item>
-        <item name="android:shadowRadius">2</item>
-        <item name="android:shadowDx">0</item>
-        <item name="android:shadowDy">4</item>
     </style>
 
     <style name="StepListText">
@@ -315,6 +313,7 @@
 
     <style name="StepListText.Inverted">
         <item name="android:textColor">?colorPrimary</item>
+        <item name="android:shadowColor">@color/black_alpha_200</item>
     </style>
 
     <style name="StepListButton" parent="StepListItem">
@@ -391,14 +390,21 @@
         <item name="android:gravity">center</item>
     </style>
 
-    <style name="PromptLabel" parent="PromptText">
+    <style name="PromptText.Inverted">
+        <item name="android:textColor">?colorPrimary</item>
+        <item name="android:shadowColor">@android:color/transparent</item>
+    </style>
+
+    <style name="PromptLabel" parent="PromptText.Inverted">
         <item name="android:padding">0dp</item>
-        <item name="android:shadowDy">2</item>
         <item name="android:textSize">@dimen/prompt_label_font_size</item>
     </style>
 
-    <style name="PromptDateTimeFields" parent="PromptText">
+    <style name="PromptDateTimeFields" parent="PromptText.Inverted">
         <item name="android:textSize">@dimen/prompt_datetime_size</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:shadowColor">@color/black_alpha_40</item>
+        <item name="android:shadowDy">2</item>
         <!-- <item name="android:layout_margin">@dimen/default_padding</item> -->
     </style>
 

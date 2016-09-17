@@ -14,6 +14,7 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -324,5 +325,13 @@ public class Utils {
 
     public static String getUUID() {
         return java.util.UUID.randomUUID().toString();
+    }
+
+    public static void setTextAppearance(Context context, TextView view, int resId) {
+        if (Utils.versionGreaterThan(Build.VERSION_CODES.M)) {
+            view.setTextAppearance(resId);
+        } else {
+            view.setTextAppearance(context, resId);
+        }
     }
 }

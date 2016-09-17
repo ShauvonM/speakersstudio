@@ -102,7 +102,7 @@ public class StepListView extends LinearLayout {
 
         mStepProgressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mStepProgressPaint.setColor(a.getColor(R.styleable.PromptList_progressColor,
-                ContextCompat.getColor(context, R.color.progressBG)));
+                ContextCompat.getColor(context, R.color.colorPrimary)));
         mStepProgressPaint.setStyle(Paint.Style.FILL);
 
         mProgressPath = new Path();
@@ -323,11 +323,7 @@ public class StepListView extends LinearLayout {
             } else {
                 resId = (x & 1) == 0 ? R.style.StepListLabel_Inverted : R.style.StepListText_Inverted;
             }
-            if (Utils.versionGreaterThan(Build.VERSION_CODES.M)) {
-                mLabels[x].setTextAppearance(resId);
-            } else {
-                mLabels[x].setTextAppearance(getContext(), resId);
-            }
+            Utils.setTextAppearance(getContext(), mLabels[x], resId);
         }
     }
 
