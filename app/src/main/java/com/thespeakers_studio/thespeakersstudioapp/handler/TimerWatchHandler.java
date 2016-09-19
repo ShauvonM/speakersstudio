@@ -47,7 +47,7 @@ public class TimerWatchHandler extends Handler {
         switch(msg.what) {
             case MessageFriend.MSG_READY:
                 // when the service is ready, it will deliver the outline and duration to us
-                mInterface.setup(msg.getData(), msg.arg1, msg.arg2 == 1);
+                mInterface.setup(msg.peekData(), msg.arg1, msg.arg2 == 1);
                 alive = true;
                 break;
 
@@ -68,9 +68,12 @@ public class TimerWatchHandler extends Handler {
                 if (!alive) {
                     return;
                 }
-                // when we get a new outline item, the service will broadcast that
-                msg.getData().setClassLoader(OutlineItem.class.getClassLoader());
-                OutlineItem item = msg.getData().getParcelable("data");
+                OutlineItem item = null;
+                if (msg.peekData() != null) {
+                    // when we get a new outline item, the service will broadcast that
+                    msg.getData().setClassLoader(OutlineItem.class.getClassLoader());
+                    item = msg.getData().getParcelable("data");
+                }
                 mInterface.outlineItem(item, msg.arg1);
                 break;
 
@@ -81,9 +84,13 @@ public class TimerWatchHandler extends Handler {
 
             case MessageFriend.MSG_RESUME:
                 // and etcetera
-                msg.getData().setClassLoader(OutlineItem.class.getClassLoader());
-                OutlineItem resumeItem = msg.getData().getParcelable("data");
-                mInterface.resume(resumeItem);
+                if (msg.peekData() != null) {
+                    msg.getData().setClassLoader(OutlineItem.class.getClassLoader());
+                    OutlineItem resumeItem = msg.getData().getParcelable("data");
+                    mInterface.resume(resumeItem);
+                } else {
+                    mInterface.resume(null);
+                }
                 break;
 
             case MessageFriend.MSG_FINISHED:
@@ -93,7 +100,7 @@ public class TimerWatchHandler extends Handler {
             case MessageFriend.MSG_KILL:
                 // when the service is killed, it will return the outline and whether or not it
                 // went all the way through the duration
-                mInterface.serviceKilled(msg.getData(), msg.arg1 == 1);
+                mInterface.serviceKilled(msg.peekData(), msg.arg1 == 1);
                 alive = false;
                 break;
 

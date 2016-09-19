@@ -11,23 +11,24 @@
         <ImageButton
             android:id="@+id/presentation_submenu"
             style="@style/PresentationListCardSubmenu"
+            android:contentDescription="@string/cd_submenu"
             />
 
         <TextView
             android:id="@+id/presentation_name"
-            android:text="Presentation Name Here"
+            android:text="@string/lorem_ipsum_words"
             style="@style/PresentationListCardName.OneColumn"
             />
 
         <TextView
             android:id="@+id/presentation_progress"
-            android:text="100% Complete"
+            android:text="@string/default_completion"
             style="@style/PresentationListCardProgress.OneColumn"
             />
 
         <TextView
             android:id="@+id/presentation_modified"
-            android:text="Modified: August 11, 2000 at some time in the night"
+            android:text="@string/default_modified"
             style="@style/PresentationListCardModified.OneColumn"
             />
 

@@ -5,13 +5,14 @@
     <android.support.design.widget.TextInputLayout
         android:id="@+id/prompt_input_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:hint="@string/lorem_ipsum_words">
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/prompt_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/textColorPrimary"
+            android:textColor="?colorPrimary"
             android:inputType="textCapSentences" />
 
     </android.support.design.widget.TextInputLayout>
@@ -25,17 +26,20 @@
             android:id="@+id/prompt_char_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="15"
+            android:textColor="?colorPrimary"
+            android:text="@string/default_char_count"
             />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="?colorPrimary"
             android:text="@string/prompt_char_limit_sep"/>
         <TextView
             android:id="@+id/prompt_char_max"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="/ 150"/>
+            android:textColor="?colorPrimary"
+            android:text="@string/default_char_max"/>
     </LinearLayout>
     <!-- end of text card items -->
 

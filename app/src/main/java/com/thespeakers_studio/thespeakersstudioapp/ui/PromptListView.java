@@ -31,8 +31,6 @@ public class PromptListView extends LinearLayout implements ListItemView.ListIte
     private ListItemView mOpenView;
     private PromptListListener mListener;
 
-    //private ListItemHeaderView mHeader;
-
     public PromptListView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -77,11 +75,6 @@ public class PromptListView extends LinearLayout implements ListItemView.ListIte
             ListItemView view;
             switch(type) {
                 case PresentationData.HEADER:
-                    /* Skip the header, because it's in the actionbar now
-                    view = new ListItemHeaderView(getContext(), thisPrompt);
-                    mHeader = (ListItemHeaderView) view;
-                    mHeader.animateFillFactor(getCompletionPercentage());
-                    */
                     view = null;
                     break;
                 case PresentationData.NEXT:
@@ -188,11 +181,11 @@ public class PromptListView extends LinearLayout implements ListItemView.ListIte
         Prompt thisPrompt = mPromptData.get(thisOrder);
         ListItemView lastView = thisOrder > 1 ? (ListItemView) getChildAt(thisOrder - 2) : null;
         boolean contiguous = thisOrder <= 1 || lastView.isFinishShown();
-        boolean thisIsAnswered = thisPrompt.getAnswerIgnoreEmpty().size() > 0
+        boolean thisIsAnswered = thisPrompt.getAnswer().size() > 0
                 || !thisPrompt.getIsPrompt();
 
+        ListItemView view = (ListItemView) getChildAt(thisOrder - 1);
         if (contiguous && thisIsAnswered) {
-            ListItemView view = (ListItemView) getChildAt(thisOrder - 1);
             view.animateLineTop(delay);
 
             /*else if (thisOrder > 1) {
@@ -206,10 +199,13 @@ public class PromptListView extends LinearLayout implements ListItemView.ListIte
                     }
                 }
             }*/
-            // check to see if we can animate the next one too
-            delay += SettingsUtils.PROMPT_PROGRESS_ANIMATION_DURATION;
-            animateProgressLine(thisOrder + 1, delay);
+        } else {
+            view.animateRemoveLine(delay);
         }
+
+        // check to see if we need to animate the next one too
+        delay += SettingsUtils.PROMPT_PROGRESS_ANIMATION_DURATION;
+        animateProgressLine(thisOrder + 1, delay);
     }
 
     public interface PromptListListener {

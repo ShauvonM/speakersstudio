@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -202,14 +203,26 @@ public class EditPresentationActivity extends BaseActivity implements
 
                 break;
             case R.id.menu_action_reset:
+                View checkboxWrapper = View.inflate(this,
+                        R.layout.dialog_clear_step_checkbox, null);
+                final CheckBox checkBox = (CheckBox) checkboxWrapper.findViewById(R.id.clear_step_checkbox);
+
                 PresentationUtils.resetPresentation(this, mPresentation,
+                        mCurrentStep > 0 ? checkboxWrapper : null,
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 if (mPresentation == null) {
                                     return;
                                 }
-                                mDbHelper.resetPresentation(mPresentation);
+                                boolean stepOnly = false;
+                                if (checkBox != null) {
+                                    stepOnly = checkBox.isChecked();
+                                }
+                                mDbHelper.resetPresentation(mPresentation,
+                                        stepOnly ? mCurrentStep : 0);
+
+                                onBackPressed();
                             }
                         }
                 );

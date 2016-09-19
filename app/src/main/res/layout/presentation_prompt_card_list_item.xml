@@ -13,18 +13,22 @@
             android:id="@+id/list_prompt_remove"
             android:src="@drawable/ic_clear_white_24dp"
             android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:layout_centerInParent="true"
             android:padding="0dp"
-            android:background="@android:color/transparent" />
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/cd_list_item_remove" />
 
         <EditText
             android:id="@+id/prompt_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/list_prompt_remove"
+            android:layout_toEndOf="@id/list_prompt_remove"
             android:layout_centerVertical="true"
-            android:layout_centerInParent="true" />
+            android:layout_centerInParent="true"
+            android:inputType="textCapWords" />
 
         <!-- character count output -->
         <LinearLayout
@@ -33,15 +37,17 @@
             android:layout_height="0dp"
             android:layout_below="@id/prompt_input"
             android:layout_alignRight="@id/prompt_input"
+            android:layout_alignEnd="@id/prompt_input"
             android:layout_marginTop="-3dp"
             android:layout_marginRight="5dp"
+            android:layout_marginEnd="5dp"
             android:alpha="0"
             android:visibility="gone">
             <TextView
                 android:id="@+id/prompt_char_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="15"
+                android:text="@string/default_char_count"
                 />
             <TextView
                 android:layout_width="wrap_content"
@@ -51,7 +57,7 @@
                 android:id="@+id/prompt_char_max"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="150" />
+                android:text="@string/default_char_max" />
         </LinearLayout>
 
     </RelativeLayout>

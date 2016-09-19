@@ -339,7 +339,7 @@ public class PresentationMainActivity extends BaseActivity
 
     @Override
     public void onPresentationReset(PresentationData presentation) {
-        mDbHelper.resetPresentation(presentation);
+        mDbHelper.resetPresentation(presentation, 0);
     }
 
     public void toggleView(boolean set) {

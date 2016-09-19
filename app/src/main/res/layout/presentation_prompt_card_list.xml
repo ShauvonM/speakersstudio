@@ -3,7 +3,7 @@
 
     <TextView
         android:id="@+id/card_label"
-        android:text="What is the Topic?"
+        android:text="@string/lorem_ipsum_sentence"
         style="@style/PromptLabel"
         />
 
@@ -21,6 +21,8 @@
         android:layout_height="46dp"
         android:src="@drawable/ic_add_white_24dp"
         android:background="@android:color/transparent"
-        android:layout_gravity="center" />
+        android:layout_gravity="center"
+        android:contentDescription="@string/cd_list_item_add"
+        />
 
 </merge>

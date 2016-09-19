@@ -1,5 +1,6 @@
 package com.thespeakers_studio.thespeakersstudioapp.ui.ListItemViewSubClasses;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -21,6 +22,7 @@ import com.thespeakers_studio.thespeakersstudioapp.model.PromptAnswer;
 /**
  * Created by smcgi_000 on 6/8/2016.
  */
+@SuppressLint("ViewConstructor")
 public class ListItemDurationPromptView extends ListItemPromptView implements AdapterView.OnItemSelectedListener, TextWatcher {
 
     private int mDuration;
@@ -45,7 +47,8 @@ public class ListItemDurationPromptView extends ListItemPromptView implements Ad
 
         // the dropdown to specify duration
         Spinner durationInput = (Spinner) findViewById(R.id.duration_input);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(), R.array.presentation_duration_array, android.R.layout.simple_spinner_item);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
+                R.array.presentation_duration_array, R.layout.spinner_item_duration);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         durationInput.setAdapter(adapter);
 

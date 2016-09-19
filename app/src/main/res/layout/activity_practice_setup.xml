@@ -41,7 +41,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
-                    android:textSize="15dp"
+                    android:textSize="15sp"
                     android:text="@string/no_saved_practices"
                     />
 
@@ -93,7 +93,11 @@
                              android:layout_height="wrap_content"
                              android:orientation="horizontal">
 
+                             <!-- this is a dummy view to prevent focus from automatically happening
+                                in the editText below -->
                              <LinearLayout
+                                 android:id="@+id/fix_focus_block"
+                                 android:orientation="horizontal"
                                  android:layout_width="0px"
                                  android:layout_height="0px"
                                  android:focusable="true"
@@ -112,8 +116,8 @@
                                  android:id="@+id/presentation_name"
                                  android:layout_width="wrap_content"
                                  android:layout_height="wrap_content"
-                                 android:text="Title"
-                                 android:textSize="20dp"/>
+                                 android:text="@string/lorem_ipsum_words"
+                                 android:textSize="20sp"/>
 
                          </LinearLayout>
 
@@ -122,7 +126,7 @@
                              android:layout_width="wrap_content"
                              android:layout_height="wrap_content"
                              android:layout_marginBottom="10dp"
-                             android:text="20 minutes" />
+                             android:text="@string/lorem_ipsum_words" />
 
                          <fragment
                              android:id="@+id/settings_fragment"
@@ -140,7 +144,8 @@
                          android:layout_gravity="center|bottom"
                          android:layout_marginTop="2dp"
                          android:layout_marginBottom="2dp"
-                         android:src="@drawable/ic_expand_more_white_24dp" />
+                         android:src="@drawable/ic_expand_more_white_24dp"
+                         android:contentDescription="@string/cd_open_settings"/>
                  </FrameLayout>
                  <!-- end of header bar -->
 
@@ -150,7 +155,7 @@
                 android:id="@+id/fab_practice"
                 android:layout_width="@dimen/fab_button"
                 android:layout_height="@dimen/fab_button"
-                android:layout_gravity="top|right"
+                android:layout_gravity="top|end"
                 android:src="@drawable/ic_play_arrow_white_24dp"
                 android:clickable="true"
                 android:focusable="true"
@@ -158,6 +163,7 @@
                 app:fabSize="normal"
                 android:layout_margin="@dimen/fab_margin"
                 style="@style/FloatingActionButtonOnContent"
+                app:pressedTranslationZ="@dimen/fab_press_translation_z"
                 />
 
         </com.thespeakers_studio.thespeakersstudioapp.ui.ToolbarShadowFrameLayout>

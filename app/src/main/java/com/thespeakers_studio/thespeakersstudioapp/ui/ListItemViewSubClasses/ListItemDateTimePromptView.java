@@ -1,5 +1,6 @@
 package com.thespeakers_studio.thespeakersstudioapp.ui.ListItemViewSubClasses;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -19,6 +20,7 @@ import com.thespeakers_studio.thespeakersstudioapp.model.PromptAnswer;
 /**
  * Created by smcgi_000 on 6/8/2016.
  */
+@SuppressLint("ViewConstructor")
 public class ListItemDateTimePromptView extends ListItemPromptView implements PromptDatepickerFragment.OnPromptDateTimeListener {
 
     private PromptDatepickerFragment mDateTimePickerFragment;

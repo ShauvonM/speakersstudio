@@ -2,17 +2,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".PresentationMain">
 
-    <item android:id="@+id/menu_action_goto_steplist" android:title="Return to List of Questions"
+    <item android:id="@+id/menu_action_goto_steplist"
+        android:title="@string/return_to_list_of_questions"
         app:showAsAction="ifRoom" android:icon="@drawable/ic_create_black_24dp" />
 
     <item android:id="@+id/menu_action_reset" android:title="@string/action_reset_outline"
             app:showAsAction="ifRoom" android:icon="@drawable/ic_assignment_late_black_24dp" />
 
-    <item android:id="@+id/menu_action_edit_outline" android:visible="false" android:title="Edit Outline"
+    <item android:id="@+id/menu_action_edit_outline" android:visible="false"
+        android:title="@string/edit_outline"
         app:showAsAction="ifRoom" android:icon="@drawable/ic_create_black_24dp" />
-    <item android:id="@+id/menu_action_save_outline" android:visible="false" android:title="Save Outline to Google Drive"
+    <item android:id="@+id/menu_action_save_outline" android:visible="false"
+        android:title="@string/save_outline_to_google_drive"
         app:showAsAction="ifRoom" android:icon="@drawable/ic_insert_drive_file_black_24dp" />
-    <item android:id="@+id/menu_action_outline_view" android:visible="false" android:title="Change View"
+    <item android:id="@+id/menu_action_outline_view" android:visible="false"
+        android:title="@string/change_view"
         app:showAsAction="ifRoom" android:icon="@drawable/ic_view_carousel_black_24dp" />
 
 </menu>

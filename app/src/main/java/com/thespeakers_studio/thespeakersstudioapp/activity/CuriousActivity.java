@@ -1,5 +1,6 @@
 package com.thespeakers_studio.thespeakersstudioapp.activity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ public class CuriousActivity extends BaseActivity {
 
     private WebView mWebView;
 
+    @SuppressLint("SetJavaScriptEnabled") // we can be reasonably confident that the js here will cooperate
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

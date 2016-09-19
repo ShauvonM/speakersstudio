@@ -1,8 +1,10 @@
 package com.thespeakers_studio.thespeakersstudioapp.ui.ListItemViewSubClasses;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +30,7 @@ import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 /**
  * Created by smcgi_000 on 6/8/2016.
  */
+@SuppressLint("ViewConstructor")
 public class ListItemLocationPromptView extends ListItemPromptView implements
         EditPresentationActivity.LocationSelectedListener {
 
@@ -135,7 +138,11 @@ public class ListItemLocationPromptView extends ListItemPromptView implements
             answers.add(new PromptAnswer("id", mPlace.getId(), mPrompt.getId()));
             answers.add(new PromptAnswer("name", mPlace.getName().toString(), mPrompt.getId()));
             answers.add(new PromptAnswer("address", mPlace.getAddress().toString(), mPrompt.getId()));
-            answers.add(new PromptAnswer("website", mPlace.getWebsiteUri().toString(), mPrompt.getId()));
+
+            Uri websiteUri = mPlace.getWebsiteUri();
+            if (websiteUri != null) {
+                answers.add(new PromptAnswer("website", websiteUri.toString(), mPrompt.getId()));
+            }
 
             return answers;
         }

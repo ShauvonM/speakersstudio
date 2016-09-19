@@ -42,7 +42,7 @@
                 android:clipChildren="false"
                 android:clipToPadding="false"
                 android:orientation="vertical"
-                app:progressColor="@color/progressBG"
+                app:progressColor="@color/black_alpha_12"
                 app:minimumHeight="@dimen/spacing_normal"
                 >
 
@@ -52,6 +52,8 @@
                     style="@style/StepListLabel"
 
                     android:paddingLeft="60dp"
+                    android:paddingStart="60dp"
+                    android:paddingEnd="60dp"
                     android:layout_marginTop="@dimen/spacing_normal"
                     />
                 <TextView
@@ -61,6 +63,8 @@
 
                     android:textSize="@dimen/prompt_list_header_size_main"
                     android:paddingLeft="60dp"
+                    android:paddingStart="60dp"
+                    android:paddingEnd="60dp"
                     android:layout_marginBottom="@dimen/spacing_normal"
                     />
 

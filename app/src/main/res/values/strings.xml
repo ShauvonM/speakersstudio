@@ -14,7 +14,6 @@
     <string name="action_reset_outline">Reset Outline</string>
     <string name="action_change_color">Change Presentation Color</string>
     <string name="action_settings">Settings</string>
-    <string name="presentation">Presentation</string>
     <string name="presentations">Presentations</string>
     <string name="new_presentation">New Presentation</string>
     <string name="details">Details</string>
@@ -24,14 +23,7 @@
     <string name="outline">Outline</string>
     <string name="timer">Timer</string>
     <string name="delete">Delete Presentation</string>
-    <string name="copy">Copy</string>
-    <string name="change_color">Change Color</string>
-    <string name="history">History</string>
-    <string name="sharing">Sharing</string>
-    <string name="share">Share</string>
     <string name="stories">Stories</string>
-    <string name="not_shared">Not Shared</string>
-    <string name="attachments">Attachments</string>
     <string name="step_1">Step 1</string>
     <string name="step_2">Step 2</string>
     <string name="step_3">Step 3</string>
@@ -48,11 +40,10 @@
 
     <string name="five_minutes">Five Minutes</string>
     <string name="ten_minutes">Ten Minutes</string>
-    <string name="fifteen_minutes">Fifteen Minutes</string>
+    <string name="fifteen_minutes">Fifteen Minutes</string><!-- FIXME: this isn't being used? -->
     <string name="twenty_minutes">Twenty Minutes</string>
     <string name="thirty_minutes">Thirty Minutes</string>
-    <string name="specify_duration">Specify Duration...</string>
-    <string name="specify_duration_minutes">Specify Duration (in minutes)</string>
+    <string name="specify_duration">Specify Duration…</string>
     <string name="minutes">Minutes</string><!-- TODO: put a %1$s in here to include the time -->
 
     <string name="list_and">and</string>
@@ -65,14 +56,16 @@
         <item>@string/specify_duration</item>
     </string-array>
 
+    <string name="cd_list_item_add">Add Item</string>
+    <string name="cd_list_item_remove">Remove Item</string>
+    <string name="cd_submenu">Options</string>
+    <string name="cd_previous">Previous item</string>
+    <string name="cd_next">Next item</string>
+    <string name="cd_open_settings">Show or hide settings</string>
+    <string name="cd_done">Done</string>
+
     <string name="drawer_open">The navigation drawer is opened</string>
     <string name="drawer_close">The navigation drawer is closed</string>
-
-    <string name="tools_text_account_information_username">Username</string>
-    <string name="tools_text_account_information_email">user@email.com</string>
-
-    <string name="tag_nav_drawer_main_entry">nav_drawer_main_entry</string>
-    <string name="tag_nav_drawer_special_entry">nav_drawer_special_entry</string>
 
     <string name="search">Search</string>
     <string name="change_view">Change View</string>
@@ -80,6 +73,7 @@
     <string name="delete_selected">Delete Selected</string>
 
     <string name="confirm_reset_message">Are you sure you want to clear everything saved for this presentation? There is no turning back.</string>
+    <string name="confirm_reset_step_only">Only clear this step, and leave the others alone.</string>
     <string name="confirm_reset_outline">Are you sure you want to clear all modifications to this outline? It will return to the default timing and layout.</string>
     <plurals name="confirm_delete_message">
         <item quantity="one">Are you sure you want to delete this presentation? You won\'t get it back.</item>
@@ -99,7 +93,6 @@
     <string name="modified_output">Modified: %1$s</string>
 
     <string name="no_presentations">You have no saved presentations.</string>
-    <string name="no_stories">You have no saved stories.</string>
     <string name="no_stories_placeholder">You cannot save stories just yet. I know, tell me about it.</string>
     <string name="no_saved_practices">You have not practiced this Presentation yet.</string>
     <string name="saved_practices_header">Your Practice History</string>
@@ -109,8 +102,12 @@
     <string name="practice_response_view_title">Practice History</string>
     <string name="practice_response_rate_prompt">How did that practice go for you?</string>
     <string name="practice_response_notes_prompt">What thoughts do you have?</string>
-    <string name="practice_response_view_notes">These were your thoughts:</string>
-    <string name="practice_response_outline_items">* This practice tracked %1$d duration change(s):</string>
+
+    <plurals name="practice_response_outline_items">
+        <item quantity="one">* This practice tracked %1$d duration change:</item>
+        <item quantity="other">* This practice tracked %1$d duration changes:</item>
+    </plurals>
+
     <string name="practice_response_cancel">Cancel</string>
     <string name="asterisk">*</string>
 
@@ -122,12 +119,22 @@
     <string name="outline_item_conclusion">Closing</string>
     <string name="outline_item_mention">Mention:</string>
     <string name="outline_item_mention_concat">Mention \"%1$s\"</string>
-    <string name="outline_duration">(%1$d Minutes)</string>
 
     <string name="practice_tracked_item_description">Section %1$s \"%2$s\" &gt; Subsection %3$s \"%4$s\" took <b>%5$s</b>.</string>
-    <string name="text_time_display_seconds">%1$d seconds</string>
-    <string name="text_time_display_minutes">%1$d minutes</string>
-    <string name="text_time_display_minutes_and_seconds">%1$d minutes, %2$d seconds</string>
+
+    <plurals name="text_time_display_seconds">
+        <item quantity="zero"> </item>
+        <item quantity="one">%1$d second</item>
+        <item quantity="other">%1$d seconds</item>
+    </plurals>
+
+    <plurals name="text_time_display_minutes">
+        <item quantity="zero"> </item>
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
+
+    <string name="text_time_display_minutes_and_seconds">%1$s, %2$s</string>
 
     <string name="practice_presentation">Practice Presentation</string>
 
@@ -139,15 +146,9 @@
     <string name="five_minutes_left">Five Minutes Left</string>
     <string name="two_minutes_left">Two Minutes Left</string>
 
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-
     <!-- Accessibility description for navigation drawer -->
     <string name="navdrawer_description_a11y">Navigation Drawer used to switch between major
         features of the application</string>
-
-    <string name="pref_completed_presentations_entry_off">Step List</string>
-    <string name="pref_completed_presentations_entry_on">Outline</string>
 
     <string name="timer_service_started">Timer</string>
     <string name="timer_service_description">%1$s - %2$s remaining</string>
@@ -158,5 +159,15 @@
     <string name="lorem_ipsum_words">Lorem ipsum dolor sit</string>
     <string name="lorem_ipsum_sentence">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</string>
     <string name="lorem_ipsum_bullet">1. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</string>
+    <string name="default_timer">00:00</string>
+    <string name="return_to_list_of_questions">Return to List of Questions</string>
+    <string name="edit_outline">Edit Outline</string>
+    <string name="save_outline_to_google_drive">Save Outline to Google Drive</string>
+    <string name="select">Select…</string>
+    <string name="default_bullet">1.</string>
+    <string name="default_completion">100\% Complete</string>
+    <string name="default_modified">Modified: August 11, 2000 at some time in the night</string>
+    <string name="default_char_count">15</string>
+    <string name="default_char_max">150</string>
 
 </resources>

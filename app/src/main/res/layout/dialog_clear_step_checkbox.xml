@@ -3,12 +3,12 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/listview_header"
+    <CheckBox
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="20sp" />
-
+        android:id="@+id/clear_step_checkbox"
+        android:text="@string/confirm_reset_step_only"
+        android:layout_margin="22dp"
+        />
 
 </LinearLayout>

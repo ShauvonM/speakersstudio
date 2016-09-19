@@ -5,13 +5,15 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import com.thespeakers_studio.thespeakersstudioapp.R;
 import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.PaintUtils;
+import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
 
@@ -19,6 +21,8 @@ import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
  * Created by smcgi_000 on 8/4/2016.
  */
 public class PromptListHeaderView extends LinearLayout{
+
+    private static final String TAG = PromptListHeaderView.class.getSimpleName();
 
     private int mSmallHeight;
 
@@ -30,7 +34,7 @@ public class PromptListHeaderView extends LinearLayout{
 
     private long mStartTime;
 
-    int mDuration;
+    private int mDuration;
 
     public PromptListHeaderView(Context context) {
         this(context, null);
@@ -46,12 +50,12 @@ public class PromptListHeaderView extends LinearLayout{
         setWillNotDraw(false);
 
         final TypedArray a = context.obtainStyledAttributes(attrs,
-                R.styleable.PromptListHeaderView, 0, 0);
+                R.styleable.PromptList, 0, 0);
 
-        mSmallHeight = a.getDimensionPixelSize(R.styleable.PromptListHeaderView_minimumHeight, 0);
+        mSmallHeight = a.getDimensionPixelSize(R.styleable.PromptList_minimumHeight, 0);
 
         mFillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mFillPaint.setColor(a.getColor(R.styleable.PromptListHeaderView_progressColor, 0));
+        mFillPaint.setColor(a.getColor(R.styleable.PromptList_progressColor, 0));
         //mFillPaint.setColor(ContextCompat.getColor(context, R.color.progressBG));
         mFillPaint.setStyle(Paint.Style.FILL);
 
@@ -72,21 +76,26 @@ public class PromptListHeaderView extends LinearLayout{
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (mFillFactor > mCurrentFillFactor) {
+        if (mFillFactor != mCurrentFillFactor) {
             // animate the fill to the given amount
             int duration = mDuration; //Utils.PROMPT_PROGRESS_ANIMATION_DURATION;
 
-            long elapsedTime = System.currentTimeMillis() - mStartTime;
+            if (mStartTime == 0) {
+                mStartTime = Utils.now();
+            }
+
+            int elapsedTime = (int) (Utils.now() - mStartTime);
             if (elapsedTime > duration) {
                 elapsedTime = duration;
             }
-            float interval = ((float) elapsedTime) / ((float) duration);
+            float interval = (float) elapsedTime / (float) duration;
             drawFill(canvas, mCurrentFillFactor, mFillFactor, interval);
 
             if (elapsedTime < duration) {
                 this.postInvalidateDelayed(1000 / PaintUtils.FRAMES_PER_SECOND);
             } else {
                 mCurrentFillFactor = mFillFactor;
+                mStartTime = 0;
             }
         } else {
             drawFill(canvas, 0, mCurrentFillFactor, 0);
@@ -141,10 +150,12 @@ public class PromptListHeaderView extends LinearLayout{
     }
 
     public void animateFillFactor(float fillFactor) {
-        if (fillFactor != mFillFactor && fillFactor > 0) {
-            mDuration = SettingsUtils.PROMPT_PROGRESS_ANIMATION_DURATION * (int)((fillFactor - mFillFactor) / 0.1);
+        fillFactor = Math.max(0, fillFactor);
+        if (fillFactor != mFillFactor) {
+            float diff = Math.abs(fillFactor - mFillFactor);
+            mDuration = (int) (SettingsUtils.PROMPT_PROGRESS_ANIMATION_DURATION * (diff * 10));
             mFillFactor = fillFactor;
-            mStartTime = System.currentTimeMillis();
+            mStartTime = 0;
             postInvalidate();
         }
     }

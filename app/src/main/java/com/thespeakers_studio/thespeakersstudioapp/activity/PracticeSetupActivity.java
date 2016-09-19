@@ -446,7 +446,7 @@ public class PracticeSetupActivity extends BaseActivity implements
         mIsDialogOpen = false;
         unbindTimerService();
 
-        if (finished) {
+        if (finished && outline != null) {
             mOutline = outline;
             showResultsDialog();
         }
@@ -457,7 +457,7 @@ public class PracticeSetupActivity extends BaseActivity implements
         AlertDialog.Builder thoughtsDialogBuilder = new AlertDialog.Builder(this);
 
         View practiceResponseDialogContents =
-                getLayoutInflater().inflate(R.layout.dialog_practice_response, null);
+                View.inflate(this, R.layout.dialog_practice_response, null);
 
         thoughtsDialogBuilder.setView(practiceResponseDialogContents);
 

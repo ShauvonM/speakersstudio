@@ -18,13 +18,17 @@ public class Prompt implements Parcelable {
     private int type;
     private String text;
     private String processedText;
+
     private ArrayList<PromptAnswer> answer;
+
     private boolean isOpen;
     private boolean required;
     private String referenceDefault;
     private int referenceId;
 
     private String answerId;
+
+    private Prompt cloneParent;
 
     public Prompt(int id, int step, int order, int type, String text, boolean req, int charLimit, int ref, String refDefault) {
         this.id = id;
@@ -96,31 +100,43 @@ public class Prompt implements Parcelable {
     }
 
     public ArrayList<PromptAnswer> getAnswer() {
+        ArrayList<PromptAnswer> nonBlankAnswers = new ArrayList<>();
+        for (PromptAnswer answer : this.answer) {
+            if (!answer.getValue().isEmpty()) {
+                nonBlankAnswers.add(answer);
+            }
+        }
+        return nonBlankAnswers;
+    }
+
+    public ArrayList<PromptAnswer> getAllAnswers() {
         return this.answer;
     }
 
-    public ArrayList<PromptAnswer> getAnswerIgnoreEmpty() {
-        ArrayList<PromptAnswer> actualAnswers = new ArrayList<>();
-        for (PromptAnswer answer : this.answer) {
-            if (!answer.getValue().isEmpty()) {
-                actualAnswers.add(answer);
-            }
-        }
-        return actualAnswers;
+    public void clearEmptyAnswers() {
+        this.answer = getAnswer();
     }
 
     public Prompt clone(String answerId) {
-        Prompt p = new Prompt(this.id, this.step, this.order, this.type, this.text, this.required, this.charLimit, this.referenceId, this.referenceDefault);
+        Prompt p = new Prompt(this.id, this.step, this.order, this.type, this.text, this.required,
+                this.charLimit, this.referenceId, this.referenceDefault);
+
         if (answerId.isEmpty()) {
             p.setAnswers(this.getAnswer());
         } else {
             p.setAnswerId(answerId);
             p.setAnswers(this.getAnswersByLinkId(answerId));
+            p.setCloneParent(this);
         }
+
         return p;
     }
     public Prompt clone() {
         return clone("");
+    }
+
+    public void setCloneParent(Prompt p) {
+        this.cloneParent = p;
     }
 
     public PromptAnswer getAnswerByKey(String key) {
@@ -159,6 +175,16 @@ public class Prompt implements Parcelable {
 
     public void resetAnswers() {
         this.answer = new ArrayList<>();
+
+        if (cloneParent != null) {
+            cloneParent.resetAnswersByLinkId(answerId);
+        }
+    }
+
+    public void resetAnswersByLinkId(String id) {
+        for (PromptAnswer answer : getAnswersByLinkId(id)) {
+            this.answer.remove(answer);
+        }
     }
 
     public void setAnswers(ArrayList<PromptAnswer> answers) {
@@ -170,6 +196,12 @@ public class Prompt implements Parcelable {
         // add answer will handle overwriting the existing dudes with new data where necessary
         for (PromptAnswer answer : answers) {
             addAnswer(answer);
+
+            // if this was cloned, it isn't actually part of a presentation, so we need to add this
+            // answer to the "master" prompt inside the presentation
+            if (cloneParent != null) {
+                cloneParent.addAnswer(answer);
+            }
         }
     }
 

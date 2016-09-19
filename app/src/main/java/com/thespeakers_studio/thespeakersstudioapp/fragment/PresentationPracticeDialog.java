@@ -30,6 +30,7 @@ import com.thespeakers_studio.thespeakersstudioapp.model.Outline;
 import com.thespeakers_studio.thespeakersstudioapp.model.OutlineItem;
 
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Set;
 
 import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
@@ -118,7 +119,7 @@ public class PresentationPracticeDialog extends DialogFragment implements
         mTimerView = (TextView) mDialog.findViewById(R.id.practice_timer_current);
         mWarningView = (TextView) mDialog.findViewById(R.id.practice_interval_warning);
 
-        mBulletListWrapper = (LinearLayout) mDialog.findViewById(R.id.practice_main_bullet_list);
+        mBulletListWrapper = (LinearLayout) mDialog.findViewById(R.id.practice_main_bullet_list_wrapper);
         mBulletListHeader = (TextView) mDialog.findViewById(R.id.practice_main_bullet_header);
         mBulletList = (LinearLayout) mDialog.findViewById(R.id.practice_main_bullet_list);
 
@@ -228,7 +229,10 @@ public class PresentationPracticeDialog extends DialogFragment implements
     // called when the handler receives a message that the service is dead
     @Override
     public void serviceKilled(Bundle outlineBundle, boolean isFinished) {
-        mOutline = new Outline(getContext(), outlineBundle);
+        if (outlineBundle != null) {
+            mOutline = new Outline(getContext(), outlineBundle);
+        }
+
         if (mInterface != null) {
             mInterface.onServiceKilled(mOutline, isFinished);
         }
@@ -402,6 +406,11 @@ public class PresentationPracticeDialog extends DialogFragment implements
         // when we get outline items, we know the timer has started;
         mIsTimerStarted = true;
 
+        if (item == null) {
+            showText(mOutputMainView, "");
+            return;
+        }
+
         if (item.getParentId().equals(OutlineItem.NO_PARENT)) {
             // FIXME: only show the topic name if there's enough time left to so
             //if (remainingTime + item.getDuration() > INTERSTITIAL_DURATION) {
@@ -465,8 +474,8 @@ public class PresentationPracticeDialog extends DialogFragment implements
                                 .getDimension(R.dimen.practice_bullet_list_font_size));
                         mBulletList.addView(tv);
 
-                        tv.setText(mOutlineHelper.getBullet(3, cnt)
-                                + " " + child.getText());
+                        tv.setText(String.format(Locale.US, "%s %s",
+                                mOutlineHelper.getBullet(3, cnt), child.getText()));
                         cnt++;
                     }
                 }

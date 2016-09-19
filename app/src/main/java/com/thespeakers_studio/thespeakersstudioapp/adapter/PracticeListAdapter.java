@@ -149,7 +149,7 @@ public class PracticeListAdapter extends RecyclerView.Adapter<PracticeListAdapte
             AlertDialog.Builder thoughtsDialogBuilder = new AlertDialog.Builder(context);
 
             View practiceResponseDialogContents =
-                    context.getLayoutInflater().inflate(R.layout.dialog_practice_response_view, null);
+                    View.inflate(v.getContext(), R.layout.dialog_practice_response_view, null);
 
             thoughtsDialogBuilder.setView(practiceResponseDialogContents);
 
@@ -176,9 +176,12 @@ public class PracticeListAdapter extends RecyclerView.Adapter<PracticeListAdapte
 
             if (mPractice.getOutlineItems().size() > 0) {
                 LOGD("SS", "Outline item answer ID: " + mPractice.getOutlineItems().get(0).getAnswerId());
+
+                int itemCount = mPractice.getOutlineItems().size();
                 outlineItemsCount.setText(String.format(
-                        itemView.getContext().getString(R.string.practice_response_outline_items),
-                        mPractice.getOutlineItems().size()
+                        itemView.getContext().getResources()
+                                .getQuantityString(R.plurals.practice_response_outline_items, itemCount),
+                        itemCount
                 ));
                 OutlineHelper outlineHelper = new OutlineHelper();
                 String[] trackingStrings = new String[mPractice.getOutlineItems().size()];

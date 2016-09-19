@@ -3,13 +3,13 @@
 
     <TextView
         android:id="@+id/card_label"
-        android:text="What is the Topic?"
+        android:text="@string/lorem_ipsum_sentence"
         style="@style/PromptLabel"
         />
 
     <!-- custom to location cards -->
     <TextView
-        android:text="Select..."
+        android:text="@string/select"
         android:id="@+id/prompt_location_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

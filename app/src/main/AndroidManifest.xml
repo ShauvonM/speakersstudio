@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.thespeakers_studio.thespeakersstudioapp">
 
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -11,7 +12,8 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:supportsRtl="true">
         <activity
             android:name=".activity.PresentationMainActivity"
             android:label="@string/saved_presentations"
@@ -24,8 +26,9 @@
         </activity>
         <activity
             android:name=".activity.EditPresentationActivity"
-            android:theme="@style/AppTheme.Inverted"
-            android:parentActivityName=".activity.PresentationMainActivity">
+            android:theme="@style/AppTheme.Inverted.EditPresentation"
+            android:parentActivityName=".activity.PresentationMainActivity"
+            tools:ignore="UnusedAttribute">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.PresentationMainActivity" />
@@ -33,7 +36,8 @@
         <activity
             android:name=".activity.PresentationPromptListActivity"
             android:theme="@style/AppTheme.Inverted"
-            android:parentActivityName=".activity.EditPresentationActivity">
+            android:parentActivityName=".activity.EditPresentationActivity"
+            tools:ignore="UnusedAttribute">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.EditPresentationActivity" />
@@ -42,7 +46,8 @@
             android:name=".activity.OutlineActivity"
             android:label="@string/outline"
             android:theme="@style/AppTheme.Outline"
-            android:parentActivityName=".activity.PresentationMainActivity">
+            android:parentActivityName=".activity.PresentationMainActivity"
+            tools:ignore="UnusedAttribute">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.PresentationMainActivity" />
@@ -52,7 +57,8 @@
             android:name=".activity.PracticeSetupActivity"
             android:label="@string/practice_presentation"
             android:theme="@style/AppTheme.WithNavDrawer.Inverted"
-            android:parentActivityName=".activity.PresentationMainActivity">
+            android:parentActivityName=".activity.PresentationMainActivity"
+            tools:ignore="UnusedAttribute">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.PresentationMainActivity" />
@@ -62,7 +68,8 @@
             android:name=".activity.StoriesMainActivity"
             android:label="@string/stories"
             android:theme="@style/AppTheme.WithNavDrawer"
-            android:parentActivityName=".activity.PresentationMainActivity">
+            android:parentActivityName=".activity.PresentationMainActivity"
+            tools:ignore="UnusedAttribute">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.PresentationMainActivity" />
@@ -71,7 +78,8 @@
             android:name=".activity.CuriousActivity"
             android:label="@string/curious"
             android:theme="@style/AppTheme.WithNavDrawer"
-            android:parentActivityName=".activity.PresentationMainActivity">
+            android:parentActivityName=".activity.PresentationMainActivity"
+            tools:ignore="UnusedAttribute">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.PresentationMainActivity" />
@@ -80,7 +88,8 @@
             android:name=".settings.SettingsActivity"
             android:label="@string/action_settings"
             android:theme="@style/AppTheme.Settings"
-            android:parentActivityName=".activity.PresentationMainActivity">
+            android:parentActivityName=".activity.PresentationMainActivity"
+            tools:ignore="UnusedAttribute">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.PresentationMainActivity" />
@@ -89,7 +98,8 @@
             android:name=".activity.AboutActivity"
             android:label="@string/about"
             android:theme="@style/AppTheme.WithNavDrawer"
-            android:parentActivityName=".activity.PresentationMainActivity">
+            android:parentActivityName=".activity.PresentationMainActivity"
+            tools:ignore="UnusedAttribute">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.PresentationMainActivity" />

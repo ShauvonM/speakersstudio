@@ -1,5 +1,6 @@
 package com.thespeakers_studio.thespeakersstudioapp.ui.ListItemViewSubClasses;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.TransitionDrawable;
 import android.support.design.widget.FloatingActionButton;
@@ -28,6 +29,7 @@ import com.thespeakers_studio.thespeakersstudioapp.model.PromptAnswer;
 /**
  * Created by smcgi_000 on 6/8/2016.
  */
+@SuppressLint("ViewConstructor")
 public class ListItemPromptView extends ListItemView {
     private CardView mCardView;
     private boolean mCardBGEmpty;
@@ -103,6 +105,14 @@ public class ListItemPromptView extends ListItemView {
         String text = answer.isEmpty() ? mPrompt.getProcessedText() : answer;
         textView.setText(text);
 
+        if (answer.isEmpty()) {
+            text = mPrompt.getProcessedText();
+            Utils.setTextAppearance(getContext(), textView, R.style.PromptText_Inverted);
+        } else {
+            text = answer;
+            Utils.setTextAppearance(getContext(), textView, R.style.PromptText);
+        }
+
         if (text.length() > 125) {
             textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.prompt_small_font_size));
         } else {
@@ -128,7 +138,7 @@ public class ListItemPromptView extends ListItemView {
                 transition.startTransition(0);
                 transition.reverseTransition(time);
             }
-            mCardView.setCardBackgroundColor(ContextCompat.getColor(getContext(), R.color.promptBG));
+            mCardView.setCardBackgroundColor(ContextCompat.getColor(getContext(), R.color.prompt_default_background));
             mCardBGEmpty = true;
         } else {
             if (mCardBGEmpty) {

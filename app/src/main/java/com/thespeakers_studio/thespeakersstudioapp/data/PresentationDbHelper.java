@@ -174,14 +174,34 @@ public class PresentationDbHelper {
         return new PresentationData(mContext, id, datetime, color);
     }
 
-    public void resetPresentation(PresentationData presentation) {
+    public void resetPresentation(PresentationData presentation, int step) {
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        db.delete(PresentationDataContract.PresentationAnswerEntry.TABLE_NAME,
-                ANSWER_SELECTION_CLAUSE,
-                getIdSelectionClause(presentation.getId()));
-        db.close();
 
-        presentation.resetAnswers();
+        if (step == 0) {
+            db.delete(PresentationDataContract.PresentationAnswerEntry.TABLE_NAME,
+                    ANSWER_SELECTION_CLAUSE,
+                    getIdSelectionClause(presentation.getId()));
+            presentation.resetAnswers();
+        } else {
+            String clause = PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_ANSWER_ID + "=?";
+            //String clause = PresentationDataContract.PresentationAnswerEntry.COLUMN_NAME_PROMPT_ID + "=?";
+            ArrayList<Prompt> prompts = presentation.getPromptsForStep(step);
+            for (Prompt prompt : prompts) {
+                for (PromptAnswer answer : prompt.getAllAnswers()) {
+                    db.delete(PresentationDataContract.PresentationAnswerEntry.TABLE_NAME,
+                            clause,
+                            new String[]{String.valueOf(answer.getId())}
+                    );
+                }
+                /*
+                db.delete(PresentationDataContract.PresentationAnswerEntry.TABLE_NAME,
+                        clause,
+                        new String[]{String.valueOf(prompt.getId())});
+                */
+                prompt.resetAnswers();
+            }
+        }
+        db.close();
 
         updatePresentationModifiedDate(presentation.getId());
     }
@@ -209,7 +229,7 @@ public class PresentationDbHelper {
 
         String datetime = Utils.getDateTimeStamp();
 
-        ArrayList<PromptAnswer> answers = prompt.getAnswer();
+        ArrayList<PromptAnswer> answers = prompt.getAllAnswers();
 
         for (PromptAnswer answer : answers) {
             //
@@ -252,6 +272,7 @@ public class PresentationDbHelper {
                 }
             }
         }
+        prompt.clearEmptyAnswers();
 
         db.close();
 
