@@ -30,7 +30,7 @@
         <item name="android:textColor">@color/textColorPrimary</item>
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
         <item name="android:textColorPrimaryInverse">@color/textColorInverse</item>
-        <item name="android:colorBackground">@color/windowBackground</item>
+        <!-- <item name="android:colorBackground">@color/windowBackground</item> -->
         <item name="colorButtonNormal">@color/colorAccent</item>
         <item name="android:textColorHint">@color/textColorPrimary</item>
     </style>
@@ -129,23 +129,6 @@
     </style>
 
     <!-- Navigation Drawer -->
-    <style name="NavDrawerRowLayout">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">48dp</item>
-        <item name="android:background">@drawable/nav_drawer_row_background</item>
-        <item name="android:gravity">start|center_vertical</item>
-        <item name="android:orientation">horizontal</item>
-        <item name="android:clickable">true</item>
-    </style>
-
-    <style name="NavDrawerRowLayout.Main">
-        <item name="android:tag">@string/tag_nav_drawer_main_entry</item>
-    </style>
-
-    <style name="NavDrawerRowLayout.Secondary">
-        <item name="android:tag">@string/tag_nav_drawer_special_entry</item>
-    </style>
-
     <style name="NavDrawerRowItemIcon">
         <item name="android:layout_height">@dimen/icon_size_24</item>
         <item name="android:layout_width">@dimen/icon_size_24</item>
@@ -341,10 +324,6 @@
     </style>
     -->
 
-    <style name="PromptListHeader">
-        <item name="android:padding">0dp</item>
-    </style>
-
     <style name="PromptCard" parent="CardView">
         <item name="android:gravity">center</item>
         <item name="android:layout_width">wrap_content</item>
@@ -380,6 +359,7 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_alignBottom">@id/card_view</item>
         <item name="android:visibility">gone</item>
+        <item name="pressedTranslationZ">@dimen/fab_press_translation_z</item>
     </style>
 
     <style name="PromptText" parent="StepListText">

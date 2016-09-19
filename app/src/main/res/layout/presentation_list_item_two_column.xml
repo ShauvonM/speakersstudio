@@ -11,6 +11,7 @@
         <ImageButton
             android:id="@+id/presentation_submenu"
             style="@style/PresentationListCardSubmenu"
+            android:contentDescription="@string/cd_submenu"
             />
 
         <TextView

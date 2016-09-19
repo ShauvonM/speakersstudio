@@ -1,5 +1,6 @@
 package com.thespeakers_studio.thespeakersstudioapp.ui.ListItemViewSubClasses;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
@@ -14,6 +15,7 @@ import com.thespeakers_studio.thespeakersstudioapp.ui.ListItemView;
 /**
  * Created by smcgi_000 on 6/9/2016.
  */
+@SuppressLint("ViewConstructor")
 public class ListItemNextView extends ListItemView {
     public ListItemNextView(Context context, Prompt prompt) {
         super(context, prompt);

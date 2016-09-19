@@ -154,7 +154,8 @@ public class Utils {
         int mins = c.get(Calendar.MINUTE);
         String ampm = c.getDisplayName(Calendar.AM_PM, Calendar.SHORT, Locale.US);
 
-        return hours + ":" + String.format("%02d", mins) + " " + ampm;
+        return String.format(Locale.US, "%d:%s %s",
+                hours, String.format(Locale.US, "%02d", mins), ampm);
     }
 
     public static String getDateTimeString (String timestamp, Resources r) {
@@ -241,13 +242,20 @@ public class Utils {
         int mins = secs / 60;
         secs = secs % 60;
 
+        String minString, secString, totalString;
+
+        minString = String.format(
+                r.getQuantityString(R.plurals.text_time_display_minutes, mins), mins);
+        secString = String.format(
+                r.getQuantityString(R.plurals.text_time_display_seconds, secs), secs);
+
         if (mins > 0 && secs > 0) {
             return String.format(r.getString(R.string.text_time_display_minutes_and_seconds),
-                    mins, secs);
+                    minString, secString);
         } else if (mins > 0) {
-            return String.format(r.getString(R.string.text_time_display_minutes), mins);
+            return minString;
         } else {
-            return String.format(r.getString(R.string.text_time_display_seconds), secs);
+            return secString;
         }
     }
 

@@ -45,7 +45,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:textSize="15dp"
+            android:textSize="15sp"
             android:text="@string/no_presentations"
             />
 
@@ -64,7 +64,7 @@
 
         <FrameLayout
             android:id="@+id/create_presentation_container"
-            android:layout_gravity="bottom|right"
+            android:layout_gravity="bottom|end"
             android:clipChildren="false"
             android:clipToPadding="false"
             android:layout_width="wrap_content"
@@ -81,6 +81,7 @@
                 android:scaleType="center"
                 app:fabSize="normal"
                 android:layout_margin="@dimen/fab_margin"
+                app:pressedTranslationZ="@dimen/fab_press_translation_z"
                 />
 
         </FrameLayout>

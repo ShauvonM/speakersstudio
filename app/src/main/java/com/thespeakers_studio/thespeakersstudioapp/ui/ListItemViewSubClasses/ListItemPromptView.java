@@ -1,5 +1,6 @@
 package com.thespeakers_studio.thespeakersstudioapp.ui.ListItemViewSubClasses;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.TransitionDrawable;
 import android.support.design.widget.FloatingActionButton;
@@ -28,6 +29,7 @@ import com.thespeakers_studio.thespeakersstudioapp.model.PromptAnswer;
 /**
  * Created by smcgi_000 on 6/8/2016.
  */
+@SuppressLint("ViewConstructor")
 public class ListItemPromptView extends ListItemView {
     private CardView mCardView;
     private boolean mCardBGEmpty;

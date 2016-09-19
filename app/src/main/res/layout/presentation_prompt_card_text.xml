@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="?colorPrimary"
-            android:text="15"
+            android:text="@string/default_char_count"
             />
         <TextView
             android:layout_width="wrap_content"
@@ -39,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="?colorPrimary"
-            android:text="150"/>
+            android:text="@string/default_char_max"/>
     </LinearLayout>
     <!-- end of text card items -->
 

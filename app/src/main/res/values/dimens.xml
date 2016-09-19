@@ -10,7 +10,6 @@
     <dimen name="fab_press_translation_z">6dp</dimen>
     <dimen name="headerbar_elevation">4dp</dimen>
     <dimen name="max_header_elevation">@dimen/headerbar_elevation</dimen>
-    <dimen name="card_elevation">2dp</dimen>
 
     <dimen name="fab_button">56dp</dimen>
     <dimen name="fab_margin">15dp</dimen>
@@ -30,24 +29,19 @@
     <dimen name="navigation_drawer_width">300dp</dimen>
     <dimen name="nav_drawer_account_section_height">176dp</dimen>
     <dimen name="nav_drawer_padding_top">32dp</dimen>
-    <dimen name="nav_drawer_profile_image_size">64dp</dimen>
     <dimen name="nav_drawer_item_icon_margin_end">32dp</dimen>
 
     <dimen name="spacing_listing_divider_top">8dp</dimen>
     <dimen name="vertical_spacing_listing_divider_bottom">8dp</dimen>
 
     <dimen name="divider_height">1dp</dimen>
-    <dimen name="elevation_app_bar">4dp</dimen>
     <dimen name="elevation_nav_drawer">16dp</dimen>
-
-    <dimen name="toolbar_shadow">10dp</dimen>
 
     <dimen name="default_padding">5dp</dimen>
 
     <dimen name="pres_list_padding">16dp</dimen>
     <dimen name="practice_list_padding">32dp</dimen>
 
-    <dimen name="pres_list_card_width">160dp</dimen>
     <dimen name="pres_list_card_padding">10dp</dimen>
     <dimen name="pres_list_name_size">25dp</dimen>
     <dimen name="pres_list_modified_size">15dp</dimen>
@@ -63,12 +57,10 @@
     <dimen name="step_list_line_width">1dp</dimen>
 
 
-    <dimen name="prompt_list_header_size_main">32dp</dimen>
+    <dimen name="prompt_list_header_size_main">32sp</dimen>
 
     <dimen name="prompt_list_line_width">10dp</dimen>
 
-    <dimen name="prompt_header_margin_top">20dp</dimen>
-    <dimen name="prompt_margin_horizontal">40dp</dimen>
     <dimen name="prompt_font_size">24dp</dimen>
     <dimen name="prompt_small_font_size">18dp</dimen>
     <dimen name="prompt_datetime_size">22dp</dimen>
@@ -84,14 +76,8 @@
     <dimen name="outline_list_padding">20dp</dimen>
     <dimen name="outline_list_padding_bottom">80dp</dimen>
     <dimen name="outline_list_bullet_spacing">10dp</dimen>
-    <dimen name="outline_main_bullet_size">20dp</dimen>
-    <dimen name="outline_bullet_size">20dp</dimen>
     <dimen name="outline_list_spacing">10dp</dimen>
-    <dimen name="outline_list_item_spacing">4dp</dimen>
     <dimen name="outline_list_tab">5dp</dimen>
-    <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="nav_header_vertical_spacing">16dp</dimen>
-    <dimen name="nav_header_height">160dp</dimen>
 
     <dimen name="practice_bullet_list_font_size">8sp</dimen>
 

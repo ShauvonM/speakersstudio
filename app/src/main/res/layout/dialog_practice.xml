@@ -7,10 +7,11 @@
         android:id="@+id/practice_timer_total"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="10:00"
-        android:textSize="20dp"
+        android:text="@string/default_timer"
+        android:textSize="20sp"
         android:layout_margin="@dimen/spacing_16"
-        android:layout_alignParentRight="true"/>
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"/>
 
     <TextView
         android:id="@+id/practice_sub"
@@ -18,11 +19,12 @@
         android:layout_height="wrap_content"
         android:text="@string/lorem_ipsum_sentence"
         android:layout_margin="@dimen/spacing_16"
-        android:textSize="20dp"
+        android:textSize="20sp"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_toLeftOf="@id/practice_timer_total"
+        android:layout_toStartOf="@id/practice_timer_total"
         />
 
     <TextView
@@ -31,7 +33,7 @@
         android:id="@+id/practice_interval_warning"
         android:text="@string/five_minutes_left"
         android:layout_centerHorizontal="true"
-        android:textSize="20dp"
+        android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="@android:color/holo_red_light"
         android:layout_below="@id/practice_sub"
@@ -41,10 +43,10 @@
         android:id="@+id/practice_timer_current"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="10:00"
+        android:text="@string/default_timer"
         android:layout_centerInParent="true"
         android:layout_alignParentBottom="true"
-        android:textSize="75dp"
+        android:textSize="75sp"
         android:textStyle="bold"
         android:layout_margin="@dimen/spacing_16"/>
 
@@ -53,7 +55,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/lorem_ipsum_sentence"
-        android:textSize="35dp"
+        android:textSize="35sp"
         android:layout_margin="@dimen/spacing_16"
         android:textStyle="bold"
         android:visibility="gone"
@@ -74,7 +76,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/lorem_ipsum_words"
-            android:textSize="25dp"
+            android:textSize="25sp"
             android:textStyle="bold" />
 
         <LinearLayout
@@ -128,6 +130,7 @@
         android:layout_margin="@dimen/spacing_16"
         android:src="@drawable/ic_arrow_back_white_50dp"
         android:background="@android:color/transparent"
+        android:contentDescription="@string/cd_previous"
         />
 
     <ImageButton
@@ -140,6 +143,7 @@
         android:layout_margin="@dimen/spacing_16"
         android:src="@drawable/ic_arrow_forward_white_50dp"
         android:background="@android:color/transparent"
+        android:contentDescription="@string/cd_next"
         />
 
     <ImageButton
@@ -153,6 +157,7 @@
         android:src="@drawable/ic_done_white_50dp"
         android:background="@android:color/transparent"
         android:visibility="gone"
+        android:contentDescription="@string/cd_done"
         />
 
     <Button
@@ -160,7 +165,9 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_toRightOf="@id/practice_timer_current"
+        android:layout_toEndOf="@id/practice_timer_current"
         android:layout_margin="0dp"
         android:background="@android:color/transparent"
         />

@@ -30,6 +30,7 @@ import com.thespeakers_studio.thespeakersstudioapp.model.Outline;
 import com.thespeakers_studio.thespeakersstudioapp.model.OutlineItem;
 
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Set;
 
 import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
@@ -118,7 +119,7 @@ public class PresentationPracticeDialog extends DialogFragment implements
         mTimerView = (TextView) mDialog.findViewById(R.id.practice_timer_current);
         mWarningView = (TextView) mDialog.findViewById(R.id.practice_interval_warning);
 
-        mBulletListWrapper = (LinearLayout) mDialog.findViewById(R.id.practice_main_bullet_list);
+        mBulletListWrapper = (LinearLayout) mDialog.findViewById(R.id.practice_main_bullet_list_wrapper);
         mBulletListHeader = (TextView) mDialog.findViewById(R.id.practice_main_bullet_header);
         mBulletList = (LinearLayout) mDialog.findViewById(R.id.practice_main_bullet_list);
 
@@ -473,8 +474,8 @@ public class PresentationPracticeDialog extends DialogFragment implements
                                 .getDimension(R.dimen.practice_bullet_list_font_size));
                         mBulletList.addView(tv);
 
-                        tv.setText(mOutlineHelper.getBullet(3, cnt)
-                                + " " + child.getText());
+                        tv.setText(String.format(Locale.US, "%s %s",
+                                mOutlineHelper.getBullet(3, cnt), child.getText()));
                         cnt++;
                     }
                 }

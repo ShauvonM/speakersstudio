@@ -89,7 +89,6 @@ public class PromptListHeaderView extends LinearLayout{
                 elapsedTime = duration;
             }
             float interval = (float) elapsedTime / (float) duration;
-            LOGD(TAG, "interval " + interval + " " + elapsedTime + " " + duration);
             drawFill(canvas, mCurrentFillFactor, mFillFactor, interval);
 
             if (elapsedTime < duration) {

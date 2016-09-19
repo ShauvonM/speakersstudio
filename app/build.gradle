@@ -28,6 +28,7 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
+    //noinspection GradleDependency
     compile "com.google.android.gms:play-services-location:${google_play_services_version}"
 
     // Android support libraries

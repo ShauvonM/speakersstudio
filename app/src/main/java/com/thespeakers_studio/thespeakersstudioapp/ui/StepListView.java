@@ -116,6 +116,8 @@ public class StepListView extends LinearLayout {
         mProgressStep = -1;
         mProgressFactor = -1;
         mProgressInvalid = false;
+
+        a.recycle();
     }
 
     public void setTopPadding(int top) {

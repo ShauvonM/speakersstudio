@@ -1,5 +1,6 @@
 package com.thespeakers_studio.thespeakersstudioapp.ui.ListItemViewSubClasses;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -21,6 +22,7 @@ import com.thespeakers_studio.thespeakersstudioapp.model.PromptAnswer;
 /**
  * Created by smcgi_000 on 6/8/2016.
  */
+@SuppressLint("ViewConstructor")
 public class ListItemDurationPromptView extends ListItemPromptView implements AdapterView.OnItemSelectedListener, TextWatcher {
 
     private int mDuration;
