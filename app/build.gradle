@@ -8,8 +8,8 @@ android {
         applicationId "com.thespeakers_studio.thespeakersstudioapp"
         minSdkVersion 15
         targetSdkVersion 24
-        versionCode 3
-        versionName "0.0.4"
+        versionCode 4
+        versionName "0.0.5"
         multiDexEnabled true
     }
     buildTypes {
