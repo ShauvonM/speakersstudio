@@ -1,12 +1,18 @@
 package com.thespeakers_studio.thespeakersstudioapp.ui;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.view.Display;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 
 import java.util.ArrayList;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.thespeakers_studio.thespeakersstudioapp.R;
 import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
@@ -23,18 +29,26 @@ import com.thespeakers_studio.thespeakersstudioapp.activity.PresentationMainActi
 import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
 import com.thespeakers_studio.thespeakersstudioapp.model.Prompt;
 
+import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
+
 /**
  * Created by smcgi_000 on 6/8/2016.
  */
 public class PromptListView extends LinearLayout implements ListItemView.ListItemListener {
+    private static final String TAG = PromptListView.class.getSimpleName();
+
     private ArrayList<Prompt> mPromptData;
     private ListItemView mOpenView;
     private PromptListListener mListener;
+
+    private Queue<View> mShowQueue;
 
     public PromptListView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         mListener = null;
+
+        mShowQueue = new ConcurrentLinkedQueue<>();
     }
 
     public void setPromptListListener (PromptListListener l) {
@@ -57,6 +71,7 @@ public class PromptListView extends LinearLayout implements ListItemView.ListIte
         mPromptData = null;
         mOpenView = null;
         removeAllViews();
+        mShowQueue = new ConcurrentLinkedQueue<>();
     }
 
     public void setData(ArrayList<Prompt> data) {
@@ -68,6 +83,8 @@ public class PromptListView extends LinearLayout implements ListItemView.ListIte
         params.setMargins(0,
                 -getResources().getDimensionPixelOffset(R.dimen.prompt_spacing_bottom),
                 0, 0);
+
+        int index = 0;
 
         // for each prompt, generate an appropriate com.thespeakers_studio.thespeakersstudioapp.view
         for (Prompt thisPrompt : mPromptData) {
@@ -118,11 +135,50 @@ public class PromptListView extends LinearLayout implements ListItemView.ListIte
                     view.setZ(count--);
                 }
 
+                // if the view ends up being too tall when we transition it in, the device can crash
+                view.setVisibility(View.GONE);
+                mShowQueue.add(view);
+
                 addView(view);
+
+                index++;
             }
         }
+        // show the first 10 prompts
+        showMorePrompts();
 
         requestLayout();
+    }
+
+    public void showMorePrompts() {
+        for (int index = 0; index < 10; index++) {
+            View child = mShowQueue.poll();
+
+            if (child != null) {
+                child.setVisibility(View.VISIBLE);
+            } else {
+                return;
+            }
+        }
+    }
+
+    public void hideInvisiblePrompts() {
+        int top = getScrollY();
+
+        WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+
+        Point size = new Point();
+        display.getSize(size);
+
+        int bottom = getScrollY() + size.y;
+
+        for (int index = 0; index < getChildCount(); index++) {
+            View v = getChildAt(index);
+            if (v.getTop() + v.getHeight() < top || v.getTop() > bottom) {
+                v.setVisibility(View.GONE);
+            }
+        }
     }
 
     private void closeOpenItem () {

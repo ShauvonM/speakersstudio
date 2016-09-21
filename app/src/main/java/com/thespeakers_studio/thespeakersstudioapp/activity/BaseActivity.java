@@ -411,17 +411,15 @@ public abstract class BaseActivity extends AppCompatActivity
         if (mHeaderHeightPixels == -1 && mHeaderBar != null) {
             mHeaderHeightPixels = mHeaderBar.getHeight();
             setLayoutPadding(mHeaderHeightPixels);
-            onScrollChanged(0,0);
+            onScrollChanged();
         }
     }
 
     @Override
-    public void onScrollChanged(int deltaX, int deltaY) {
+    public void onScrollChanged(int scrollX, int scrollY, SmartScrollView view) {
         if (findViewById(R.id.headerbar_scroll) == null) {
             return;
         }
-
-        int scrollY = findViewById(R.id.headerbar_scroll).getScrollY();
 
         // the headerbar needs to follow the scroll
         mHeaderBar.setTranslationY(scrollY);
@@ -433,6 +431,10 @@ public abstract class BaseActivity extends AppCompatActivity
         }
 
         setHeaderElevation(scrollY);
+    }
+
+    public void onScrollChanged() {
+        onScrollChanged(0, 0, null);
     }
 
     protected float setHeaderElevation(int scrollY) {

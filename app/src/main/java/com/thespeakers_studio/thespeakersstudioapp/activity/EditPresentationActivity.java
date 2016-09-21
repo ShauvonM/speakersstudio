@@ -3,17 +3,20 @@ package com.thespeakers_studio.thespeakersstudioapp.activity;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.CheckBox;
@@ -33,6 +36,7 @@ import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
 import com.thespeakers_studio.thespeakersstudioapp.model.Prompt;
 import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
 import com.thespeakers_studio.thespeakersstudioapp.ui.PromptListHeaderView;
+import com.thespeakers_studio.thespeakersstudioapp.ui.SmartScrollView;
 import com.thespeakers_studio.thespeakersstudioapp.ui.StepListView;
 import com.thespeakers_studio.thespeakersstudioapp.utils.AnalyticsHelper;
 import com.thespeakers_studio.thespeakersstudioapp.utils.PresentationUtils;
@@ -270,6 +274,8 @@ public class EditPresentationActivity extends BaseActivity implements
             return;
         }
 
+        mPromptListFragment.hideInvisiblePrompts();
+
         FragmentManager fm = getSupportFragmentManager();
         if (fm.getBackStackEntryCount() > 0) {
             fm.popBackStack();
@@ -384,6 +390,7 @@ public class EditPresentationActivity extends BaseActivity implements
                 mStepListFragment.clearOnProgressAnimationListener();
             }
         });
+        mPromptListFragment.hideInvisiblePrompts();
         getSupportFragmentManager().popBackStack();
     }
 
@@ -439,6 +446,24 @@ public class EditPresentationActivity extends BaseActivity implements
                 .animateFillFactor(mPresentation.getCompletionPercentage(mCurrentStep));
     }
 
+    @Override
+    public void onScrollChanged(int scrollX, int scrollY, SmartScrollView view) {
+        if (view != null && mPromptListFragment.isVisible()) {
+            Display display = getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+
+            int maxY = view.getChildAt(0).getMeasuredHeight() - size.y;
+            float scrollpercentage = (float) scrollY / (float) maxY;
+
+            if (scrollpercentage > 0.75) {
+                mPromptListFragment.showMorePrompts();
+            }
+        }
+
+        super.onScrollChanged(scrollX, scrollY, view);
+    }
+
     // animates the header opening, which shows the selected step
     private void showHeaderDetails() {
         ((PromptListHeaderView) mHeaderDetails).reset();
@@ -475,7 +500,7 @@ public class EditPresentationActivity extends BaseActivity implements
                 mHeaderDetailsHeightPixels = detailsHeight;
                 mHeaderHeightPixels = fullHeaderHeight;
                 mHeaderDetails.clearAnimation();
-                onScrollChanged(0,0);
+                onScrollChanged();
             }
         });
 
@@ -510,7 +535,7 @@ public class EditPresentationActivity extends BaseActivity implements
                 mHeaderDetailsHeightPixels = 0;
                 mHeaderHeightPixels = actionBarSize;
                 mHeaderDetails.clearAnimation();
-                onScrollChanged(0,0);
+                onScrollChanged();
             }
         });
 
