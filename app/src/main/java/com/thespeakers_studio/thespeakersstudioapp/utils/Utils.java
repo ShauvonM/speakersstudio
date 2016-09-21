@@ -154,6 +154,10 @@ public class Utils {
         int mins = c.get(Calendar.MINUTE);
         String ampm = c.getDisplayName(Calendar.AM_PM, Calendar.SHORT, Locale.US);
 
+        if (hours == 0) {
+            hours = 12; // midnight will be 0
+        }
+
         return String.format(Locale.US, "%d:%s %s",
                 hours, String.format(Locale.US, "%02d", mins), ampm);
     }
