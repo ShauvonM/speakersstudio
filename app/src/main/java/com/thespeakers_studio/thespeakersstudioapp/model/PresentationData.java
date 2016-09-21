@@ -77,7 +77,7 @@ public class PresentationData {
         mPrompts.add(new Prompt(10, 2, 2, PARAGRAPH,  "Describe the audience.", 250));
         mPrompts.add(new Prompt(11, 2, 3, LIST,       "What recent events are important to acknowledge or mention?", 50));
         mPrompts.add(new Prompt(12, 2, 4, LIST,       "What recent news or announcements are noteworthy to this audience?", 50));
-        mPrompts.add(new Prompt(13, 2, 5, TEXT,       "What do you want the audience to know, do, or feel when they leave?", 50));
+        mPrompts.add(new Prompt(13, 2, 5, TEXT,       "What do you want the audience to know, do, or feel when they leave?", 150));
         mPrompts.add(new Prompt(14, 2, 6, LIST,       "Who in the audience do you need to recognize?", 50));
 
         mPrompts.add(new Prompt(15, 3, 1, PARAGRAPH,  "What do you want to say to the audience?", 140));
