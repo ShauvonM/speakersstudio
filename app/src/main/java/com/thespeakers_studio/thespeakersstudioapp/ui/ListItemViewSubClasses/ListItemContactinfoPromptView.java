@@ -37,8 +37,6 @@ public class ListItemContactinfoPromptView extends ListItemPromptView implements
 
     @Override
     protected void renderViews() {
-        super.renderViews();
-
         EditText nameInput = (EditText) findViewById(R.id.name_input);
         EditText compInput = (EditText) findViewById(R.id.company_input);
         EditText emalInput = (EditText) findViewById(R.id.email_input);
@@ -53,7 +51,11 @@ public class ListItemContactinfoPromptView extends ListItemPromptView implements
         compInput.addTextChangedListener(this);
         emalInput.addTextChangedListener(this);
         phonInput.addTextChangedListener(this);
+
+        super.renderViews();
     }
+
+
 
     @Override
     public ArrayList<PromptAnswer> getUserInput() {
