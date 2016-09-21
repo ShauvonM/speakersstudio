@@ -42,6 +42,7 @@ public class PresentationData {
     public static final int PRESENTATION_TOPIC = 1; // the ID of the prompt that "names" the presentation
     public static final int PRESENTATION_DURATION = 8; // the ID of the duration prompt
     public static final int PRESENTATION_DATE = 4;
+    public static final int PRESENTATION_LOCATION = 5;
     public static final int PRESENTATION_TOPICS = 17;
 
     public static final int PRESENTATION_HEADER = 0;
@@ -59,37 +60,37 @@ public class PresentationData {
 
         // add a generic item to use for the Header and Next buttons on the list of cards
         // this might not be the best way to do this, but it makes sense to me
-        mPrompts.add(new Prompt(0, 0, 0, HEADER, ""));
-        mPrompts.add(new Prompt(24, 5, 0, NEXT, ""));
-        mPrompts.add(new Prompt(25, 5, 0, NONE, "Please complete %s\nto continue."));
+        mPrompts.add(new Prompt(this, 0, 0, 0, HEADER, ""));
+        mPrompts.add(new Prompt(this, 24, 5, 0, NEXT, ""));
+        mPrompts.add(new Prompt(this, 25, 5, 0, NONE, "Please complete %s\nto continue."));
 
         // Prompt(int id, int step, int order, String type, String text, int charLimit)
-        mPrompts.add(new Prompt(1, 1, 1, TEXT,        "What are you talking about?", 50));
-        mPrompts.add(new Prompt(2, 1, 2, TEXT,        "What is the Event?", 50));
-        mPrompts.add(new Prompt(3, 1, 3, TEXT,        "Describe the tone of the event (celebratory, solemn, informal, formal, etc)", 50));
-        mPrompts.add(new Prompt(4, 1, 4, DATETIME,    "When is the\nevent?"));
-        mPrompts.add(new Prompt(5, 1, 5, LOCATION,    "Where is the event?"));
-        mPrompts.add(new Prompt(6, 1, 6, CONTACTINFO, "Who is hosting\nthe event?"));
-        mPrompts.add(new Prompt(7, 1, 7, PARAGRAPH,   "What is the\nhost's mission?", 250));
-        mPrompts.add(new Prompt(8, 1, 8, DURATION,    "What is the\nPresentation\nduration?"));
+        mPrompts.add(new Prompt(this, 1, 1, 1, TEXT,        "What are you talking about?", 50));
+        mPrompts.add(new Prompt(this, 2, 1, 2, TEXT,        "What is the Event?", 50));
+        mPrompts.add(new Prompt(this, 3, 1, 3, TEXT,        "Describe the tone of the event (celebratory, solemn, informal, formal, etc)", 50));
+        mPrompts.add(new Prompt(this, 4, 1, 4, DATETIME,    "When is the\nevent?"));
+        mPrompts.add(new Prompt(this, 5, 1, 5, LOCATION,    "Where is the event?"));
+        mPrompts.add(new Prompt(this, 6, 1, 6, CONTACTINFO, "Who is hosting\nthe event?"));
+        mPrompts.add(new Prompt(this, 7, 1, 7, PARAGRAPH,   "What is the\nhost's mission?", 250));
+        mPrompts.add(new Prompt(this, 8, 1, 8, DURATION,    "What is the\nPresentation\nduration?"));
 
-        mPrompts.add(new Prompt(9, 2, 1, PARAGRAPH,   "Why is %t\nimportant?", 250,                          2, "this event"));
-        mPrompts.add(new Prompt(10, 2, 2, PARAGRAPH,  "Describe the audience.", 250));
-        mPrompts.add(new Prompt(11, 2, 3, LIST,       "What recent events are important to acknowledge or mention?", 50));
-        mPrompts.add(new Prompt(12, 2, 4, LIST,       "What recent news or announcements are noteworthy to this audience?", 50));
-        mPrompts.add(new Prompt(13, 2, 5, TEXT,       "What do you want the audience to know, do, or feel when they leave?", 150));
-        mPrompts.add(new Prompt(14, 2, 6, LIST,       "Who in the audience do you need to recognize?", 50));
+        mPrompts.add(new Prompt(this, 9, 2, 1, PARAGRAPH,   "Why is %t\nimportant?", 250,                          2, "this event"));
+        mPrompts.add(new Prompt(this, 10, 2, 2, PARAGRAPH,  "Describe the audience.", 250));
+        mPrompts.add(new Prompt(this, 11, 2, 3, LIST,       "What recent events are important to acknowledge or mention?", 50));
+        mPrompts.add(new Prompt(this, 12, 2, 4, LIST,       "Google the company and look for any recent awards or other news. What has the company achieved?", 50));
+        mPrompts.add(new Prompt(this, 13, 2, 5, TEXT,       "What do you want the audience to know, do, or feel when they leave?", 150));
+        mPrompts.add(new Prompt(this, 14, 2, 6, LIST,       "Who in the audience do you need to recognize?", 50));
 
-        mPrompts.add(new Prompt(15, 3, 1, PARAGRAPH,  "What do you want to say to the audience?", 140));
-        mPrompts.add(new Prompt(16, 3, 2, PARAGRAPH,  "Why?", 250));
-        mPrompts.add(new Prompt(17, 3, 3, LIST,       "What things do you want to talk about (we'll get to why later)?", 50));
+        mPrompts.add(new Prompt(this, 15, 3, 1, PARAGRAPH,  "What do you want to say to the audience?", 140));
+        mPrompts.add(new Prompt(this, 16, 3, 2, PARAGRAPH,  "Why?", 250));
+        mPrompts.add(new Prompt(this, 17, 3, 3, LIST,       "What things do you want to talk about (we'll get to why later)?", 50));
 
-        mPrompts.add(new Prompt(18, 4, 1, PARAGRAPH,  "What is your first sentence?", 140));
-        mPrompts.add(new Prompt(19, 4, 2, PARAGRAPH,  "What is your last sentence?", 140));
-        mPrompts.add(new Prompt(20, 4, 3, PARAGRAPH,  "Why is \"%l\" important?", 140,                          17, ""));
-        mPrompts.add(new Prompt(21, 4, 4, PARAGRAPH,  "How does \"%l\" connect to the Audience?", 140,          17, ""));
-        mPrompts.add(new Prompt(22, 4, 5, TEXT,       "What story can you connect to \"%l?\"", 50,              17, ""));
-        mPrompts.add(new Prompt(23, 4, 6, PARAGRAPH,  "How do you transition from %l to %n ?", 140,             17, ""));
+        mPrompts.add(new Prompt(this, 18, 4, 1, PARAGRAPH,  "What is your first sentence?", 140));
+        mPrompts.add(new Prompt(this, 19, 4, 2, PARAGRAPH,  "What is your last sentence?", 140));
+        mPrompts.add(new Prompt(this, 20, 4, 3, PARAGRAPH,  "Why is \"%l\" important?", 140,                          17, ""));
+        mPrompts.add(new Prompt(this, 21, 4, 4, PARAGRAPH,  "How does \"%l\" connect to the Audience?", 140,          17, ""));
+        mPrompts.add(new Prompt(this, 22, 4, 5, TEXT,       "What story can you connect to \"%l?\"", 50,              17, ""));
+        mPrompts.add(new Prompt(this, 23, 4, 6, PARAGRAPH,  "How do you transition from %l to %n ?", 140,             17, ""));
 
         mIsSelected = false;
     }

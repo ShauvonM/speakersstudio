@@ -235,6 +235,7 @@ public class ListItemPromptView extends ListItemView {
         mPrompt.toggleOpen();
 
         fireItemOpen();
+        onOpen();
 
         setCardBackground(400, true);
 
@@ -294,6 +295,10 @@ public class ListItemPromptView extends ListItemView {
             editLayoutAnimation.setDuration(750);
             cardView.startAnimation(editLayoutAnimation);
         }
+    }
+
+    protected void onOpen() {
+
     }
 
     private void setOpenLayoutParams() {

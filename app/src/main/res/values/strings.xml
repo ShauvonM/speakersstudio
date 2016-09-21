@@ -32,8 +32,9 @@
     <string name="datepicker_button_default">Choose Date</string>
     <string name="datetime_at">at</string>
     <string name="location_prompt">Select...</string>
-    <string name="contactinfo_name_hint">Name</string>
-    <string name="contactinfo_company_hint">Company</string>
+    <string name="contactinfo_name_hint">Your Contact\'s Name</string>
+    <string name="contactinfo_company_hint">Host Company</string>
+    <string name="contactinfo_company_website_hint">Host Company\'s Website</string>
     <string name="contactinfo_phone_hint">Phone Number</string>
     <string name="contactinfo_email_hint">Email Address</string>
     <string name="custom_duration_hint">Duration (Minutes)</string>
