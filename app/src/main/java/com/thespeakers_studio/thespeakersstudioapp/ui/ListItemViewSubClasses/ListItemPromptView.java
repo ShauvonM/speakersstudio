@@ -26,11 +26,15 @@ import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
 import com.thespeakers_studio.thespeakersstudioapp.model.Prompt;
 import com.thespeakers_studio.thespeakersstudioapp.model.PromptAnswer;
 
+import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
+
 /**
  * Created by smcgi_000 on 6/8/2016.
  */
 @SuppressLint("ViewConstructor")
 public class ListItemPromptView extends ListItemView {
+    private static final String TAG = ListItemPromptView.class.getSimpleName();
+
     private CardView mCardView;
     private boolean mCardBGEmpty;
 
@@ -59,7 +63,6 @@ public class ListItemPromptView extends ListItemView {
     @Override
     protected void renderViews() {
         String text = mPrompt.getProcessedText();
-        String answer = processAnswer();
 
         if (mPrompt.getType() != PresentationData.NONE) {
             setOnClickListener(this);
@@ -79,6 +82,7 @@ public class ListItemPromptView extends ListItemView {
         }
 
         // some other setup things now
+        String answer = processAnswer();
 
         setSaveButtonIcon();
 
@@ -161,7 +165,7 @@ public class ListItemPromptView extends ListItemView {
     }
 
     private boolean hasUserInput() {
-        return !getUserInput().isEmpty();
+        return getUserInput().size() != 0;
     }
 
     protected void setSaveButtonIcon() {
@@ -231,6 +235,7 @@ public class ListItemPromptView extends ListItemView {
         mPrompt.toggleOpen();
 
         fireItemOpen();
+        onOpen();
 
         setCardBackground(400, true);
 
@@ -290,6 +295,10 @@ public class ListItemPromptView extends ListItemView {
             editLayoutAnimation.setDuration(750);
             cardView.startAnimation(editLayoutAnimation);
         }
+    }
+
+    protected void onOpen() {
+
     }
 
     private void setOpenLayoutParams() {

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.transition.Transition;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,9 +15,11 @@ import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
 import com.thespeakers_studio.thespeakersstudioapp.model.Prompt;
 import com.thespeakers_studio.thespeakersstudioapp.ui.PromptListView;
 import com.thespeakers_studio.thespeakersstudioapp.R;
+import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 import java.util.ArrayList;
 
+import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
 import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.makeLogTag;
 
 /**
@@ -65,6 +68,8 @@ public class PresentationPromptListFragment extends Fragment implements PromptLi
             setStep(mStep);
         }
 
+
+
         return mView;
     }
 
@@ -99,6 +104,17 @@ public class PresentationPromptListFragment extends Fragment implements PromptLi
         mPromptData = mPresentation.getPromptsForStep(step);
         Log.d("SS", "Step count: " + mPromptData.size());
         mPromptList.setData(mPromptData);
+    }
+
+    public void showMorePrompts() {
+        mPromptList.showMorePrompts();
+    }
+
+    public void hideInvisiblePrompts() {
+        if (isVisible() && mStep == 4) {
+            // only step four causes any problems
+            mPromptList.hideInvisiblePrompts();
+        }
     }
 
     private void resetStep() {

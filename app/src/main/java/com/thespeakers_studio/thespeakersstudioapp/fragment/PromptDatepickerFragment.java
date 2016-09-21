@@ -13,9 +13,12 @@ import java.util.Calendar;
 /**
  * Created by smcgi_000 on 6/10/2016.
  */
-public class PromptDatepickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
+public class PromptDatepickerFragment extends DialogFragment implements
+        DatePickerDialog.OnDateSetListener,
+        TimePickerDialog.OnTimeSetListener {
+
     private Calendar mCalendar;
-    private boolean mType;
+    private boolean mIsTimePicker;
     private OnPromptDateTimeListener mListener;
 
     public void setOnPromptDateTimeListener (OnPromptDateTimeListener l) {
@@ -31,16 +34,16 @@ public class PromptDatepickerFragment extends DialogFragment implements DatePick
     }
 
     public void setDatePicker () {
-        mType = false;
+        mIsTimePicker = false;
     }
     public void setTimePicker () {
-        mType = true;
+        mIsTimePicker = true;
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        if (mType) {
-            int hour = mCalendar.get(Calendar.HOUR);
+        if (mIsTimePicker) {
+            int hour = mCalendar.get(Calendar.HOUR_OF_DAY);
             int minute = mCalendar.get(Calendar.MINUTE);
 
             return new TimePickerDialog(getActivity(), this, hour, minute, false);
@@ -66,7 +69,7 @@ public class PromptDatepickerFragment extends DialogFragment implements DatePick
 
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-        mCalendar.set(Calendar.HOUR, hourOfDay);
+        mCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
         mCalendar.set(Calendar.MINUTE, minute);
 
         if (mListener != null) {

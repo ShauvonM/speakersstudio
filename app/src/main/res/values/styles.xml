@@ -378,6 +378,7 @@
     <style name="PromptLabel" parent="PromptText.Inverted">
         <item name="android:padding">0dp</item>
         <item name="android:textSize">@dimen/prompt_label_font_size</item>
+        <item name="android:gravity">center</item>
     </style>
 
     <style name="PromptDateTimeFields" parent="PromptText.Inverted">
@@ -386,6 +387,14 @@
         <item name="android:shadowColor">@color/black_alpha_40</item>
         <item name="android:shadowDy">2</item>
         <!-- <item name="android:layout_margin">@dimen/default_padding</item> -->
+    </style>
+
+    <style name="PromptEditTextIcon">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginRight">@dimen/spacing_8</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:layout_gravity">bottom</item>
     </style>
 
     <style name="PresentationOutline">

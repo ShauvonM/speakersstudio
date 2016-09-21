@@ -19,7 +19,7 @@
         android:id="@+id/list_prompt_add"
         android:layout_width="46dp"
         android:layout_height="46dp"
-        android:src="@drawable/ic_add_white_24dp"
+        android:src="@drawable/ic_add_black_24dp"
         android:background="@android:color/transparent"
         android:layout_gravity="center"
         android:contentDescription="@string/cd_list_item_add"

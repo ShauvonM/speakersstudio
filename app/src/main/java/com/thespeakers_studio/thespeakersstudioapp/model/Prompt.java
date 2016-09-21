@@ -3,6 +3,8 @@ package com.thespeakers_studio.thespeakersstudioapp.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.thespeakers_studio.thespeakersstudioapp.data.PresentationDbHelper;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -11,6 +13,8 @@ import java.util.Comparator;
  * Created by smcgi_000 on 4/21/2016.
  */
 public class Prompt implements Parcelable {
+    private PresentationData mPresentation;
+
     private int id;
     private int step;
     private int order;
@@ -30,7 +34,10 @@ public class Prompt implements Parcelable {
 
     private Prompt cloneParent;
 
-    public Prompt(int id, int step, int order, int type, String text, boolean req, int charLimit, int ref, String refDefault) {
+    public Prompt(PresentationData presentation,
+                  int id, int step, int order, int type, String text, boolean req, int charLimit,
+                  int ref, String refDefault) {
+        mPresentation = presentation;
         this.id = id;
         this.step = step;
         this.order = order;
@@ -48,20 +55,25 @@ public class Prompt implements Parcelable {
         this.answerId = "";
     }
     // no req or char limit
-    public Prompt(int id, int step, int order, int type, String text) {
-        this(id, step, order, type, text, true, 0, 0, "");
+    public Prompt(PresentationData pres, int id, int step, int order, int type, String text) {
+        this(pres, id, step, order, type, text, true, 0, 0, "");
     }
     // with req but no charlimit
-    public Prompt(int id, int step, int order, int type, String text, boolean req) {
-        this(id, step, order, type, text, req, 0, 0, "");
+    public Prompt(PresentationData pres, int id, int step, int order, int type, String text, boolean req) {
+        this(pres, id, step, order, type, text, req, 0, 0, "");
     }
     // with charlimit but no req
-    public Prompt(int id, int step, int order, int type, String text, int charLimit) {
-        this(id, step, order, type, text, true, charLimit, 0, "");
+    public Prompt(PresentationData pres, int id, int step, int order, int type, String text, int charLimit) {
+        this(pres, id, step, order, type, text, true, charLimit, 0, "");
     }
     // with charLimit and reference default, but no req
-    public Prompt(int id, int step, int order, int type, String text, int charLimit, int ref, String refDef) {
-        this(id, step, order, type, text, true, charLimit, ref, refDef);
+    public Prompt(PresentationData pres, int id, int step, int order, int type, String text,
+                  int charLimit, int ref, String refDef) {
+        this(pres, id, step, order, type, text, true, charLimit, ref, refDef);
+    }
+
+    public PresentationData getPresentation() {
+        return mPresentation;
     }
 
     public String getAnswerId() {
@@ -118,8 +130,8 @@ public class Prompt implements Parcelable {
     }
 
     public Prompt clone(String answerId) {
-        Prompt p = new Prompt(this.id, this.step, this.order, this.type, this.text, this.required,
-                this.charLimit, this.referenceId, this.referenceDefault);
+        Prompt p = new Prompt(mPresentation, this.id, this.step, this.order, this.type, this.text,
+                this.required, this.charLimit, this.referenceId, this.referenceDefault);
 
         if (answerId.isEmpty()) {
             p.setAnswers(this.getAnswer());
