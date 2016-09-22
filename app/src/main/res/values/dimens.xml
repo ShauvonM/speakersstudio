@@ -1,10 +1,6 @@
 <resources>
 
     <!-- standard metrics -->
-    <dimen name="spacing_normal">8dp</dimen>
-    <dimen name="spacing_micro">4dp</dimen>
-    <dimen name="padding_normal">16dp</dimen>
-
     <dimen name="fab_elevation">8dp</dimen>
     <dimen name="max_fab_elevation">8dp</dimen>
     <dimen name="fab_press_translation_z">6dp</dimen>
@@ -19,6 +15,7 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
 
     <!-- some defaults -->
+    <dimen name="spacing_4">4dp</dimen>
     <dimen name="spacing_8">8dp</dimen>
     <dimen name="spacing_16">16dp</dimen>
     <dimen name="spacing_48">48dp</dimen>
