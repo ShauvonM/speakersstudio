@@ -24,10 +24,12 @@
             <TextView
                 android:id="@+id/step_1_label"
                 android:text="@string/step_1"
+                android:visibility="invisible"
                 style="@style/StepListLabel" />
             <TextView
                 android:id="@+id/step_1_text"
                 android:text="@string/details"
+                android:visibility="invisible"
                 style="@style/StepListText"
             />
         </LinearLayout>
@@ -38,10 +40,12 @@
             <TextView
                 android:id="@+id/step_2_label"
                 android:text="@string/step_2"
+                android:visibility="invisible"
                 style="@style/StepListLabel" />
             <TextView
                 android:id="@+id/step_2_text"
                 android:text="@string/landscape"
+                android:visibility="invisible"
                 style="@style/StepListText"
                 />
         </LinearLayout>
@@ -52,10 +56,12 @@
             <TextView
                 android:id="@+id/step_3_label"
                 android:text="@string/step_3"
+                android:visibility="invisible"
                 style="@style/StepListLabel" />
             <TextView
                 android:id="@+id/step_3_text"
                 android:text="@string/specifics"
+                android:visibility="invisible"
                 style="@style/StepListText"
             />
         </LinearLayout>
@@ -66,10 +72,12 @@
             <TextView
                 android:id="@+id/step_4_label"
                 android:text="@string/step_4"
+                android:visibility="invisible"
                 style="@style/StepListLabel" />
             <TextView
                 android:id="@+id/step_4_text"
                 android:text="@string/content"
+                android:visibility="invisible"
                 style="@style/StepListText"
             />
         </LinearLayout>

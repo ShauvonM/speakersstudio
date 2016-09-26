@@ -1,14 +1,14 @@
 package com.thespeakers_studio.thespeakersstudioapp.ui;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
-import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
@@ -19,7 +19,6 @@ import android.widget.TextView;
 import com.thespeakers_studio.thespeakersstudioapp.R;
 import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.PaintUtils;
-import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 
 import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
 
@@ -28,6 +27,8 @@ import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
  */
 public class StepListView extends LinearLayout {
     private static final String TAG = StepListView.class.getSimpleName();
+
+    private final int mProgressColor;
 
     private Paint mBGPaint;
     private Paint mStepLinePaint;
@@ -56,9 +57,17 @@ public class StepListView extends LinearLayout {
     private long mStartTime;
 
     private TextView[] mLabels;
-    private int[] mLabelPositions;
+    private Rect[] mLabelPositions;
 
     private OnProgressAnimationListener mProgressAnimationListener;
+
+    private final int mStepLabelSize;
+    private final int mStepTextSize;
+
+    private Paint mLabelPaint;
+    private Paint mLabelDonePaint;
+    private Paint mTextPaint;
+    private Paint mTextDonePaint;
 
     public interface OnProgressAnimationListener {
         public void onProgressAnimationFinished();
@@ -76,6 +85,11 @@ public class StepListView extends LinearLayout {
 
         final TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.PromptList, 0, 0);
+
+        mProgressColor = a.getColor(R.styleable.PromptList_progressColor,
+                ContextCompat.getColor(context, R.color.colorPrimary));
+
+        a.recycle();
 
         mShadowWidth = PaintUtils.getShadowBlur(2, context);
         mShadowY = PaintUtils.getShadowY(2, context);
@@ -101,8 +115,7 @@ public class StepListView extends LinearLayout {
         PaintUtils.setShadowLayer(mStepLinePaint, 0, context);
 
         mStepProgressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mStepProgressPaint.setColor(a.getColor(R.styleable.PromptList_progressColor,
-                ContextCompat.getColor(context, R.color.colorPrimary)));
+        mStepProgressPaint.setColor(mProgressColor);
         mStepProgressPaint.setStyle(Paint.Style.FILL);
 
         mProgressPath = new Path();
@@ -117,7 +130,34 @@ public class StepListView extends LinearLayout {
         mProgressFactor = -1;
         mProgressInvalid = false;
 
-        a.recycle();
+        mStepLabelSize = context.getResources()
+                .getDimensionPixelSize(R.dimen.step_list_label_font_size);
+        mStepTextSize = context.getResources()
+                .getDimensionPixelSize(R.dimen.step_list_font_size);
+
+        mLabelPaint = new Paint();
+        mLabelPaint.setColor(mProgressColor);
+        mLabelPaint.setStyle(Paint.Style.FILL);
+        mLabelPaint.setTextSize(mStepLabelSize);
+
+        mLabelDonePaint = new Paint();
+        mLabelDonePaint.setColor(ContextCompat.getColor(getContext(), R.color.textColorPrimary));
+        mLabelDonePaint.setStyle(Paint.Style.FILL);
+        mLabelDonePaint.setTextSize(mStepLabelSize);
+
+        mTextPaint = new Paint();
+        mTextPaint.setColor(mProgressColor);
+        mTextPaint.setStyle(Paint.Style.FILL);
+        mTextPaint.setTextSize(mStepTextSize);
+        mTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+        mTextPaint.setShadowLayer(2, 0, 4, ContextCompat.getColor(getContext(), R.color.black_alpha_200));
+
+        mTextDonePaint = new Paint();
+        mTextDonePaint.setColor(ContextCompat.getColor(getContext(), R.color.textColorPrimary));
+        mTextDonePaint.setStyle(Paint.Style.FILL);
+        mTextDonePaint.setTextSize(mStepTextSize);
+        mTextDonePaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+        mTextDonePaint.setShadowLayer(2, 0, 4, ContextCompat.getColor(getContext(), R.color.shadow));
     }
 
     public void setTopPadding(int top) {
@@ -182,10 +222,28 @@ public class StepListView extends LinearLayout {
                     (TextView) findViewById(R.id.step_4_text)
             };
 
-            mLabelPositions = new int[8];
+            // TODO: these should just be rendered into the view, we shouldn't be using views
+            mLabelPositions = new Rect[8];
+            Resources r = getContext().getResources();
+            int prevBottom = 0;
             for(int x = 0; x < mLabels.length; x++) {
-                mLabelPositions[x] = mLabels[x].getTop() +
-                        ((LinearLayout) mLabels[x].getParent()).getTop();
+                LinearLayout parent = (LinearLayout) mLabels[x].getParent();
+
+                int left = mLabels[x].getLeft() + parent.getLeft()
+                        + r.getDimensionPixelSize(R.dimen.step_list_item_padding_horizontal);
+                int top = mLabels[x].getTop() + parent.getTop()
+                        + r.getDimensionPixelSize(R.dimen.step_list_item_padding_vertical);
+
+                int right = left + mLabels[x].getWidth();
+                int bottom = top + mLabels[x].getHeight();
+
+                if (x % 2 == 0) {
+                    prevBottom = mLabels[x].getHeight();
+                } else {
+                    top += prevBottom + 5;
+                }
+
+                mLabelPositions[x] = new Rect(left, top, right, bottom);
             }
         }
         if (mWidth == 0) {
@@ -317,6 +375,33 @@ public class StepListView extends LinearLayout {
 
         canvas.drawPath(mProgressPath, mStepProgressPaint);
 
+        int index = 0;
+        boolean label = true;
+        for (TextView labelView : mLabels) {
+            String text = labelView.getText().toString();
+            if (!label) {
+                text = text.toUpperCase();
+            }
+
+            Rect pos = mLabelPositions[index];
+
+            int x = pos.left;
+            int y = pos.top;
+
+            Paint paintToUse;
+            if (progY > y) {
+                paintToUse = label ? mLabelDonePaint : mTextDonePaint;
+            } else {
+                paintToUse = label ? mLabelPaint : mTextPaint;
+            }
+
+            canvas.drawText(text, x, y, paintToUse);
+
+            index++;
+            label = !label;
+        }
+
+        /*
         // change the color of the text labels
         for (int x = 0; x < mLabelPositions.length; x++) {
             int resId;
@@ -327,6 +412,7 @@ public class StepListView extends LinearLayout {
             }
             Utils.setTextAppearance(getContext(), mLabels[x], resId);
         }
+        */
     }
 
     public void setProgressHeight(int step, float progress) {

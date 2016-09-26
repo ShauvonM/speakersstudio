@@ -454,6 +454,7 @@ public abstract class BaseActivity extends AppCompatActivity
         // multiply scrollY by a fraction to give it a bit of a parallax effect
         float factor = parallax ? (float) (scrollY * 0.75) : scrollY;
         float heightDifference = Math.min(mHeaderDetailsHeightPixels - minHeaderDetailsHeight, factor);
+
         return mHeaderDetailsHeightPixels - (int) heightDifference;
     }
 
@@ -526,9 +527,9 @@ public abstract class BaseActivity extends AppCompatActivity
         super.onResume();
         invalidateOptionsMenu();
 
-        // reset the
-        mHeaderDetailsHeightPixels = -1;
-        mHeaderHeightPixels = -1;
+        // reset the business
+        //mHeaderDetailsHeightPixels = -1;
+        //mHeaderHeightPixels = -1;
 
         int actionBarSize = Utils.calculateActionBarSize(this);
         ToolbarShadowFrameLayout layout = (ToolbarShadowFrameLayout) findViewById(R.id.main_content);
