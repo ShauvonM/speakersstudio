@@ -1,21 +1,18 @@
 package com.thespeakers_studio.thespeakersstudioapp.fragment;
 
 import android.content.Context;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.transition.Transition;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.thespeakers_studio.thespeakersstudioapp.activity.PresentationPromptListActivity;
 import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
 import com.thespeakers_studio.thespeakersstudioapp.model.Prompt;
 import com.thespeakers_studio.thespeakersstudioapp.ui.PromptListView;
 import com.thespeakers_studio.thespeakersstudioapp.R;
-import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
+import com.thespeakers_studio.thespeakersstudioapp.ui.SmartScrollView;
 
 import java.util.ArrayList;
 
@@ -25,9 +22,11 @@ import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.makeLog
 /**
  * Created by smcgi_000 on 5/10/2016.
  */
-public class PresentationPromptListFragment extends Fragment implements PromptListView.PromptListListener {
+public class PresentationPromptListFragment extends Fragment implements
+        PromptListView.PromptListListener,
+        SmartScrollView.Callbacks {
 
-    public static final String TAG = makeLogTag(PresentationPromptListFragment.class);
+    public static final String TAG = PresentationPromptListFragment.class.getSimpleName();
 
     private View mView;
     private PromptSaveListener mPromptSaveListener;
@@ -37,6 +36,9 @@ public class PresentationPromptListFragment extends Fragment implements PromptLi
 
     private int mStep;
 
+    private SmartScrollView.Callbacks mScrollCallback;
+
+    private SmartScrollView mScrollView;
     private PromptListView mPromptList;
 
     @Override
@@ -61,6 +63,9 @@ public class PresentationPromptListFragment extends Fragment implements PromptLi
         // Inflate the layout for this fragment
         mView = inflater.inflate(R.layout.fragment_prompt_list, container, false);
 
+        mScrollView = (SmartScrollView) findViewById(R.id.prompt_list_scroll);
+        mScrollView.addCallbacks(this);
+
         mPromptList = (PromptListView) findViewById(R.id.prompt_list);
         mPromptList.setPromptListListener(this);
 
@@ -68,9 +73,18 @@ public class PresentationPromptListFragment extends Fragment implements PromptLi
             setStep(mStep);
         }
 
-
-
         return mView;
+    }
+
+    public void setScrollCallback(SmartScrollView.Callbacks callback) {
+        mScrollCallback = callback;
+    }
+
+    @Override
+    public void onScrollChanged(int scrollX, int scrollY, SmartScrollView view) {
+        if (mScrollCallback != null) {
+            mScrollCallback.onScrollChanged(scrollX, scrollY, view);
+        }
     }
 
     private View findViewById(int id) {
@@ -102,8 +116,10 @@ public class PresentationPromptListFragment extends Fragment implements PromptLi
         resetPrompts();
         mStep = step;
         mPromptData = mPresentation.getPromptsForStep(step);
-        Log.d("SS", "Step count: " + mPromptData.size());
         mPromptList.setData(mPromptData);
+        mScrollView.scrollTo(0, 0);
+
+        LOGD(TAG, "Step count: " + mPromptData.size());
     }
 
     public void showMorePrompts() {

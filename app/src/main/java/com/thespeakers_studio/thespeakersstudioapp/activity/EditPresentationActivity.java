@@ -118,6 +118,8 @@ public class EditPresentationActivity extends BaseActivity implements
 
         ft.commit();
 
+        mPromptListFragment.setScrollCallback(this);
+
         if (savedInstanceState != null) {
             mCurrentStep = savedInstanceState.getInt(STATE_STEP);
             setPresentationId(savedInstanceState.getString(STATE_PRESENTATION_ID));
@@ -180,6 +182,7 @@ public class EditPresentationActivity extends BaseActivity implements
             menu.findItem(R.id.menu_action_practice).setVisible(true);
         }
 
+        // FIXME: this really shouldn't be here
         onBackStackChanged();
         return super.onCreateOptionsMenu(menu);
     }
@@ -326,8 +329,14 @@ public class EditPresentationActivity extends BaseActivity implements
                 } else if (resultCode == RESULT_CANCELED) {
                     // the user canceled the thing
                 }
+                LOGD(TAG, "onActivityResult");
                 break;
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     private void returnActivityResult() {
@@ -461,7 +470,13 @@ public class EditPresentationActivity extends BaseActivity implements
             }
         }
 
-        super.onScrollChanged(scrollX, scrollY, view);
+        if (mHeaderDetails != null) {
+            ViewGroup.LayoutParams params = mHeaderDetails.getLayoutParams();
+            params.height = getNewHeaderDetailsHeight(scrollY, true);
+            mHeaderDetails.setLayoutParams(params);
+        }
+
+        setHeaderElevation(scrollY);
     }
 
     // animates the header opening, which shows the selected step

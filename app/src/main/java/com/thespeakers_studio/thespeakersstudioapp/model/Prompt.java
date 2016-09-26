@@ -72,6 +72,11 @@ public class Prompt implements Parcelable {
         this(pres, id, step, order, type, text, true, charLimit, ref, refDef);
     }
 
+    // an empty Prompt, just in case
+    public Prompt(PresentationData pres) {
+        this(pres, 0, 0, 0, PresentationData.NONE, "", false, 0, 0, "");
+    }
+
     public PresentationData getPresentation() {
         return mPresentation;
     }

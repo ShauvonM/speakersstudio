@@ -2,11 +2,15 @@ package com.thespeakers_studio.thespeakersstudioapp.ui.ListItemViewSubClasses;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -14,6 +18,8 @@ import android.widget.RelativeLayout;
 import java.util.ArrayList;
 
 import com.thespeakers_studio.thespeakersstudioapp.R;
+import com.thespeakers_studio.thespeakersstudioapp.model.PresentationData;
+import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
 import com.thespeakers_studio.thespeakersstudioapp.utils.Utils;
 import com.thespeakers_studio.thespeakersstudioapp.model.Prompt;
 import com.thespeakers_studio.thespeakersstudioapp.model.PromptAnswer;
@@ -25,8 +31,8 @@ import com.thespeakers_studio.thespeakersstudioapp.model.PromptAnswer;
 public class ListItemListPromptView extends ListItemPromptView implements View.OnFocusChangeListener {
 
     private LinearLayout mListWrapper;
-    // default to three list items
-    private final int DEFAULT_LIST_COUNT = 3;
+
+    private ArrayList<View> mListItems;
 
     public ListItemListPromptView(Context context, Prompt prompt) {
         super(context, prompt);
@@ -40,11 +46,19 @@ public class ListItemListPromptView extends ListItemPromptView implements View.O
     @Override
     protected void inflateEditContents(LayoutInflater inflater, LinearLayout wrapper) {
         inflater.inflate(R.layout.presentation_prompt_card_list, wrapper, true);
+
+        // for the "google the company" prompt, we will include some magic buttons to do that
+        if (mPrompt.getId() == PresentationData.PRESENTATION_GOOGLE) {
+            inflater.inflate(R.layout.list_option_google_buttons,
+                    (ViewGroup) wrapper.findViewById(R.id.list_prompt_item_wrapper), true);
+        }
     }
 
     @Override
     protected void renderViews() {
         mListWrapper = (LinearLayout) findViewById(R.id.list_prompt_item_wrapper);
+
+        mListItems = new ArrayList<>();
 
         ArrayList<PromptAnswer> answers = mPrompt.getAnswer();
         if (answers.size() > 0) {
@@ -54,12 +68,45 @@ public class ListItemListPromptView extends ListItemPromptView implements View.O
                 }
             }
         } else {
-            for(int startingCount = 0; startingCount < DEFAULT_LIST_COUNT; startingCount++) {
+            for(int startingCount = 0; startingCount < SettingsUtils.DEFAULT_LIST_COUNT; startingCount++) {
                 inflateListItem();
             }
         }
 
         findViewById(R.id.list_prompt_add).setOnClickListener(this);
+
+        // add the special buttons to the "google the company" prompt
+        if (mPrompt.getId() == PresentationData.PRESENTATION_GOOGLE) {
+            Button btnGoogle = (Button) findViewById(R.id.button_google);
+            Button btnWebsite = (Button) findViewById(R.id.button_website);
+
+            PresentationData presentation = mPrompt.getPresentation();
+            Prompt hostInfo = presentation.getPromptById(PresentationData.PRESENTATION_CONTACTINFO);
+            Prompt locationInfo = presentation.getPromptById(PresentationData.PRESENTATION_LOCATION);
+
+            String company = hostInfo.getAnswerByKey("company").getValue();
+            if (company.isEmpty()) {
+                company = locationInfo.getAnswerByKey("name").getValue();
+            }
+            String website = hostInfo.getAnswerByKey("company_website").getValue();
+            if (website.isEmpty()) {
+                website = locationInfo.getAnswerByKey("website").getValue();
+            }
+
+            if (company.isEmpty()) {
+                btnGoogle.setVisibility(View.GONE);
+            } else {
+                btnGoogle.setTag(company);
+                btnGoogle.setOnClickListener(this);
+            }
+
+            if (website.isEmpty()) {
+                btnWebsite.setVisibility(View.GONE);
+            } else {
+                btnWebsite.setTag(website);
+                btnWebsite.setOnClickListener(this);
+            }
+        }
 
         super.renderViews();
     }
@@ -70,6 +117,7 @@ public class ListItemListPromptView extends ListItemPromptView implements View.O
         inflater.inflate(R.layout.presentation_prompt_card_list_item, mListWrapper, true);
 
         final RelativeLayout layout = (RelativeLayout) mListWrapper.getChildAt(mListWrapper.getChildCount() - 1);
+        mListItems.add(layout);
         EditText input = (EditText) layout.findViewById(R.id.prompt_input);
 
         // store the ID so it stays tied to this list item even if it changes position
@@ -126,7 +174,8 @@ public class ListItemListPromptView extends ListItemPromptView implements View.O
 
     private void removeListItem(View item) {
         mListWrapper.removeView(item);
-        if (mListWrapper.getChildCount() == 0) {
+        mListItems.remove(item);
+        if (mListItems.size() == 0) {
             // we can't have no items in the list, so add a new blank one now
             inflateListItem();
         }
@@ -143,6 +192,20 @@ public class ListItemListPromptView extends ListItemPromptView implements View.O
                 removeListItem((RelativeLayout) v.getParent());
                 setSaveButtonIcon();
                 break;
+            case R.id.button_google:
+                String company = (String) v.getTag();
+                Uri searchUri = Uri.parse("http://www.google.com/search?q=" + company);
+
+                Intent googleBrowserIntent = new Intent(Intent.ACTION_VIEW, searchUri);
+                getContext().startActivity(googleBrowserIntent);
+                break;
+            case R.id.button_website:
+                String website = (String) v.getTag();
+                Uri websiteUri = Uri.parse(website);
+
+                Intent websiteIntent = new Intent(Intent.ACTION_VIEW, websiteUri);
+                getContext().startActivity(websiteIntent);
+                break;
             default:
                 super.onClick(v);
                 break;
@@ -158,8 +221,8 @@ public class ListItemListPromptView extends ListItemPromptView implements View.O
     @Override
     protected ArrayList<PromptAnswer> getUserInput() {
         ArrayList<PromptAnswer> answers = new ArrayList<>();
-        for(int cnt = 0; cnt < mListWrapper.getChildCount(); cnt++) {
-            RelativeLayout layout = (RelativeLayout) mListWrapper.getChildAt(cnt);
+        for(int cnt = 0; cnt < mListItems.size(); cnt++) {
+            RelativeLayout layout = (RelativeLayout) mListItems.get(cnt);
             EditText input = (EditText) layout.findViewById(R.id.prompt_input);
             String id = (String) layout.getTag();
             String text = input.getText().toString().trim();

@@ -43,7 +43,7 @@
                 android:clipToPadding="false"
                 android:orientation="vertical"
                 app:progressColor="@color/black_alpha_12"
-                app:minimumHeight="@dimen/spacing_normal"
+                app:minimumHeight="@dimen/spacing_8"
                 >
 
                 <TextView
@@ -54,7 +54,7 @@
                     android:paddingLeft="60dp"
                     android:paddingStart="60dp"
                     android:paddingEnd="60dp"
-                    android:layout_marginTop="@dimen/spacing_normal"
+                    android:layout_marginTop="@dimen/spacing_8"
                     />
                 <TextView
                     android:id="@+id/step_name"
@@ -65,7 +65,7 @@
                     android:paddingLeft="60dp"
                     android:paddingStart="60dp"
                     android:paddingEnd="60dp"
-                    android:layout_marginBottom="@dimen/spacing_normal"
+                    android:layout_marginBottom="@dimen/spacing_8"
                     />
 
             </com.thespeakers_studio.thespeakersstudioapp.ui.PromptListHeaderView>

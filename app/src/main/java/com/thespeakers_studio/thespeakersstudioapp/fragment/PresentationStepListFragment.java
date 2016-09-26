@@ -16,13 +16,15 @@ import com.thespeakers_studio.thespeakersstudioapp.settings.SettingsUtils;
 import com.thespeakers_studio.thespeakersstudioapp.ui.StepListView;
 import com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils;
 
+import static com.thespeakers_studio.thespeakersstudioapp.utils.LogUtils.LOGD;
+
 /**
  * Created by smcgi_000 on 5/9/2016.
  */
 public class PresentationStepListFragment extends Fragment implements View.OnClickListener,
         StepListView.OnProgressAnimationListener {
 
-    public static final String TAG = LogUtils.makeLogTag(PresentationStepListFragment.class);
+    public static final String TAG = PresentationStepListFragment.class.getSimpleName();
 
     private View mView;
     private StepListView mStepListView;

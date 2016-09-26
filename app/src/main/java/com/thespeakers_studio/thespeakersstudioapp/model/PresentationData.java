@@ -43,6 +43,8 @@ public class PresentationData {
     public static final int PRESENTATION_DURATION = 8; // the ID of the duration prompt
     public static final int PRESENTATION_DATE = 4;
     public static final int PRESENTATION_LOCATION = 5;
+    public static final int PRESENTATION_CONTACTINFO = 6;
+    public static final int PRESENTATION_GOOGLE = 12;
     public static final int PRESENTATION_TOPICS = 17;
 
     public static final int PRESENTATION_HEADER = 0;
@@ -160,6 +162,10 @@ public class PresentationData {
 
     public Prompt getPromptById(int id) {
         int index = getPromptIndexById(id);
+        // make sure we don't break anything that assumes we are returning a prompt
+        if (index == -1) {
+            return new Prompt(this);
+        }
         return processPrompt(mPrompts.get(index));
     }
 
